@@ -14,7 +14,8 @@ import java.util.Map;
 
 public class BlueprintEngine {
 
-    public static void execute(String json, String eventType, String name, String[] args, String triggerUuid) {
+    public static void execute(String json, String eventType, String name, String[] args, 
+                                String triggerUuid, String triggerName, double tx, double ty, double tz) {
         try {
             MaingraphforMC.LOGGER.info("Executing blueprint: {} for event {}", name, eventType);
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
@@ -35,7 +36,7 @@ public class BlueprintEngine {
                 }
             }
 
-            NodeContext ctx = new NodeContext(name, args, triggerUuid, nodesMap);
+            NodeContext ctx = new NodeContext(name, args, triggerUuid, triggerName, tx, ty, tz, nodesMap);
 
             for (JsonElement e : executionNodes) {
                 if (!e.isJsonObject()) continue;

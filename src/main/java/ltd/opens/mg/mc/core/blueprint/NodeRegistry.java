@@ -38,6 +38,10 @@ public class NodeRegistry {
             .addOutput("name", NodeDefinition.PortType.STRING, colorString)
             .addOutput("parameters", NodeDefinition.PortType.LIST, colorList)
             .addOutput("trigger_uuid", NodeDefinition.PortType.UUID, colorUUID)
+            .addOutput("trigger_name", NodeDefinition.PortType.STRING, colorString)
+            .addOutput("trigger_x", NodeDefinition.PortType.FLOAT, colorFloat)
+            .addOutput("trigger_y", NodeDefinition.PortType.FLOAT, colorFloat)
+            .addOutput("trigger_z", NodeDefinition.PortType.FLOAT, colorFloat)
             .build());
 
         // Function
@@ -63,6 +67,13 @@ public class NodeRegistry {
             .addInput("uuid", NodeDefinition.PortType.UUID, colorUUID)
             .addOutput("name", NodeDefinition.PortType.STRING, colorString)
             .addOutput("type", NodeDefinition.PortType.STRING, colorString)
+            .addOutput("pos_x", NodeDefinition.PortType.FLOAT, colorFloat)
+            .addOutput("pos_y", NodeDefinition.PortType.FLOAT, colorFloat)
+            .addOutput("pos_z", NodeDefinition.PortType.FLOAT, colorFloat)
+            .addOutput("health", NodeDefinition.PortType.FLOAT, colorFloat)
+            .addOutput("max_health", NodeDefinition.PortType.FLOAT, colorFloat)
+            .addOutput("is_living", NodeDefinition.PortType.BOOLEAN, colorBoolean)
+            .addOutput("is_player", NodeDefinition.PortType.BOOLEAN, colorBoolean)
             .build());
 
         // Logic

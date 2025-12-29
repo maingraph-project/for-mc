@@ -109,13 +109,17 @@ public class MaingraphforMCClient {
                         String name = StringArgumentType.getString(context, "name");
                         String argsStr = StringArgumentType.getString(context, "args");
                         String[] args = argsStr.split("\\s+");
-                        String triggerUuid = context.getSource().getPlayer() != null ? context.getSource().getPlayer().getUUID().toString() : "";
+                        
+                        var source = context.getSource();
+                        String triggerUuid = source.getEntity() != null ? source.getEntity().getUUID().toString() : "";
+                        String triggerName = source.getTextName();
+                        var pos = source.getPosition();
                         
                         try {
                             Path dataFile = getBlueprintPath();
                             if (Files.exists(dataFile)) {
                                 String json = Files.readString(dataFile);
-                                BlueprintEngine.execute(json, "on_mgrun", name, args, triggerUuid);
+                                BlueprintEngine.execute(json, "on_mgrun", name, args, triggerUuid, triggerName, pos.x, pos.y, pos.z);
                             } else {
                                 context.getSource().sendFailure(Component.literal("Blueprint data file not found: " + dataFile.toAbsolutePath()));
                             }
@@ -127,12 +131,15 @@ public class MaingraphforMCClient {
                 )
                 .executes(context -> {
                     String name = StringArgumentType.getString(context, "name");
-                    String triggerUuid = context.getSource().getPlayer() != null ? context.getSource().getPlayer().getUUID().toString() : "";
+                    var source = context.getSource();
+                    String triggerUuid = source.getEntity() != null ? source.getEntity().getUUID().toString() : "";
+                    String triggerName = source.getTextName();
+                    var pos = source.getPosition();
                     try {
                         Path dataFile = getBlueprintPath();
                         if (Files.exists(dataFile)) {
                             String json = Files.readString(dataFile);
-                            BlueprintEngine.execute(json, "on_mgrun", name, new String[0], triggerUuid);
+                            BlueprintEngine.execute(json, "on_mgrun", name, new String[0], triggerUuid, triggerName, pos.x, pos.y, pos.z);
                         } else {
                             context.getSource().sendFailure(Component.literal("Blueprint data file not found: " + dataFile.toAbsolutePath()));
                         }
