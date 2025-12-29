@@ -85,6 +85,7 @@ public class NodeLogicRegistry {
 
         // Logic
         register("branch", new BranchHandler());
+        register("cast", new CastHandler());
 
         // Data
         register("player_health", new PlayerHealthHandler());

@@ -87,5 +87,13 @@ public class NodeRegistry {
             .addOutput("true", NodeDefinition.PortType.EXEC, colorExec)
             .addOutput("false", NodeDefinition.PortType.EXEC, colorExec)
             .build());
+
+        register(new NodeDefinition.Builder("cast", "Cast (Convert)")
+            .category("Logic")
+            .color(0xFF888888)
+            .addInput("input", NodeDefinition.PortType.OBJECT, colorObject)
+            .addInput("to_type", NodeDefinition.PortType.STRING, colorString, true, "STRING")
+            .addOutput("output", NodeDefinition.PortType.OBJECT, colorObject)
+            .build());
     }
 }
