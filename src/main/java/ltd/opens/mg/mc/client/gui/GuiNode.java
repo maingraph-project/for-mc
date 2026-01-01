@@ -105,24 +105,38 @@ public class GuiNode {
         return new float[]{px, py};
     }
 
+    public void updateConnectedState(List<GuiConnection> connections) {
+        for (NodePort p : inputs) {
+            p.isConnected = false;
+            for (GuiConnection c : connections) {
+                if (c.to == this && c.toPort.equals(p.id)) {
+                    p.isConnected = true;
+                    break;
+                }
+            }
+        }
+        for (NodePort p : outputs) {
+            p.isConnected = false;
+            for (GuiConnection c : connections) {
+                if (c.from == this && c.fromPort.equals(p.id)) {
+                    p.isConnected = true;
+                    break;
+                }
+            }
+        }
+    }
+
     public void render(GuiGraphics guiGraphics, net.minecraft.client.gui.Font font, int mouseX, int mouseY, float panX, float panY, float zoom, List<GuiConnection> connections, GuiNode focusedNode, String focusedPort) {
         if (sizeDirty) {
             updateSize(font);
         }
 
         // LOD 3: Minimal rendering for very far zoom
-        if (zoom < 0.1f) {
+        if (zoom < 0.15f) {
             guiGraphics.fill((int) x, (int) y, (int) (x + width), (int) (y + height), color);
-            // Draw a slightly darker border
-            guiGraphics.renderOutline((int) x, (int) y, (int) width, (int) height, 0x88000000);
             return;
         }
 
-        // Shadow - skip if zooming out significantly
-        if (zoom > 0.4f) {
-            guiGraphics.fill((int) x + 2, (int) y + 2, (int) (x + width + 2), (int) (y + height + 2), 0x88000000);
-        }
-        
         // Background
         guiGraphics.fill((int) x, (int) y, (int) (x + width), (int) (y + height), 0xEE1A1A1A);
         
@@ -130,28 +144,32 @@ public class GuiNode {
         double worldMouseX = (mouseX - panX) / zoom;
         double worldMouseY = (mouseY - panY) / zoom;
         boolean isHovered = worldMouseX >= x && worldMouseX <= x + width && worldMouseY >= y && worldMouseY <= y + height;
-        int borderColor = isHovered ? 0xFFFFFFFF : 0xFF333333;
-        guiGraphics.renderOutline((int) x, (int) y, (int) width, (int) height, borderColor);
+        
+        // Simplified border: only draw if hovered or at reasonable zoom
+        if (isHovered || zoom > 0.4f) {
+            int borderColor = isHovered ? 0xFFFFFFFF : 0xFF333333;
+            guiGraphics.renderOutline((int) x, (int) y, (int) width, (int) height, borderColor);
+        }
         
         // Header
         guiGraphics.fill((int) x + 1, (int) y + 1, (int) (x + width - 1), (int) (y + headerHeight), color);
         
         // Title - hide if too small
+        if (zoom > 0.3f) {
+            guiGraphics.drawString(font, title, (int) x + 5, (int) y + 4, 0xFFFFFFFF, false); // Disabled shadow for performance
+        }
+
+        // Render Ports - Skip entirely if very zoomed out
         if (zoom > 0.2f) {
-            guiGraphics.drawString(font, title, (int) x + 5, (int) y + 4, 0xFFFFFFFF, zoom > 0.5f);
-        }
+            // Render Inputs
+            for (int i = 0; i < inputs.size(); i++) {
+                renderPort(guiGraphics, font, inputs.get(i), (int) x, (int) (y + headerHeight + 10 + i * 15), true, connections, focusedNode, focusedPort, zoom);
+            }
 
-        // LOD 2: No ports labels, just shapes if zoom > 0.2
-        // LOD 1: No input fields if zoom < 0.5
-        
-        // Render Inputs
-        for (int i = 0; i < inputs.size(); i++) {
-            renderPort(guiGraphics, font, inputs.get(i), (int) x, (int) (y + headerHeight + 10 + i * 15), true, connections, focusedNode, focusedPort, zoom);
-        }
-
-        // Render Outputs
-        for (int i = 0; i < outputs.size(); i++) {
-            renderPort(guiGraphics, font, outputs.get(i), (int) (x + width), (int) (y + headerHeight + 10 + i * 15), false, connections, focusedNode, focusedPort, zoom);
+            // Render Outputs
+            for (int i = 0; i < outputs.size(); i++) {
+                renderPort(guiGraphics, font, outputs.get(i), (int) (x + width), (int) (y + headerHeight + 10 + i * 15), false, connections, focusedNode, focusedPort, zoom);
+            }
         }
     }
 
@@ -171,25 +189,8 @@ public class GuiNode {
 
     private void renderPort(GuiGraphics guiGraphics, net.minecraft.client.gui.Font font, NodePort port, int px, int py, boolean isInput, List<GuiConnection> connections, GuiNode focusedNode, String focusedPort, float zoom) {
         int color = getPortColor(port);
-        boolean isConnected = false;
+        boolean isConnected = port.isConnected;
         
-        // Skip connection check if zoomed out too much and not drawing port shapes anyway
-        if (zoom > 0.2f) {
-            for (GuiConnection conn : connections) {
-                if (isInput) {
-                    if (conn.to == this && conn.toPort.equals(port.id)) {
-                        isConnected = true;
-                        break;
-                    }
-                } else {
-                    if (conn.from == this && conn.fromPort.equals(port.id)) {
-                        isConnected = true;
-                        break;
-                    }
-                }
-            }
-        }
-
         // Port rendering (more "Unreal Engine" style)
         if (zoom > 0.3f) {
             float size = 4.0f;
@@ -286,7 +287,8 @@ public class GuiNode {
     }
 
     private void renderTriangle(GuiGraphics guiGraphics, float x1, float y1, float x2, float y2, float x3, float y3, int color) {
-        // Optimized triangle fill: Use scanline but with fewer fill calls
+        // For very small triangles (like ports), we can just use 3 lines or a few fills
+        // But for filled triangles, scanline is correct. Let's keep it but optimize the edge calculation.
         float minY = Math.min(y1, Math.min(y2, y3));
         float maxY = Math.max(y1, Math.max(y2, y3));
         
@@ -296,21 +298,22 @@ public class GuiNode {
         for (int y = iMinY; y <= iMaxY; y++) {
             float minX = Float.MAX_VALUE;
             float maxX = -Float.MAX_VALUE;
-            
-            float[][] edges = {{x1, y1, x2, y2}, {x2, y2, x3, y3}, {x3, y3, x1, y1}};
             boolean intersected = false;
-            for (float[] edge : edges) {
-                float ey1 = edge[1], ey2 = edge[3];
+
+            // Manual edge intersection for speed
+            float[][] v = {{x1, y1}, {x2, y2}, {x3, y3}, {x1, y1}};
+            for (int i = 0; i < 3; i++) {
+                float ey1 = v[i][1], ey2 = v[i+1][1];
                 if ((ey1 <= y && ey2 > y) || (ey2 <= y && ey1 > y)) {
-                    float ex1 = edge[0], ex2 = edge[2];
+                    float ex1 = v[i][0], ex2 = v[i+1][0];
                     float ix = ex1 + (y - ey1) * (ex2 - ex1) / (ey2 - ey1);
-                    minX = Math.min(minX, ix);
-                    maxX = Math.max(maxX, ix);
+                    if (ix < minX) minX = ix;
+                    if (ix > maxX) maxX = ix;
                     intersected = true;
                 }
             }
             if (intersected) {
-                guiGraphics.fill((int)Math.floor(minX), y, (int)Math.ceil(maxX), y + 1, color);
+                guiGraphics.fill((int)minX, y, (int)maxX + 1, y + 1, color);
             }
         }
     }
@@ -337,38 +340,37 @@ public class GuiNode {
         float len = (float) Math.sqrt(dx * dx + dy * dy);
         if (len < 0.5f) return;
 
-        // Optimized line drawing for ports and outlines
-        float step = 1.5f;
-        int numSteps = (int)(len / step);
-        float xInc = dx * step / len;
-        float yInc = dy * step / len;
-        float curX = x1;
-        float curY = y1;
-
-        for (int i = 0; i <= numSteps; i++) {
-            guiGraphics.fill((int)curX, (int)curY, (int)curX + 1, (int)curY + 1, color);
-            curX += xInc;
-            curY += yInc;
-        }
+        // Use matrix transformation for rotated line
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(x1, y1);
+        float angle = (float) Math.atan2(dy, dx);
+        guiGraphics.pose().rotate(angle);
+        guiGraphics.fill(0, 0, (int)len, 1, color);
+        guiGraphics.pose().popMatrix();
     }
 
     private void drawCircle(GuiGraphics guiGraphics, float cx, float cy, int radius, int color) {
+        // Optimization: For small radii, we can pre-calculate or use a very simple loop
+        int r2 = radius * radius;
         for (int y = -radius; y <= radius; y++) {
-            int xSpan = (int) Math.sqrt(radius * radius - y * y);
+            int xSpan = (int) Math.sqrt(r2 - y * y);
             guiGraphics.fill((int)(cx - xSpan), (int)(cy + y), (int)(cx + xSpan + 1), (int)(cy + y + 1), color);
         }
     }
 
     private void drawCircleOutline(GuiGraphics guiGraphics, float cx, float cy, int radius, int color) {
-        for (int y = -radius; y <= radius; y++) {
-            int xSpan = (int) Math.sqrt(radius * radius - y * y);
-            guiGraphics.fill((int)(cx - xSpan), (int)(cy + y), (int)(cx - xSpan + 1), (int)(cy + y + 1), color);
-            guiGraphics.fill((int)(cx + xSpan), (int)(cy + y), (int)(cx + xSpan + 1), (int)(cy + y + 1), color);
-        }
-        for (int x = -radius; x <= radius; x++) {
-            int ySpan = (int) Math.sqrt(radius * radius - x * x);
-            guiGraphics.fill((int)(cx + x), (int)(cy - ySpan), (int)(cx + x + 1), (int)(cy - ySpan + 1), color);
-            guiGraphics.fill((int)(cx + x), (int)(cy + ySpan), (int)(cx + x + 1), (int)(cy + ySpan + 1), color);
+        // Optimization: Draw as a polygon with fewer segments
+        int segments = radius > 10 ? 16 : 8;
+        float lastX = cx + radius;
+        float lastY = cy;
+        
+        for (int i = 1; i <= segments; i++) {
+            float angle = (float) (i * 2 * Math.PI / segments);
+            float x = (float) (cx + Math.cos(angle) * radius);
+            float y = (float) (cy + Math.sin(angle) * radius);
+            drawLine(guiGraphics, lastX, lastY, x, y, color);
+            lastX = x;
+            lastY = y;
         }
     }
 
@@ -381,6 +383,7 @@ public class GuiNode {
         public boolean hasInput;
         public Object defaultValue;
         public String[] options;
+        public boolean isConnected = false;
 
         public NodePort(String id, String displayName, NodeDefinition.PortType type, int color, boolean isInput, boolean hasInput, Object defaultValue, String[] options) {
             this.id = id;

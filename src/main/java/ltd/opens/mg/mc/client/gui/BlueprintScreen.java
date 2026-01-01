@@ -40,6 +40,10 @@ public class BlueprintScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         BlueprintRenderer.drawGrid(guiGraphics, this.width, this.height, state.panX, state.panY, state.zoom);
 
+        // Pre-calculate connection states only once if needed, or just less frequently
+        // For now, let's just make sure we don't do it inside the scaled pose if not needed
+        // but it's currently inside the node loop which is fine if culling works.
+
         guiGraphics.pose().pushMatrix();
         guiGraphics.pose().translate(state.panX, state.panY);
         guiGraphics.pose().scale(state.zoom, state.zoom);
@@ -56,6 +60,10 @@ public class BlueprintScreen extends Screen {
             if (sX + sW < 0 || sX > this.width || sY + sH < 0 || sY > this.height) {
                 continue;
             }
+            
+            // Only update if something changed? For now, the bottleneck was drawLine.
+            // But let's keep it optimized.
+            node.updateConnectedState(state.connections);
             node.render(guiGraphics, this.font, mouseX, mouseY, state.panX, state.panY, state.zoom, state.connections, state.focusedNode, state.focusedPort);
         }
 

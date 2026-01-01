@@ -10,7 +10,8 @@ public class BlueprintRenderer {
         guiGraphics.fill(0, 0, width, height, 0xFF121212);
 
         float scaledGridSize = 20 * zoom;
-        if (scaledGridSize > 5) { // Only draw small grid if it's not too dense
+        // Optimized grid: Only draw if zoom is large enough, and use fewer lines
+        if (zoom > 0.5f) {
             int color = 0xFF262626;
             float startX = panX % scaledGridSize;
             if (startX > 0) startX -= scaledGridSize;
@@ -27,7 +28,7 @@ public class BlueprintRenderer {
         
         // Draw larger grid lines every 5 small grid squares
         float largeGridSize = 100 * zoom;
-        if (largeGridSize > 5) {
+        if (largeGridSize > 10) { // Only draw if visible
             float largeStartX = panX % largeGridSize;
             if (largeStartX > 0) largeStartX -= largeGridSize;
             float largeStartY = panY % largeGridSize;
@@ -113,22 +114,17 @@ public class BlueprintRenderer {
         float len = (float) Math.sqrt(dx * dx + dy * dy);
         if (len < 0.5f) return;
 
-        // Optimized line drawing: balance thickness and performance
-        // 2x2 square for a clean but visible look
-        float step = 1.5f; 
-        int numSteps = (int)(len / step);
-        float xInc = dx * step / len;
-        float yInc = dy * step / len;
-        float curX = x1;
-        float curY = y1;
-
-        for (int i = 0; i <= numSteps; i++) {
-            // Draw 2x2 square for standard thickness
-            guiGraphics.fill((int)curX, (int)curY, (int)curX + 2, (int)curY + 2, color);
-            curX += xInc;
-            curY += yInc;
-        }
-        // Ensure end point is drawn
-        guiGraphics.fill((int)x2, (int)y2, (int)x2 + 2, (int)y2 + 2, color);
+        // Use PoseStack for efficient rotated rectangle drawing
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(x1, y1);
+        
+        float angle = (float) Math.atan2(dy, dx);
+        guiGraphics.pose().rotate(angle);
+        
+        // Draw the line as a thin rectangle
+        // Thickness is 2.0f
+        guiGraphics.fill(0, -1, (int)len, 1, color);
+        
+        guiGraphics.pose().popMatrix();
     }
 }
