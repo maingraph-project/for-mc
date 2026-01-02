@@ -65,6 +65,15 @@ public class NodeRegistry {
             .addOutput("exec", "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, colorExec)
             .build());
 
+        register(new NodeDefinition.Builder("run_command_as_player", "node.mgmc.run_command_as_player.name")
+            .category("node_category.mgmc.action.player")
+            .color(0xFF4488FF)
+            .addInput("exec", "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, colorExec)
+            .addInput("uuid", "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, colorUUID)
+            .addInput("command", "node.mgmc.run_command_as_player.port.command", NodeDefinition.PortType.STRING, colorString, true, "say hello")
+            .addOutput("exec", "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, colorExec)
+            .build());
+
         // Action -> World
         register(new NodeDefinition.Builder("play_effect", "node.mgmc.play_effect.name")
             .category("node_category.mgmc.action.world")

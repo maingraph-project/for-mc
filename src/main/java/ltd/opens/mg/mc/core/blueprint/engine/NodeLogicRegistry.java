@@ -80,6 +80,7 @@ public class NodeLogicRegistry {
 
         // Functions
         register("print_chat", new PrintChatHandler());
+        register("run_command_as_player", new RunCommandAsPlayerHandler());
         register("print_string", new PrintStringHandler());
         register("get_list_item", new GetListItemHandler());
         register("list_add", new ListAddHandler());
