@@ -98,6 +98,7 @@
   "node.mgmc.get_entity_info.port.max_health": "最大生命值",
   "node.mgmc.get_entity_info.port.is_living": "是否为生物",
   "node.mgmc.get_entity_info.port.is_player": "是否为玩家",
+  "node.mgmc.get_entity_info.port.permission_level": "权限等级",
   "node.mgmc.cast.port.input": "输入",
   "node.mgmc.cast.port.to_type": "转换为类型",
   "node.mgmc.cast.port.output": "输出",

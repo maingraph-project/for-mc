@@ -8,6 +8,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import java.util.UUID;
 
@@ -42,6 +45,11 @@ public class GetEntityInfoHandler implements NodeHandler {
                         return "0";
                     case "is_living": return String.valueOf(entity instanceof LivingEntity);
                     case "is_player": return String.valueOf(entity instanceof Player);
+                    case "permission_level":
+                        if (entity instanceof ServerPlayer serverPlayer && ctx.level != null) {
+                            return String.valueOf(ctx.level.getServer().getProfilePermissions(new NameAndId(serverPlayer.getUUID(), serverPlayer.getGameProfile().name())).level());
+                        }
+                        return "0";
                 }
             }
         } catch (Exception e) {
@@ -71,6 +79,7 @@ public class GetEntityInfoHandler implements NodeHandler {
             case "pos_z":
             case "health":
             case "max_health":
+            case "permission_level":
                 return "0";
             case "is_living":
             case "is_player":
