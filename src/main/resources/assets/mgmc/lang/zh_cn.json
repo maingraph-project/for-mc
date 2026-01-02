@@ -9,7 +9,7 @@
   "gui.mgmc.blueprint_selection.back": "返回",
   "gui.mgmc.blueprint_selection.about": "关于",
   "gui.mgmc.about.title": "关于 Maingraph for MC",
-  "gui.mgmc.about.website": "访问官网 (Opens.ltd)",
+  "gui.mgmc.about.website": "访问官网",
    "gui.mgmc.about.info": "Maingraph for MC 是一个为 Minecraft 设计的高级可视化蓝图 engine。它通过直观的节点连接，允许玩家和开发者在无需编写复杂代码的情况下实现复杂的逻辑自动化、自定义事件处理和交互功能。",
    "gui.mgmc.about.link": "官方站点: mc.maingraph.opens.ltd",
   "gui.mgmc.blueprint_selection.refresh": "刷新",
