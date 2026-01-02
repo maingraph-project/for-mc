@@ -87,6 +87,11 @@ public class BlueprintSelectionScreen extends Screen {
             refreshFileList();
         }).bounds(startX + (buttonWidth + spacing) * 2, buttonY, buttonWidth, buttonHeight).build());
 
+        // About Button (Top-Right)
+        this.addRenderableWidget(Button.builder(Component.translatable("gui.mgmc.blueprint_selection.about"), b -> {
+            Minecraft.getInstance().setScreen(new AboutScreen(this));
+        }).bounds(this.width - 60, 10, 50, 20).build());
+
         refreshFileList();
 
         // Rename box (initially hidden)

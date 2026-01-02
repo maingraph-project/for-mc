@@ -5,21 +5,26 @@ import ltd.opens.mg.mc.core.blueprint.NodeRegistry;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class BlueprintMenu {
-    private String currentPath = "node_category.mgmc";
-    private String hoveredCategory = null;
     private String searchQuery = "";
-    private int selectedIndex = 0;
     private List<SearchResult> filteredResults = new ArrayList<>();
-    private float scrollAmount = 0;
-    private float subScrollAmount = 0;
-    private int menuWidth = 180;
+    private int selectedIndex = -1;
+    private double scrollAmount = 0;
+    private double subScrollAmount = 0;
+    private int menuWidth = 150;
     private int subMenuWidth = 150;
+    private int lastMenuContentY = 0;
+    private int lastMenuHeight = 0;
+    private String hoveredCategory = null;
+    private String currentPath = "node_category.mgmc";
 
     private static class SearchResult {
         final NodeDefinition node;
@@ -56,9 +61,6 @@ public class BlueprintMenu {
         if (hoverBreak) guiGraphics.fill(x + 1, y + 23, x + width - 1, y + 43, 0x44FFFFFF);
         guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_editor.context_menu.break_links"), x + 8, y + 28, 0xFFFFFFFF, false);
     }
-
-    private int lastMenuHeight = 0;
-    private int lastMenuContentY = 0;
 
     public void renderNodeMenu(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, double menuX, double menuY, int screenWidth, int screenHeight) {
         int x = (int) menuX;
@@ -252,9 +254,6 @@ public class BlueprintMenu {
             scrollAmount = Mth.clamp(scrollAmount, 0, maxScroll);
 
             String currentHoveredCatInMain = null;
-            NodeDefinition currentHoveredNode = null;
-            boolean backHovered = false;
-
             int currentIdx = 0;
             // Render Back
             if (hasBack) {
@@ -262,9 +261,8 @@ public class BlueprintMenu {
                 if (itemY + itemHeight >= contentY && itemY <= contentY + height) {
                     boolean hovered = mouseX >= x && mouseX <= x + width && mouseY >= itemY && mouseY <= itemY + itemHeight;
                     if (hovered) {
-                        guiGraphics.fill(x + 1, itemY, x + width - 1, itemY + itemHeight, 0x44FFFFFF);
-                        backHovered = true;
-                    }
+                    guiGraphics.fill(x + 1, itemY, x + width - 1, itemY + itemHeight, 0x44FFFFFF);
+                }
                     guiGraphics.drawString(font, "<- " + Component.translatable("gui.mgmc.blueprint_selection.back").getString(), x + 8, itemY + 4, 0xFFAAAAAA, false);
                 }
                 currentIdx++;
@@ -292,7 +290,6 @@ public class BlueprintMenu {
                     boolean hovered = mouseX >= x && mouseX <= x + width && mouseY >= itemY && mouseY <= itemY + itemHeight;
                     if (hovered) {
                         guiGraphics.fill(x + 1, itemY, x + width - 1, itemY + itemHeight, 0x44FFFFFF);
-                        currentHoveredNode = def;
                     }
                     guiGraphics.drawString(font, Component.translatable(def.name()), x + 8, itemY + 4, 0xFFFFFFFF, false);
                 }
@@ -400,7 +397,7 @@ public class BlueprintMenu {
         }
     }
 
-    private void renderScrollbar(GuiGraphics guiGraphics, int x, int y, int width, int height, float scroll, int totalHeight) {
+    private void renderScrollbar(GuiGraphics guiGraphics, int x, int y, int width, int height, double scroll, int totalHeight) {
         guiGraphics.fill(x, y, x + width, y + height, 0x22FFFFFF);
         int barHeight = (int) ((height / (float) totalHeight) * height);
         int barY = y + (int) ((scroll / (float) totalHeight) * height);
@@ -708,7 +705,7 @@ public class BlueprintMenu {
             int itemHeight = 18;
             int displayCount = Math.min(totalItems, maxVisibleItems);
             int height = displayCount * itemHeight + 6;
-            int contentY = y + 25 + 2;
+            int contentY = y + 20 + 25 + 2;
             if (contentY + height > screenHeight) contentY = y - height;
 
             List<NodeDefinition> catNodes = NodeRegistry.getAll().stream()
