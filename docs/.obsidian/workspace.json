@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "首页.md",
+                "file": "命令/mgrun.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "首页"
+              "title": "mgrun"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "首页.md",
+                "file": "命令/mgrun.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "首页 的反向链接列表"
+              "title": "mgrun 的反向链接列表"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "首页.md",
+                "file": "命令/mgrun.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "首页 的出链列表"
+              "title": "mgrun 的出链列表"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "首页.md",
+                "file": "命令/mgrun.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "首页 的大纲"
+              "title": "mgrun 的大纲"
             }
           }
         ]
@@ -185,11 +185,17 @@
   },
   "active": "994b8e2d8c7d5c2f",
   "lastOpenFiles": [
+    "节点/事件/当运行【斜杠】mgrun命令时.md",
+    "命令/mgrun.md",
+    "命令",
+    "类型.md",
+    "核心概念.md",
+    "首页.md",
+    "节点/事件",
+    "节点",
     "nodes/events/on_mgrun.md",
     "nodes/events",
     "nodes",
-    "基础入门.md",
-    "首页.md",
-    "核心概念.md"
+    "基础入门.md"
   ]
 }
