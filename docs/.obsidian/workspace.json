@@ -11,10 +11,14 @@
             "id": "042a907c634234a4",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "关系图谱"
+              "type": "markdown",
+              "state": {
+                "file": "搜索.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "搜索"
             }
           }
         ]
@@ -90,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "搜索.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -99,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "反向链接"
+              "title": "搜索 的反向链接列表"
             }
           },
           {
@@ -108,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "搜索.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "出链"
+              "title": "搜索 的出链列表"
             }
           },
           {
@@ -150,12 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "搜索.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "大纲"
+              "title": "搜索 的大纲"
             }
           }
         ]
@@ -177,6 +184,23 @@
   },
   "active": "042a907c634234a4",
   "lastOpenFiles": [
+    "节点/事件/世界事件/当运行【斜杠】mgrun命令时.md",
+    "节点/事件/生物事件/当生物死亡时.md",
+    "节点/事件/生物事件/当生物在世界中生成时.md",
+    "节点/事件/生物事件/当生物受到伤害时.md",
+    "节点/事件/玩家事件/当玩家进入游戏时.md",
+    "节点/事件/玩家事件/当玩家移动.md",
+    "节点/事件/玩家事件/当玩家破坏方块时.md",
+    "节点/事件/玩家事件/当玩家点击方块时.md",
+    "节点/事件/玩家事件/当玩家死亡时.md",
+    "节点/事件/玩家事件/当玩家敲击时.md",
+    "节点/事件/玩家事件/当玩家放置方块时.md",
+    "节点/事件/玩家事件/当玩家复活时.md",
+    "节点/事件/玩家事件/当玩家受到伤害.md",
+    "节点/事件/玩家事件/当玩家使用物品.md",
+    "节点/事件/世界事件",
+    "节点/事件/生物事件",
+    "节点/事件/玩家事件",
     "MAX_RECURSION_DEPTH.md",
     "节点/事件/当生物在世界中生成时.md",
     "节点/事件/当生物受到伤害时.md",
@@ -189,21 +213,7 @@
     "节点/事件/当玩家进入游戏时.md",
     "节点/事件/当玩家点击方块时.md",
     "节点/事件/当玩家放置方块时.md",
-    "节点/事件/当玩家破坏方块时.md",
-    "搜索.md",
-    "首页.md",
-    "节点/变量/设置变量.md",
-    "节点/变量/获取变量.md",
     "节点/变量/字符串/image.png",
-    "节点/变量/字符串/连接字符串.md",
-    "节点/变量/字符串/替换字符串.md",
-    "节点/变量/字符串/截取子字符串.md",
-    "节点/变量/字符串/大小写转换-修剪.md",
-    "节点/变量/字符串/大小写转换.md",
-    "节点/变量/字符串/获取子字符串.md",
-    "节点/变量/字符串/获取字符串长度.md",
-    "节点/变量/字符串/字符串连接.md",
-    "节点/变量/字符串/字符串替换.md",
     "节点/变量/列表",
     "节点/动作/世界动作",
     "节点/变量/浮点数",
@@ -213,9 +223,6 @@
     "节点/逻辑/数学与转换/image.png",
     "未命名.canvas",
     "节点/逻辑/布尔逻辑",
-    "节点/逻辑/比较",
-    "节点/逻辑/数学与转换",
-    "节点/逻辑",
     "image.png",
     "节点/事件/image.png"
   ]
