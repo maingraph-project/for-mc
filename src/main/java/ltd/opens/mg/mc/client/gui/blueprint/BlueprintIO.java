@@ -8,10 +8,7 @@ import ltd.opens.mg.mc.core.blueprint.NodeRegistry;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BlueprintIO {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -250,21 +247,56 @@ public class BlueprintIO {
         connections.clear();
         
         Collection<NodeDefinition> allDefs = NodeRegistry.getAllDefinitions();
-        int x = 50;
-        int y = 50;
-        int count = 0;
-        int columns = (int) Math.sqrt(allDefs.size()) + 2;
         
+        // Group by category for better organization
+        Map<String, List<NodeDefinition>> byCategory = new TreeMap<>();
         for (NodeDefinition def : allDefs) {
-            GuiNode node = new GuiNode(def, x, y);
-            nodes.add(node);
+            byCategory.computeIfAbsent(def.category(), k -> new ArrayList<>()).add(def);
+        }
+
+        int startX = 50;
+        int currentY = 50;
+        int columnSpacing = 30;
+        int rowSpacing = 40;
+
+        for (Map.Entry<String, List<NodeDefinition>> entry : byCategory.entrySet()) {
+            int currentX = startX;
+            int maxRowHeight = 0;
             
-            x += 180;
-            count++;
-            if (count % columns == 0) {
-                x = 50;
-                y += 120;
+            // Add category label as a special note? (Optional, maybe later)
+            
+            for (NodeDefinition def : entry.getValue()) {
+                // Estimate size
+                int maxPorts = Math.max(def.inputs().size(), def.outputs().size());
+                int estimatedHeight = 15 + 10 + maxPorts * 15 + 10;
+                
+                // Estimate width
+                int maxInputW = 0;
+                for (NodeDefinition.PortDefinition p : def.inputs()) {
+                    maxInputW = Math.max(maxInputW, 10 + p.displayName().length() * 6 + (p.hasInput() ? 55 : 0));
+                }
+                int maxOutputW = 0;
+                for (NodeDefinition.PortDefinition p : def.outputs()) {
+                    maxOutputW = Math.max(maxOutputW, 10 + p.displayName().length() * 6);
+                }
+                int estimatedWidth = Math.max(120, Math.max(def.name().length() * 7, maxInputW + maxOutputW + 25));
+
+                GuiNode node = new GuiNode(def, currentX, currentY);
+                nodes.add(node);
+                
+                currentX += estimatedWidth + columnSpacing;
+                maxRowHeight = Math.max(maxRowHeight, estimatedHeight);
+                
+                // Wrap to next line if row gets too long
+                if (currentX > 2500) {
+                    currentX = startX;
+                    currentY += maxRowHeight + rowSpacing;
+                    maxRowHeight = 0;
+                }
             }
+            
+            // Next category starts on a new row with extra spacing
+            currentY += maxRowHeight + rowSpacing * 2;
         }
     }
 
