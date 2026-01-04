@@ -6,13 +6,14 @@ import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
 
 public class OnPlayerMoveHandler implements NodeHandler {
     @Override
-    public String getValue(JsonObject node, String pinId, NodeContext ctx) {
-        if (pinId.equals("x")) return String.valueOf(ctx.triggerX);
-        if (pinId.equals("y")) return String.valueOf(ctx.triggerY);
-        if (pinId.equals("z")) return String.valueOf(ctx.triggerZ);
-        if (pinId.equals("speed")) return String.valueOf(ctx.triggerSpeed);
+    public Object getValue(JsonObject node, String pinId, NodeContext ctx) {
+        if (pinId.equals("x")) return ctx.triggerX;
+        if (pinId.equals("y")) return ctx.triggerY;
+        if (pinId.equals("z")) return ctx.triggerZ;
+        if (pinId.equals("speed")) return ctx.triggerSpeed;
         if (pinId.equals("uuid")) return ctx.triggerUuid;
-        return "";
+        return null;
     }
 }
+
 

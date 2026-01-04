@@ -4,13 +4,14 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StringCombineHandler implements NodeHandler {
     @Override
-    public String getValue(JsonObject node, String pinId, NodeContext ctx) {
+    public Object getValue(JsonObject node, String pinId, NodeContext ctx) {
         if (pinId.equals("output")) {
             StringBuilder sb = new StringBuilder();
             if (node.has("inputs")) {
@@ -34,7 +35,7 @@ public class StringCombineHandler implements NodeHandler {
                     // Skip exec if it exists (though string_combine shouldn't have one)
                     if (key.equals("exec")) continue;
                     
-                    String val = NodeLogicRegistry.evaluateInput(node, key, ctx);
+                    String val = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, key, ctx));
                     if (val != null) {
                         sb.append(val);
                     }
@@ -42,7 +43,7 @@ public class StringCombineHandler implements NodeHandler {
             }
             return sb.toString();
         }
-        return "";
+        return null;
     }
 
     private int extractNumber(String s) {
@@ -50,4 +51,6 @@ public class StringCombineHandler implements NodeHandler {
         return num.isEmpty() ? 0 : Integer.parseInt(num);
     }
 }
+
+
 

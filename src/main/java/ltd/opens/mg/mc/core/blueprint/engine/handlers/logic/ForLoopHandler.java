@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 
 public class ForLoopHandler implements NodeHandler {
     @Override
@@ -14,20 +15,17 @@ public class ForLoopHandler implements NodeHandler {
             return;
         }
 
-        String startStr = NodeLogicRegistry.evaluateInput(node, "start", ctx);
-        String endStr = NodeLogicRegistry.evaluateInput(node, "end", ctx);
+        int start = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, "start", ctx));
+        int end = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, "end", ctx));
         
         try {
-            int start = (int) Double.parseDouble(startStr.isEmpty() ? "0" : startStr);
-            int end = (int) Double.parseDouble(endStr.isEmpty() ? "0" : endStr);
-            
             // Support nested loops by saving the previous break state
             boolean previousBreakRequested = ctx.breakRequested;
             ctx.breakRequested = false;
 
             for (int i = start; i <= end; i++) {
                 // Store current index in the node object so getValue can retrieve it
-                node.addProperty("_index", String.valueOf(i));
+                node.addProperty("_index", i);
                 
                 // Trigger loop body
                 NodeLogicRegistry.triggerExec(node, "loop_body", ctx);
@@ -52,11 +50,14 @@ public class ForLoopHandler implements NodeHandler {
     }
 
     @Override
-    public String getValue(JsonObject node, String pinId, NodeContext ctx) {
+    public Object getValue(JsonObject node, String pinId, NodeContext ctx) {
         if (pinId.equals("index")) {
-            return node.has("_index") ? node.get("_index").getAsString() : "0";
+            return node.has("_index") ? node.get("_index").getAsInt() : 0;
         }
-        return "";
+        return null;
     }
 }
+
+
+
 

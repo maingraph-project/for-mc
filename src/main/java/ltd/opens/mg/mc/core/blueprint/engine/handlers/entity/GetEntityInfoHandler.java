@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,8 +17,8 @@ import java.util.UUID;
 
 public class GetEntityInfoHandler implements NodeHandler {
     @Override
-    public String getValue(JsonObject node, String pinId, NodeContext ctx) {
-        String uuidStr = NodeLogicRegistry.evaluateInput(node, "uuid", ctx);
+    public Object getValue(JsonObject node, String pinId, NodeContext ctx) {
+        String uuidStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, "uuid", ctx));
         if (uuidStr == null || uuidStr.isEmpty()) return getDefaultValue(pinId);
 
         try {
@@ -30,31 +31,31 @@ public class GetEntityInfoHandler implements NodeHandler {
                     case "type": return entity.getType().getDescription().getString();
                     case "registry_name": 
                         return BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
-                    case "pos_x": return String.valueOf(entity.getX());
-                    case "pos_y": return String.valueOf(entity.getY());
-                    case "pos_z": return String.valueOf(entity.getZ());
+                    case "pos_x": return entity.getX();
+                    case "pos_y": return entity.getY();
+                    case "pos_z": return entity.getZ();
                     case "health":
                         if (entity instanceof LivingEntity) {
-                            return String.valueOf(((LivingEntity) entity).getHealth());
+                            return ((LivingEntity) entity).getHealth();
                         }
-                        return "0";
+                        return 0.0;
                     case "max_health":
                         if (entity instanceof LivingEntity) {
-                            return String.valueOf(((LivingEntity) entity).getMaxHealth());
+                            return ((LivingEntity) entity).getMaxHealth();
                         }
-                        return "0";
-                    case "is_living": return String.valueOf(entity instanceof LivingEntity);
-                    case "is_player": return String.valueOf(entity instanceof Player);
+                        return 0.0;
+                    case "is_living": return entity instanceof LivingEntity;
+                    case "is_player": return entity instanceof Player;
                     case "is_online":
                         if (ctx.level != null) {
-                            return String.valueOf(ctx.level.getServer().getPlayerList().getPlayer(uuid) != null);
+                            return ctx.level.getServer().getPlayerList().getPlayer(uuid) != null;
                         }
-                        return "false";
+                        return false;
                     case "permission_level":
                         if (entity instanceof ServerPlayer serverPlayer && ctx.level != null) {
-                            return String.valueOf(ctx.level.getServer().getProfilePermissions(new NameAndId(serverPlayer.getUUID(), serverPlayer.getGameProfile().name())).level().id());
+                            return ctx.level.getServer().getProfilePermissions(new NameAndId(serverPlayer.getUUID(), serverPlayer.getGameProfile().name())).level().id();
                         }
-                        return "0";
+                        return 0.0;
                 }
             }
         } catch (Exception e) {
@@ -77,7 +78,7 @@ public class GetEntityInfoHandler implements NodeHandler {
         }
     }
 
-    private String getDefaultValue(String pinId) {
+    private Object getDefaultValue(String pinId) {
         switch (pinId) {
             case "pos_x":
             case "pos_y":
@@ -85,14 +86,17 @@ public class GetEntityInfoHandler implements NodeHandler {
             case "health":
             case "max_health":
             case "permission_level":
-                return "0";
+                return 0.0;
             case "is_living":
             case "is_player":
             case "is_online":
-                return "false";
+                return false;
             default:
                 return "";
         }
     }
 }
+
+
+
 

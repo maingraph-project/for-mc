@@ -20,7 +20,7 @@ public class NodeContext {
     public final double triggerValue;
     public final String triggerExtraUuid;
     public final Map<String, JsonObject> nodesMap;
-    public final Map<String, String> variables = new HashMap<>();
+    public final Map<String, Object> variables = new HashMap<>();
     public boolean breakRequested = false;
     public String lastTriggeredPin;
 

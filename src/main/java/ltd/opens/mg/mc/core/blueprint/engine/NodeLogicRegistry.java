@@ -26,16 +26,16 @@ public class NodeLogicRegistry {
         return HANDLERS.get(typeId);
     }
 
-    public static String evaluateInput(JsonObject node, String pinId, NodeContext ctx) {
-        if (!node.has("inputs")) return "";
+    public static Object evaluateInput(JsonObject node, String pinId, NodeContext ctx) {
+        if (!node.has("inputs")) return null;
         JsonObject inputs = node.getAsJsonObject("inputs");
-        if (!inputs.has(pinId)) return "";
+        if (!inputs.has(pinId)) return null;
 
         JsonObject input = inputs.getAsJsonObject(pinId);
         String type = input.get("type").getAsString();
 
         if (type.equals("value")) {
-            return input.has("value") ? input.get("value").getAsString() : "";
+            return input.has("value") ? input.get("value").getAsString() : null;
         } else if (type.equals("link")) {
             String sourceId = input.get("nodeId").getAsString();
             String sourceSocket = input.get("socket").getAsString();
@@ -44,18 +44,18 @@ public class NodeLogicRegistry {
                 return evaluateOutput(sourceNode, sourceSocket, ctx);
             }
         }
-        return "";
+        return null;
     }
 
-    public static String evaluateOutput(JsonObject node, String pinId, NodeContext ctx) {
+    public static Object evaluateOutput(JsonObject node, String pinId, NodeContext ctx) {
         String type = node.has("type") ? node.get("type").getAsString() : null;
-        if (type == null) return "";
+        if (type == null) return null;
 
         NodeHandler handler = get(type);
         if (handler != null) {
             return handler.getValue(node, pinId, ctx);
         }
-        return "";
+        return null;
     }
 
     public static void triggerExec(JsonObject node, String pinId, NodeContext ctx) {

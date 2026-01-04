@@ -4,17 +4,21 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 
 public class AbsFloatHandler implements NodeHandler {
     @Override
-    public String getValue(JsonObject node, String pinId, NodeContext ctx) {
+    public Object getValue(JsonObject node, String pinId, NodeContext ctx) {
         if (pinId.equals("result")) {
             try {
-                double a = Double.parseDouble(NodeLogicRegistry.evaluateInput(node, "input", ctx));
-                return String.valueOf(Math.abs(a));
+                double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, "input", ctx));
+                return Math.abs(a);
             } catch (Exception e) {}
         }
-        return "0";
+        return 0.0;
     }
 }
+
+
+
 

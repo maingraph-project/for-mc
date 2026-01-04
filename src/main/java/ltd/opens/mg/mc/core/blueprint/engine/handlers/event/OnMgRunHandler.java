@@ -3,10 +3,11 @@ package ltd.opens.mg.mc.core.blueprint.engine.handlers.event;
 import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 
 public class OnMgRunHandler implements NodeHandler {
     @Override
-    public String getValue(JsonObject node, String pinId, NodeContext ctx) {
+    public Object getValue(JsonObject node, String pinId, NodeContext ctx) {
         if (pinId.equals("name")) return ctx.eventName;
         if (pinId.equals("parameters")) {
             // Join args with a delimiter or return as a format that our list item node understands
@@ -20,10 +21,13 @@ public class OnMgRunHandler implements NodeHandler {
         if (pinId.equals("trigger_name")) {
             return ctx.triggerName != null ? ctx.triggerName : "";
         }
-        if (pinId.equals("trigger_x")) return String.valueOf(ctx.triggerX);
-        if (pinId.equals("trigger_y")) return String.valueOf(ctx.triggerY);
-        if (pinId.equals("trigger_z")) return String.valueOf(ctx.triggerZ);
-        return "";
+        if (pinId.equals("trigger_x")) return ctx.triggerX;
+        if (pinId.equals("trigger_y")) return ctx.triggerY;
+        if (pinId.equals("trigger_z")) return ctx.triggerZ;
+        return null;
     }
 }
+
+
+
 

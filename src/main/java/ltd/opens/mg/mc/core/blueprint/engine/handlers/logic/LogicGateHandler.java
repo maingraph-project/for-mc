@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 
 public class LogicGateHandler implements NodeHandler {
     private final String mode;
@@ -13,15 +14,15 @@ public class LogicGateHandler implements NodeHandler {
     }
 
     @Override
-    public String getValue(JsonObject node, String pinId, NodeContext ctx) {
+    public Object getValue(JsonObject node, String pinId, NodeContext ctx) {
         if (pinId.equals("result")) {
             try {
                 if (mode.equals("not")) {
-                    boolean a = Boolean.parseBoolean(NodeLogicRegistry.evaluateInput(node, "a", ctx));
-                    return String.valueOf(!a);
+                    boolean a = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, "a", ctx));
+                    return !a;
                 } else {
-                    boolean a = Boolean.parseBoolean(NodeLogicRegistry.evaluateInput(node, "a", ctx));
-                    boolean b = Boolean.parseBoolean(NodeLogicRegistry.evaluateInput(node, "b", ctx));
+                    boolean a = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, "a", ctx));
+                    boolean b = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, "b", ctx));
                     boolean res = false;
                     switch (mode) {
                         case "and": res = a && b; break;
@@ -30,11 +31,13 @@ public class LogicGateHandler implements NodeHandler {
                         case "nand": res = !(a && b); break;
                         case "nor": res = !(a || b); break;
                     }
-                    return String.valueOf(res);
+                    return res;
                 }
             } catch (Exception e) {}
         }
-        return "false";
+        return false;
     }
 }
+
+
 

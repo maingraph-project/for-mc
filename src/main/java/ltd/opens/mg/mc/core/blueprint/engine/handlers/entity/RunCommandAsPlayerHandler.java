@@ -4,14 +4,15 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.UUID;
 
 public class RunCommandAsPlayerHandler implements NodeHandler {
     @Override
     public void execute(JsonObject node, NodeContext ctx) {
-        String uuidStr = NodeLogicRegistry.evaluateInput(node, "uuid", ctx);
-        String command = NodeLogicRegistry.evaluateInput(node, "command", ctx);
+        String uuidStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, "uuid", ctx));
+        String command = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, "command", ctx));
 
         if (ctx.level != null && !ctx.level.isClientSide() && ctx.level.getServer() != null) {
             ServerPlayer player = null;
@@ -40,4 +41,6 @@ public class RunCommandAsPlayerHandler implements NodeHandler {
         NodeLogicRegistry.triggerExec(node, "exec", ctx);
     }
 }
+
+
 

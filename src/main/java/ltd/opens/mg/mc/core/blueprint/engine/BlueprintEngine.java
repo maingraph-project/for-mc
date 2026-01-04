@@ -5,6 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import ltd.opens.mg.mc.MaingraphforMC;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
@@ -69,7 +72,7 @@ public class BlueprintEngine {
                 
                 if (type != null && type.equals(eventType)) {
                     // Check if the 'name' output matches the requested name
-                    String nodeName = NodeLogicRegistry.evaluateOutput(node, "name", ctx);
+                    String nodeName = TypeConverter.toString(NodeLogicRegistry.evaluateOutput(node, "name", ctx));
                     if (name.isEmpty() || name.equals(nodeName)) {
                         NodeLogicRegistry.triggerExec(node, "exec", ctx);
                     }

@@ -4,18 +4,22 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 
 public class MinFloatHandler implements NodeHandler {
     @Override
-    public String getValue(JsonObject node, String pinId, NodeContext ctx) {
+    public Object getValue(JsonObject node, String pinId, NodeContext ctx) {
         if (pinId.equals("result")) {
             try {
-                double a = Double.parseDouble(NodeLogicRegistry.evaluateInput(node, "a", ctx));
-                double b = Double.parseDouble(NodeLogicRegistry.evaluateInput(node, "b", ctx));
-                return String.valueOf(Math.min(a, b));
+                double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, "a", ctx));
+                double b = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, "b", ctx));
+                return Math.min(a, b);
             } catch (Exception e) {}
         }
-        return "0";
+        return 0.0;
     }
 }
+
+
+
 

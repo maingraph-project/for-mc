@@ -11,7 +11,7 @@ public interface NodeHandler {
     /**
      * For data nodes (Value providers)
      */
-    default String getValue(JsonObject node, String pinId, NodeContext ctx) {
-        return "";
+    default Object getValue(JsonObject node, String pinId, NodeContext ctx) {
+        return null;
     }
 }
