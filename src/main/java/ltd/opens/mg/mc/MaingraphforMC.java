@@ -153,7 +153,10 @@ public class MaingraphforMC {
                     if (cached == null || lastModified > cached.lastModified) {
                         String json = Files.readString(dataFile);
                         JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-                        long version = obj.has("_version") ? obj.get("_version").getAsLong() : 0;
+                        long version = 0;
+                    if (obj.has("_version") && obj.get("_version").isJsonPrimitive() && obj.get("_version").getAsJsonPrimitive().isNumber()) {
+                        version = obj.get("_version").getAsLong();
+                    }
                         cached = new CachedBlueprint(obj, lastModified, version);
                         blueprintCache.put(name, cached);
                     }
