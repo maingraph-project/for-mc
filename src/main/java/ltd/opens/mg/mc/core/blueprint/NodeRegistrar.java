@@ -3,21 +3,25 @@ package ltd.opens.mg.mc.core.blueprint;
 public class NodeRegistrar {
     private static final int colorExec = 0xFFFFFFFF;
     private static final int colorString = 0xFFDA00DA;
-    private static final int colorFloat = 0xFF36CF36;
+    private static final int colorFloat = 0xFF55FF55;
     private static final int colorBoolean = 0xFF920101;
     private static final int colorObject = 0xFF00AAFF;
     private static final int colorList = 0xFFFFCC00;
     private static final int colorUUID = 0xFF55FF55;
     private static final int colorEnum = 0xFFFFAA00;
 
+    /**
+     * 旧版节点注册入口。
+     * 现已逐步迁移至 NodeInitializer 模块化注册。
+     */
     public static void registerAll() {
-        registerActions();
+        // registerEvents(); // 事件节点暂未迁移
         registerVariables();
-        registerLogic();
         registerStrings();
     }
 
     private static void registerEvents() {
+        // 暂保留事件节点注册，直到 EventNodes.java 完成完整逻辑重构
         NodeRegistry.register(new NodeDefinition.Builder("on_mgrun", "node.mgmc.on_mgrun.name")
             .category("node_category.mgmc.events.world")
             .color(0xFF880000)
@@ -159,70 +163,15 @@ public class NodeRegistrar {
             .build());
     }
 
-    private static void registerActions() {
-        NodeRegistry.register(new NodeDefinition.Builder("print_chat", "node.mgmc.print_chat.name")
-            .category("node_category.mgmc.action.player")
-            .color(0xFF4488FF)
-            .addInput("exec", "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, colorExec)
-            .addInput("message", "node.mgmc.port.message", NodeDefinition.PortType.STRING, colorString, true, "Hello Chat")
-            .addOutput("exec", "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, colorExec)
-            .build());
-
-        NodeRegistry.register(new NodeDefinition.Builder("run_command_as_player", "node.mgmc.run_command_as_player.name")
-            .category("node_category.mgmc.action.player")
-            .color(0xFF4488FF)
-            .addInput("exec", "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, colorExec)
-            .addInput("uuid", "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, colorUUID)
-            .addInput("command", "node.mgmc.run_command_as_player.port.command", NodeDefinition.PortType.STRING, colorString, true, "say hello")
-            .addOutput("exec", "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, colorExec)
-            .build());
-
-        NodeRegistry.register(new NodeDefinition.Builder("play_effect", "node.mgmc.play_effect.name")
-            .category("node_category.mgmc.action.world")
-            .color(0xFF4488FF)
-            .addInput("exec", "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, colorExec)
-            .addInput("effect", "node.mgmc.play_effect.port.effect", NodeDefinition.PortType.STRING, colorString, true, "minecraft:happy_villager")
-            .addInput("x", "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, colorFloat, true, 0.0)
-            .addInput("y", "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, colorFloat, true, 0.0)
-            .addInput("z", "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, colorFloat, true, 0.0)
-            .addOutput("exec", "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, colorExec)
-            .build());
-
-        NodeRegistry.register(new NodeDefinition.Builder("explosion", "node.mgmc.explosion.name")
-            .category("node_category.mgmc.action.world")
-            .color(0xFFFF4444)
-            .addInput("exec", "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, colorExec)
-            .addInput("x", "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, colorFloat, true, 0.0)
-            .addInput("y", "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, colorFloat, true, 0.0)
-            .addInput("z", "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, colorFloat, true, 0.0)
-            .addInput("radius", "node.mgmc.explosion.port.radius", NodeDefinition.PortType.FLOAT, colorFloat, true, 3.0)
-            .addOutput("exec", "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, colorExec)
-            .build());
-    }
-
     private static void registerVariables() {
-        NodeRegistry.register(new NodeDefinition.Builder("get_entity_info", "node.mgmc.get_entity_info.name")
-            .category("node_category.mgmc.variable.entity")
-            .color(0xFF44AA44)
-            .addInput("uuid", "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, colorUUID)
-            .addOutput("name", "node.mgmc.port.name", NodeDefinition.PortType.STRING, colorString)
-            .addOutput("type", "node.mgmc.get_entity_info.port.type", NodeDefinition.PortType.ENUM, colorEnum)
-            .addOutput("registry_name", "node.mgmc.get_entity_info.port.registry_name", NodeDefinition.PortType.STRING, colorString)
-            .addOutput("pos_x", "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, colorFloat)
-            .addOutput("pos_y", "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, colorFloat)
-            .addOutput("pos_z", "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, colorFloat)
-            .addOutput("health", "node.mgmc.get_entity_info.port.health", NodeDefinition.PortType.FLOAT, colorFloat)
-            .addOutput("max_health", "node.mgmc.get_entity_info.port.max_health", NodeDefinition.PortType.FLOAT, colorFloat)
-            .addOutput("is_living", "node.mgmc.get_entity_info.port.is_living", NodeDefinition.PortType.BOOLEAN, colorBoolean)
-            .addOutput("is_player", "node.mgmc.get_entity_info.port.is_player", NodeDefinition.PortType.BOOLEAN, colorBoolean)
-            .addOutput("is_online", "node.mgmc.get_entity_info.port.is_online", NodeDefinition.PortType.BOOLEAN, colorBoolean)
-            .addOutput("permission_level", "node.mgmc.get_entity_info.port.permission_level", NodeDefinition.PortType.FLOAT, colorFloat)
-            .build());
+        // 已迁移至各 Node 类中注册
     }
 
     private static void registerLogic() {
+        // 已迁移至 LogicNodes.java
     }
 
     private static void registerStrings() {
+        // 已迁移至 StringNodes.java
     }
 }

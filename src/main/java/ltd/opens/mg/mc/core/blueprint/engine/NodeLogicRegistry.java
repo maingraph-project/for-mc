@@ -5,10 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.engine.handlers.math.*;
 import ltd.opens.mg.mc.core.blueprint.engine.handlers.logic.*;
+import ltd.opens.mg.mc.core.blueprint.engine.handlers.logic.*;
 import ltd.opens.mg.mc.core.blueprint.engine.handlers.event.*;
 import ltd.opens.mg.mc.core.blueprint.engine.handlers.string.*;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.entity.*;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.collection.*;
 import ltd.opens.mg.mc.core.blueprint.engine.handlers.variable.*;
 import ltd.opens.mg.mc.core.blueprint.engine.handlers.world.*;
 
@@ -117,18 +116,6 @@ public class NodeLogicRegistry {
 
     static {
         // Functions
-        register("print_chat", new PrintChatHandler());
-        register("run_command_as_player", new RunCommandAsPlayerHandler());
-        register("print_string", new PrintStringHandler());
-        register("get_entity_info", new GetEntityInfoHandler());
-        register("play_effect", new PlayEffectHandler());
-        register("explosion", new ExplosionHandler());
-
-        // Logic
-        
-        // Data
-        register("player_health", new PlayerHealthHandler());
-        
         // Comparison
     }
 }

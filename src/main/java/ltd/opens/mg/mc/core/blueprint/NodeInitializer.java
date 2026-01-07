@@ -8,6 +8,8 @@ import ltd.opens.mg.mc.core.blueprint.nodes.ConversionNodes;
 import ltd.opens.mg.mc.core.blueprint.nodes.ControlFlowNodes;
 import ltd.opens.mg.mc.core.blueprint.nodes.StringNodes;
 import ltd.opens.mg.mc.core.blueprint.nodes.ListNodes;
+import ltd.opens.mg.mc.core.blueprint.nodes.ActionNodes;
+import ltd.opens.mg.mc.core.blueprint.nodes.GetEntityInfoNode;
 
 /**
  * 蓝图节点统一初始化入口
@@ -25,5 +27,7 @@ public class NodeInitializer {
         ControlFlowNodes.register();
         StringNodes.register();
         ListNodes.register();
+        ActionNodes.register();
+        GetEntityInfoNode.register();
     }
 }

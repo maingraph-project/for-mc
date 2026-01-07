@@ -29,11 +29,11 @@
 - [x] `on_entity_spawn` (实体生成)
 
 ### 2.2 动作与实体节点 (Action/Entity Nodes)
-- [ ] `print_chat` (聊天输出) -> `ActionNodes.java`
-- [ ] `run_command_as_player` (以玩家身份运行命令) -> `ActionNodes.java`
-- [ ] `play_effect` (播放特效) -> `ActionNodes.java`
-- [ ] `explosion` (爆炸) -> `ActionNodes.java`
-- [ ] `get_entity_info` (获取实体信息) -> **独立类** `GetEntityInfoNode.java`
+- [x] `print_chat` (聊天输出) -> `ActionNodes.java`
+- [x] `run_command_as_player` (以玩家身份运行命令) -> `ActionNodes.java`
+- [x] `play_effect` (播放特效) -> `ActionNodes.java`
+- [x] `explosion` (爆炸) -> `ActionNodes.java`
+- [x] `get_entity_info` (获取实体信息) -> **独立类** `GetEntityInfoNode.java`
 
 ### 2.3 数学运算节点 (Math Nodes) -> `MathNodes.java`
 - [x] `add_float` (+)
