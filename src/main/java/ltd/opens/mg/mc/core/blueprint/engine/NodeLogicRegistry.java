@@ -3,13 +3,6 @@ package ltd.opens.mg.mc.core.blueprint.engine;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.math.*;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.logic.*;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.logic.*;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.event.*;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.string.*;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.variable.*;
-import ltd.opens.mg.mc.core.blueprint.engine.handlers.world.*;
 
 import java.util.HashMap;
 import java.util.Map;
