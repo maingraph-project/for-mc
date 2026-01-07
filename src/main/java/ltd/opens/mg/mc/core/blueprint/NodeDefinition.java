@@ -1,7 +1,9 @@
 package ltd.opens.mg.mc.core.blueprint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public record NodeDefinition(
     String id,
@@ -9,7 +11,8 @@ public record NodeDefinition(
     String category,
     int color,
     List<PortDefinition> inputs,
-    List<PortDefinition> outputs
+    List<PortDefinition> outputs,
+    Map<String, Object> properties
 ) {
     public static class Builder {
         private final String id;
@@ -18,6 +21,7 @@ public record NodeDefinition(
         private int color = 0xFF444444;
         private final List<PortDefinition> inputs = new ArrayList<>();
         private final List<PortDefinition> outputs = new ArrayList<>();
+        private final Map<String, Object> properties = new HashMap<>();
 
         public Builder(String id, String name) {
             this.id = id;
@@ -31,6 +35,11 @@ public record NodeDefinition(
 
         public Builder color(int color) {
             this.color = color;
+            return this;
+        }
+
+        public Builder addProperty(String key, Object value) {
+            this.properties.put(key, value);
             return this;
         }
 
@@ -71,7 +80,7 @@ public record NodeDefinition(
         }
 
         public NodeDefinition build() {
-            return new NodeDefinition(id, name, category, color, List.copyOf(inputs), List.copyOf(outputs));
+            return new NodeDefinition(id, name, category, color, List.copyOf(inputs), List.copyOf(outputs), Map.copyOf(properties));
         }
     }
 

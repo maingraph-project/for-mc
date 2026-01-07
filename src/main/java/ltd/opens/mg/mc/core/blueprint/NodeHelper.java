@@ -1,0 +1,116 @@
+package ltd.opens.mg.mc.core.blueprint;
+
+import ltd.opens.mg.mc.core.blueprint.engine.NodeHandler;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+
+/**
+ * 节点注册助手类，提供链式调用 API 统一元数据与逻辑注册。
+ */
+public class NodeHelper {
+    private final NodeDefinition.Builder builder;
+    private final String id;
+
+    private NodeHelper(String id, String nameKey) {
+        this.id = id;
+        this.builder = new NodeDefinition.Builder(id, nameKey);
+    }
+
+    /**
+     * 开始配置一个新节点
+     * @param id 节点唯一标识
+     * @param nameKey 节点名称的 i18n key
+     * @return NodeHelper 实例
+     */
+    public static NodeHelper setup(String id, String nameKey) {
+        return new NodeHelper(id, nameKey);
+    }
+
+    /**
+     * 设置节点分类
+     * @param categoryKey 分类的 i18n key (支持嵌套路径如 mgmc.math)
+     * @return NodeHelper 实例
+     */
+    public NodeHelper category(String categoryKey) {
+        builder.category(categoryKey);
+        return this;
+    }
+
+    /**
+     * 添加输入端口
+     */
+    public NodeHelper input(String id, String displayNameKey, NodeDefinition.PortType type, int color) {
+        builder.addInput(id, displayNameKey, type, color);
+        return this;
+    }
+
+    public NodeHelper input(String id, String displayNameKey, NodeDefinition.PortType type, int color, Object defaultValue) {
+        builder.addInput(id, displayNameKey, type, color, true, defaultValue);
+        return this;
+    }
+
+    public NodeHelper input(String id, String displayNameKey, NodeDefinition.PortType type, int color, Object defaultValue, String[] options) {
+        builder.addInput(id, displayNameKey, type, color, true, defaultValue, options);
+        return this;
+    }
+
+    /**
+     * 添加输出端口
+     */
+    public NodeHelper output(String id, String displayNameKey, NodeDefinition.PortType type, int color) {
+        builder.addOutput(id, displayNameKey, type, color);
+        return this;
+    }
+
+    /**
+     * 添加执行输入端口 (默认 ID 为 "exec")
+     */
+    public NodeHelper execIn() {
+        return input("exec", "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, 0xFFFFFFFF);
+    }
+
+    public NodeHelper execIn(String id, String displayNameKey) {
+        return input(id, displayNameKey, NodeDefinition.PortType.EXEC, 0xFFFFFFFF);
+    }
+
+    /**
+     * 添加执行输出端口 (默认 ID 为 "exec")
+     */
+    public NodeHelper execOut() {
+        return output("exec", "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, 0xFFFFFFFF);
+    }
+
+    public NodeHelper execOut(String id, String displayNameKey) {
+        return output(id, displayNameKey, NodeDefinition.PortType.EXEC, 0xFFFFFFFF);
+    }
+
+    /**
+     * 为节点添加自定义标记或属性（用于消除 Handler 中的硬编码逻辑）
+     * @param key 标记键
+     * @param value 标记值
+     * @return NodeHelper 实例
+     */
+    public NodeHelper flag(String key, Object value) {
+        builder.addProperty(key, value);
+        return this;
+    }
+
+    /**
+     * 注册节点（元数据与逻辑同时注册）
+     * @param handler 节点执行逻辑处理器
+     */
+    public void register(NodeHandler handler) {
+        NodeRegistry.register(builder.build());
+        NodeLogicRegistry.register(id, handler);
+    }
+
+    /**
+     * 获取内部 Builder（用于扩展或特殊配置）
+     */
+    public NodeDefinition.Builder getBuilder() {
+        return builder;
+    }
+
+    public String getId() {
+        return id;
+    }
+}
