@@ -3,12 +3,12 @@
 用于追踪所有节点从旧的 `NodeRegistrar` / `NodeLogicRegistry` 分散注册模式，重构为 `NodeHelper` 统一注册模式的进度。
 
 ## 1. 核心工具准备
-- [ ] `NodeHelper.java` 实现
+- [x] `NodeHelper.java` 实现
     - [x] 基础 Builder 包装与链式调用架构
     - [x] 端口添加 API (`input`, `output`)
     - [x] 执行流快捷 API (`execIn`, `execOut`)
     - [x] 属性/标记系统 (`flag`) - 用于消除硬编码
-    - [ ] 统一注册逻辑 (`register`) - 对接元数据与逻辑中心
+    - [x] 统一注册逻辑 (`register`) - 对接元数据与逻辑中心
 
 ## 2. 节点重构列表
 

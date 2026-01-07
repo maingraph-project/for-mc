@@ -99,8 +99,28 @@ public class NodeHelper {
      * @param handler 节点执行逻辑处理器
      */
     public void register(NodeHandler handler) {
+        if (handler == null) {
+            throw new IllegalArgumentException("Node handler cannot be null for node: " + id);
+        }
         NodeRegistry.register(builder.build());
         NodeLogicRegistry.register(id, handler);
+    }
+
+    /**
+     * 为简单节点提供快速注册接口（仅支持 getValue 逻辑）
+     */
+    public void register(SimpleValueHandler valueHandler) {
+        register(new NodeHandler() {
+            @Override
+            public Object getValue(com.google.gson.JsonObject node, String portId, ltd.opens.mg.mc.core.blueprint.engine.NodeContext ctx) {
+                return valueHandler.handle(node, ctx);
+            }
+        });
+    }
+
+    @FunctionalInterface
+    public interface SimpleValueHandler {
+        Object handle(com.google.gson.JsonObject node, ltd.opens.mg.mc.core.blueprint.engine.NodeContext ctx);
     }
 
     /**
