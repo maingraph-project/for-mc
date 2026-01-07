@@ -139,7 +139,7 @@ public class StringNodes {
                 };
             });
 
-        // 字符串分割 (Split)
+        // 字符串分割 (Split) - 归类到列表，因为输出是列表
         NodeHelper.setup("string_split", "node.mgmc.string_split.name")
             .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)

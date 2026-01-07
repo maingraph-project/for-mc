@@ -28,7 +28,7 @@ public class ListNodes {
     public static void register() {
         // --- 1. 获取元素 (get_list_item) ---
         NodeHelper.setup("get_list_item", "node.mgmc.get_list_item.name")
-            .category("node_category.mgmc.data.list")
+            .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)
             .input("list", "node.mgmc.get_list_item.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
             .input("index", "node.mgmc.get_list_item.port.index", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
@@ -46,7 +46,7 @@ public class ListNodes {
 
         // --- 2. 添加元素 (list_add) ---
         NodeHelper.setup("list_add", "node.mgmc.list_add.name")
-            .category("node_category.mgmc.data.list")
+            .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)
             .input("list", "node.mgmc.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
             .input("item", "node.mgmc.port.value", NodeDefinition.PortType.ANY, COLOR_ANY)
@@ -60,7 +60,7 @@ public class ListNodes {
 
         // --- 3. 移除元素 (list_remove) ---
         NodeHelper.setup("list_remove", "node.mgmc.list_remove.name")
-            .category("node_category.mgmc.data.list")
+            .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)
             .input("list", "node.mgmc.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
             .input("index", "node.mgmc.port.index", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
@@ -76,7 +76,7 @@ public class ListNodes {
 
         // --- 4. 列表长度 (list_length) ---
         NodeHelper.setup("list_length", "node.mgmc.list_length.name")
-            .category("node_category.mgmc.data.list")
+            .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)
             .input("list", "node.mgmc.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
             .output("length", "node.mgmc.port.length", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
@@ -91,7 +91,7 @@ public class ListNodes {
 
         // --- 5. 包含元素 (list_contains) ---
         NodeHelper.setup("list_contains", "node.mgmc.list_contains.name")
-            .category("node_category.mgmc.data.list")
+            .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)
             .input("list", "node.mgmc.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
             .input("item", "node.mgmc.port.value", NodeDefinition.PortType.ANY, COLOR_ANY)
@@ -120,7 +120,7 @@ public class ListNodes {
 
         // --- 6. 设置元素 (list_set_item) ---
         NodeHelper.setup("list_set_item", "node.mgmc.list_set_item.name")
-            .category("node_category.mgmc.data.list")
+            .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)
             .input("list", "node.mgmc.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
             .input("index", "node.mgmc.port.index", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
@@ -145,7 +145,7 @@ public class ListNodes {
 
         // --- 7. 合并/转字符串 (list_join) ---
         NodeHelper.setup("list_join", "node.mgmc.list_join.name")
-            .category("node_category.mgmc.data.list")
+            .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)
             .input("list", "node.mgmc.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
             .input("delimiter", "node.mgmc.port.delimiter", NodeDefinition.PortType.STRING, COLOR_STRING, ",")
@@ -163,7 +163,7 @@ public class ListNodes {
 
         // --- 8. 随机元素 (random_list_item) ---
         NodeHelper.setup("random_list_item", "node.mgmc.random_list_item.name")
-            .category("node_category.mgmc.data.list")
+            .category("node_category.mgmc.variable.list")
             .color(COLOR_LIST)
             .input("list", "node.mgmc.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
             .output("item", "node.mgmc.port.value", NodeDefinition.PortType.ANY, COLOR_ANY)

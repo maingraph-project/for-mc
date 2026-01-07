@@ -28,7 +28,7 @@ public class GetEntityInfoNode {
 
     public static void register() {
         NodeHelper.setup("get_entity_info", "node.mgmc.get_entity_info.name")
-            .category("node_category.mgmc.entity")
+            .category("node_category.mgmc.variable.entity")
             .color(COLOR_ENTITY)
             .input("uuid", "node.mgmc.port.uuid", NodeDefinition.PortType.STRING, COLOR_STRING, "")
             .output("name", "node.mgmc.port.name", NodeDefinition.PortType.STRING, COLOR_STRING)

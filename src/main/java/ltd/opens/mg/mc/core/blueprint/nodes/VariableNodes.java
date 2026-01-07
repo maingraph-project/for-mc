@@ -20,7 +20,7 @@ public class VariableNodes {
     public static void register() {
         // --- 常量节点 ---
         NodeHelper.setup("float", "node.mgmc.float.name")
-            .category("node_category.mgmc.data.constants")
+            .category("node_category.mgmc.variable.float")
             .color(COLOR_FLOAT)
             .output("value", "node.mgmc.port.output", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
             .registerValue((node, portId, ctx) -> {
@@ -32,7 +32,7 @@ public class VariableNodes {
             });
 
         NodeHelper.setup("boolean", "node.mgmc.boolean.name")
-            .category("node_category.mgmc.data.constants")
+            .category("node_category.mgmc.variable.boolean")
             .color(COLOR_BOOLEAN)
             .output("value", "node.mgmc.port.output", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
@@ -44,7 +44,7 @@ public class VariableNodes {
             });
 
         NodeHelper.setup("string", "node.mgmc.string.name")
-            .category("node_category.mgmc.data.constants")
+            .category("node_category.mgmc.variable.string")
             .color(COLOR_STRING)
             .output("value", "node.mgmc.port.output", NodeDefinition.PortType.STRING, COLOR_STRING)
             .registerValue((node, portId, ctx) -> {
@@ -57,7 +57,7 @@ public class VariableNodes {
 
         // --- 变量操作 ---
         NodeHelper.setup("get_variable", "node.mgmc.get_variable.name")
-            .category("node_category.mgmc.data.variables")
+            .category("node_category.mgmc.variable")
             .color(COLOR_VARIABLE)
             .input("name", "node.mgmc.port.name", NodeDefinition.PortType.STRING, COLOR_STRING, "")
             .output("value", "node.mgmc.port.value", NodeDefinition.PortType.OBJECT, 0xFFFFFFFF)
@@ -68,7 +68,7 @@ public class VariableNodes {
             });
 
         NodeHelper.setup("set_variable", "node.mgmc.set_variable.name")
-            .category("node_category.mgmc.data.variables")
+            .category("node_category.mgmc.variable")
             .color(COLOR_VARIABLE)
             .execIn()
             .execOut()

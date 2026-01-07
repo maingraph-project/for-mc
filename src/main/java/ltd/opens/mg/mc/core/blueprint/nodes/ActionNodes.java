@@ -29,7 +29,7 @@ public class ActionNodes {
     public static void register() {
         // print_chat (聊天输出)
         NodeHelper.setup("print_chat", "node.mgmc.print_chat.name")
-            .category("node_category.mgmc.action")
+            .category("node_category.mgmc.action.player")
             .color(COLOR_ACTION)
             .input("exec", "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, 0)
             .input("message", "node.mgmc.port.message", NodeDefinition.PortType.STRING, COLOR_STRING, "")
@@ -57,7 +57,7 @@ public class ActionNodes {
 
         // run_command_as_player (以玩家身份运行命令)
         NodeHelper.setup("run_command_as_player", "node.mgmc.run_command_as_player.name")
-            .category("node_category.mgmc.action")
+            .category("node_category.mgmc.action.player")
             .color(COLOR_ACTION)
             .input("exec", "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, 0)
             .input("uuid", "node.mgmc.port.uuid", NodeDefinition.PortType.STRING, COLOR_STRING, "")
