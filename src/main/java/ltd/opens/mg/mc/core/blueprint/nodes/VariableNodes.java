@@ -22,37 +22,31 @@ public class VariableNodes {
         NodeHelper.setup("float", "node.mgmc.float.name")
             .category("node_category.mgmc.variable.float")
             .color(COLOR_FLOAT)
+            .property("input_type", "float")
+            .input("value", "node.mgmc.port.value", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
             .output("value", "node.mgmc.port.output", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
             .registerValue((node, portId, ctx) -> {
-                if (node.has("properties")) {
-                    var props = node.getAsJsonObject("properties");
-                    if (props.has("value")) return props.get("value").getAsDouble();
-                }
-                return 0.0;
+                return TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, "value", ctx));
             });
 
         NodeHelper.setup("boolean", "node.mgmc.boolean.name")
             .category("node_category.mgmc.variable.boolean")
             .color(COLOR_BOOLEAN)
+            .property("input_type", "boolean")
+            .input("value", "node.mgmc.port.value", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, false)
             .output("value", "node.mgmc.port.output", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
-                if (node.has("properties")) {
-                    var props = node.getAsJsonObject("properties");
-                    if (props.has("value")) return props.get("value").getAsBoolean();
-                }
-                return false;
+                return TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, "value", ctx));
             });
 
         NodeHelper.setup("string", "node.mgmc.string.name")
             .category("node_category.mgmc.variable.string")
             .color(COLOR_STRING)
+            .property("input_type", "multiline_text")
+            .input("value", "node.mgmc.port.value", NodeDefinition.PortType.STRING, COLOR_STRING, "")
             .output("value", "node.mgmc.port.output", NodeDefinition.PortType.STRING, COLOR_STRING)
             .registerValue((node, portId, ctx) -> {
-                if (node.has("properties")) {
-                    var props = node.getAsJsonObject("properties");
-                    if (props.has("value")) return props.get("value").getAsString();
-                }
-                return "";
+                return TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, "value", ctx));
             });
 
         // --- 变量操作 ---
