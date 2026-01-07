@@ -148,40 +148,13 @@ public class NodeLogicRegistry {
 
         // Data
         register("player_health", new PlayerHealthHandler());
-        register("add_float", new AddFloatHandler());
-        register("sub_float", new SubFloatHandler());
-        register("mul_float", new MulFloatHandler());
-        register("div_float", new DivFloatHandler());
-        register("mod_float", new ModFloatHandler());
-        register("abs_float", new AbsFloatHandler());
-        register("min_float", new MinFloatHandler());
-        register("max_float", new MaxFloatHandler());
-        register("clamp_float", new ClampFloatHandler());
-        register("round_float", new RoundFloatHandler());
-        register("floor_float", new FloorFloatHandler());
-        register("ceil_float", new CeilFloatHandler());
-        register("random_float", new RandomFloatHandler());
-        register("random_int", new RandomIntHandler());
-        register("random_bool", new RandomBoolHandler());
         register("random_list_item", new RandomListItemHandler());
         
         // Comparison
-        register("compare_eq", new CompareFloatHandler("eq"));
-        register("compare_neq", new CompareFloatHandler("neq"));
-        register("compare_gt", new CompareFloatHandler("gt"));
-        register("compare_gte", new CompareFloatHandler("gte"));
-        register("compare_lt", new CompareFloatHandler("lt"));
-        register("compare_lte", new CompareFloatHandler("lte"));
 
         // Logic Gates
-        register("logic_and", new LogicGateHandler("and"));
-        register("logic_or", new LogicGateHandler("or"));
-        register("logic_not", new LogicGateHandler("not"));
-        register("logic_xor", new LogicGateHandler("xor"));
 
         register("string", new StringHandler());
-        register("float", new FloatHandler());
-        register("boolean", new BooleanHandler());
         register("get_variable", new GetVariableHandler());
         register("set_variable", new SetVariableHandler());
     }
