@@ -21,5 +21,6 @@ public class NodeRegistry {
 
     static {
         NodeRegistrar.registerAll();
+        NodeInitializer.init();
     }
 }
