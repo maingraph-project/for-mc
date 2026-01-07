@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>MGMC UI Proposal A - Master-Detail</title>
+    <style>
+        body { background: #1e1e1e; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 300px; background: #252525; border-right: 2px solid #333; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #333; font-weight: bold; color: #55ff55; }
+        .rule-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .rule-card { background: #333; padding: 15px; margin-bottom: 10px; border-radius: 4px; cursor: pointer; border: 1px solid transparent; }
+        .rule-card:hover { border-color: #55ff55; }
+        .rule-card.active { background: #444; border-left: 4px solid #55ff55; }
+        .rule-name { font-weight: bold; display: block; }
+        .rule-preview { font-size: 0.8em; color: #888; }
+        
+        .main-editor { flex: 1; padding: 40px; display: flex; flex-direction: column; }
+        .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .rule-input { background: #333; border: 1px solid #555; color: white; padding: 10px; font-size: 1.2em; width: 300px; }
+        
+        .form-section { background: #2d2d2d; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .section-title { color: #aaa; margin-bottom: 15px; font-size: 0.9em; text-transform: uppercase; }
+        .condition-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        select, input { background: #3c3c3c; border: 1px solid #555; color: white; padding: 8px; border-radius: 4px; }
+        .btn-add { background: #4a4a4a; border: none; color: #55ff55; padding: 8px 15px; cursor: pointer; margin-top: 10px; }
+        .btn-add:hover { background: #555; }
+        
+        .blueprint-tag { background: #3b4252; color: #88c0d0; padding: 5px 12px; border-radius: 20px; display: inline-block; margin: 5px; font-size: 0.9em; }
+        
+        .footer { margin-top: auto; display: flex; justify-content: center; gap: 20px; padding: 20px; border-top: 1px solid #333; }
+        .btn-save { background: #2e7d32; color: white; border: none; padding: 12px 40px; font-size: 1.1em; cursor: pointer; border-radius: 4px; }
+        .btn-save:hover { background: #388e3c; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">规则列表</div>
+        <div class="rule-list">
+            <div class="rule-card active">
+                <span class="rule-name">沙漠僵尸强化</span>
+                <span class="rule-preview">id=zombie, biome=desert</span>
+            </div>
+            <div class="rule-card">
+                <span class="rule-name">全球重力减倍</span>
+                <span class="rule-preview">global=true</span>
+            </div>
+            <div class="rule-card">
+                <span class="rule-name">团队战利品修正</span>
+                <span class="rule-preview">team=blue</span>
+            </div>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #333; text-align: center;">
+            <button class="btn-add" style="width: 100%">+ 新建规则</button>
+        </div>
+    </div>
+    
+    <div class="main-editor">
+        <div class="editor-header">
+            <input type="text" class="rule-input" value="沙漠僵尸强化">
+            <div>
+                <label><input type="checkbox" checked> 启用规则</label>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="section-title">触发条件 (AND)</div>
+            <div class="condition-row">
+                <select><option>实体 ID</option></select>
+                <select><option>等于 (==)</option></select>
+                <input type="text" value="minecraft:zombie">
+                <button style="color: #ff5555; background: none; border: none; cursor: pointer;">×</button>
+            </div>
+            <div class="condition-row">
+                <select><option>生物群系</option></select>
+                <select><option>等于 (==)</option></select>
+                <input type="text" value="minecraft:desert">
+                <button style="color: #ff5555; background: none; border: none; cursor: pointer;">×</button>
+            </div>
+            <button class="btn-add">+ 添加条件</button>
+        </div>
+        
+        <div class="form-section">
+            <div class="section-title">执行蓝图</div>
+            <div>
+                <span class="blueprint-tag">buff_zombie_speed ✕</span>
+                <span class="blueprint-tag">spawn_sand_particles ✕</span>
+                <button class="btn-add" style="border-radius: 20px; font-size: 0.8em;">+ 绑定蓝图</button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <button class="btn-save">保存配置</button>
+        </div>
+    </div>
+</body>
+</html>
