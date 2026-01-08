@@ -175,6 +175,11 @@ public class BlueprintMappingScreen extends Screen {
         public int getRowWidth() {
             return this.width - 10;
         }
+
+        @Override
+        public int getRowLeft() {
+            return this.getX() + 5;
+        }
     }
 
     class IdEntry extends ObjectSelectionList.Entry<IdEntry> {
@@ -186,10 +191,25 @@ public class BlueprintMappingScreen extends Screen {
 
         @Override
         public void renderContent(GuiGraphics guiGraphics, int index, int top, boolean isHovered, float partialTick) {
-            int x = idList.getX();
-            int y = top + 2;
-            int color = selectedId != null && selectedId.equals(id) ? 0xFFFFFF00 : 0xFFFFFFFF;
-            guiGraphics.drawString(font, id, x + 5, y + 5, color);
+            int entryWidth = this.getWidth();
+            int entryLeft = this.getX();
+            int entryHeight = this.getHeight();
+            int y = this.getY();
+            if (y <= 0) y = top;
+
+            boolean isSelected = selectedId != null && selectedId.equals(id);
+
+            // 渲染背景和边框
+            if (isSelected) {
+                guiGraphics.fill(entryLeft, y, entryLeft + entryWidth, y + entryHeight, 0x44FFFFFF);
+                guiGraphics.renderOutline(entryLeft, y, entryWidth, entryHeight, 0xFFFFCC00);
+            } else if (isHovered) {
+                guiGraphics.fill(entryLeft, y, entryLeft + entryWidth, y + entryHeight, 0x22FFFFFF);
+                guiGraphics.renderOutline(entryLeft, y, entryWidth, entryHeight, 0xFF888888);
+            }
+
+            int color = isSelected ? 0xFFFFCC00 : (isHovered ? 0xFFFFFFFF : 0xFFAAAAAA);
+            guiGraphics.drawString(font, id, entryLeft + 5, y + (entryHeight - 8) / 2, color);
         }
 
         @Override
@@ -218,6 +238,11 @@ public class BlueprintMappingScreen extends Screen {
         public int getRowWidth() {
             return this.width - 10;
         }
+
+        @Override
+        public int getRowLeft() {
+            return this.getX() + 5;
+        }
     }
 
     class BlueprintMappingEntry extends ObjectSelectionList.Entry<BlueprintMappingEntry> {
@@ -229,19 +254,35 @@ public class BlueprintMappingScreen extends Screen {
 
         @Override
         public void renderContent(GuiGraphics guiGraphics, int index, int top, boolean isHovered, float partialTick) {
-            int x = blueprintList.getX();
-            int y = top + 2;
-            guiGraphics.drawString(font, blueprintPath, x + 5, y + 5, 0xFFFFFFFF);
+            int entryWidth = this.getWidth();
+            int entryLeft = this.getX();
+            int entryHeight = this.getHeight();
+            int y = this.getY();
+            if (y <= 0) y = top;
+
+            // 渲染背景
+            if (isHovered) {
+                guiGraphics.fill(entryLeft, y, entryLeft + entryWidth, y + entryHeight, 0x22FFFFFF);
+                guiGraphics.renderOutline(entryLeft, y, entryWidth, entryHeight, 0xFF888888);
+            }
+
+            int color = isHovered ? 0xFFFFFFFF : 0xFFAAAAAA;
+            guiGraphics.drawString(font, blueprintPath, entryLeft + 5, y + (entryHeight - 8) / 2, color);
             
             // 删除按钮 (X)
-            int xBtnX = x + blueprintList.getWidth() - 25;
-            guiGraphics.drawString(font, "X", xBtnX, y + 5, isHovered ? 0xFFFF0000 : 0xFFAAAAAA);
+            int xBtnWidth = 20;
+            int xBtnX = entryLeft + entryWidth - xBtnWidth;
+            // 简化悬停显示：只要条目被悬停，就显示浅红色的 X
+            guiGraphics.drawString(font, "X", xBtnX + 5, y + (entryHeight - 8) / 2, isHovered ? 0xFFFF5555 : 0x44FF5555);
         }
 
         @Override
         public boolean mouseClicked(MouseButtonEvent event, boolean isDouble) {
-            int x = blueprintList.getX();
-            int xBtnX = x + blueprintList.getWidth() - 25;
+            int entryWidth = this.getWidth();
+            int entryLeft = this.getX();
+            int xBtnWidth = 20;
+            int xBtnX = entryLeft + entryWidth - xBtnWidth;
+            
             if (event.x() >= xBtnX) {
                 if (selectedId != null && workingMappings.containsKey(selectedId)) {
                     workingMappings.get(selectedId).remove(blueprintPath);
