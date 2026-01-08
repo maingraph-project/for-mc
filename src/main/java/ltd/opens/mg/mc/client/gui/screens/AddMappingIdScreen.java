@@ -65,7 +65,9 @@ public class AddMappingIdScreen extends Screen {
         }).bounds(centerX + 5, centerY + 85, 100, 20).build());
 
         updateSuggestions("");
-        this.setInitialFocus(this.searchBox);
+        Minecraft.getInstance().execute(() -> {
+            this.setInitialFocus(this.searchBox);
+        });
     }
 
     @Override
@@ -103,10 +105,6 @@ public class AddMappingIdScreen extends Screen {
             this.errorTicks = 60;
             return;
         }
-        // 关键修复：仅在当前确实拥有焦点时才尝试清除，防止重复 blur 触发 IllegalStateException
-        if (this.getFocused() != null) {
-            this.setFocused(null);
-        }
         onSelect.accept(id);
         this.onClose();
     }
@@ -123,16 +121,21 @@ public class AddMappingIdScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         
         // 绘制模态框背景
         int centerX = this.width / 2;
         int centerY = this.height / 2;
         guiGraphics.fillGradient(centerX - 160, centerY - 110, centerX + 160, centerY + 115, 0xEE101010, 0xEE101010);
         guiGraphics.renderOutline(centerX - 160, centerY - 110, 320, 225, 0xFF555555);
+    }
 
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+        
+        int centerY = this.height / 2;
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, centerY - 125, 0xFFFFFF);
 
         if (errorMessage != null) {
@@ -144,9 +147,6 @@ public class AddMappingIdScreen extends Screen {
     public boolean keyPressed(KeyEvent event) {
         int keyCode = event.key();
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            if (this.getFocused() != null) {
-                this.setFocused(null);
-            }
             this.onClose();
             return true;
         }
@@ -181,34 +181,32 @@ public class AddMappingIdScreen extends Screen {
 
         @Override
         public void renderContent(GuiGraphics guiGraphics, int index, int top, boolean isHovered, float partialTick) {
-            int left = this.getX();
-            int width = this.getWidth();
-            int height = this.getHeight();
-            int y = this.getY();
-            if (y <= 0) y = top;
-
+            int left = suggestionList.getRowLeft();
+            int width = suggestionList.getRowWidth();
+            int height = 25; // 使用构造函数中定义的固定行高
+            
             boolean isSelected = suggestionList.getSelected() == this;
             boolean isExists = existingIds.contains(info.id);
 
             if (isSelected) {
-                guiGraphics.fill(left, y, left + width, y + height, 0x44FFFFFF);
-                guiGraphics.renderOutline(left, y, width, height, 0xFFFFAA00);
+                guiGraphics.fill(left, top, left + width, top + height, 0x44FFFFFF);
+                guiGraphics.renderOutline(left, top, width, height, 0xFFFFAA00);
             } else if (isHovered) {
-                guiGraphics.fill(left, y, left + width, y + height, 0x22FFFFFF);
+                guiGraphics.fill(left, top, left + width, top + height, 0x22FFFFFF);
             }
 
             // 绘制图标
             if (!info.icon.isEmpty()) {
-                guiGraphics.renderItem(info.icon, left + 2, y + 2);
+                guiGraphics.renderItem(info.icon, left + 2, top + 2);
             }
 
             // 绘制文本
             int textColor = isExists ? 0x888888 : 0xFFFFFF;
-            guiGraphics.drawString(font, info.name, left + 25, y + 2, textColor);
-            guiGraphics.drawString(font, info.id, left + 25, y + 12, 0x888888);
+            guiGraphics.drawString(font, info.name, left + 25, top + 2, textColor);
+            guiGraphics.drawString(font, info.id, left + 25, top + 12, 0x888888);
             
             if (isExists) {
-                guiGraphics.drawString(font, "✔", left + width - 15, y + 5, 0x55FF55);
+                guiGraphics.drawString(font, "✔", left + width - 15, top + 5, 0x55FF55);
             }
         }
 

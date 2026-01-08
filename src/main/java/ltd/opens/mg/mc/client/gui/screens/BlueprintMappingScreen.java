@@ -63,13 +63,15 @@ public class BlueprintMappingScreen extends Screen {
 
         // 添加 ID 按钮 (+)
         this.addRenderableWidget(Button.builder(Component.literal("+"), b -> {
-            Minecraft.getInstance().setScreen(new AddMappingIdScreen(this, new ArrayList<>(workingMappings.keySet()), id -> {
-                if (!workingMappings.containsKey(id)) {
-                    workingMappings.put(id, new HashSet<>());
-                    refreshIdList();
-                    selectId(id);
-                }
-            }));
+            Minecraft.getInstance().execute(() -> {
+                Minecraft.getInstance().setScreen(new AddMappingIdScreen(this, new ArrayList<>(workingMappings.keySet()), id -> {
+                    if (!workingMappings.containsKey(id)) {
+                        workingMappings.put(id, new HashSet<>());
+                        refreshIdList();
+                        selectId(id);
+                    }
+                }));
+            });
         }).bounds(10 + sidePanelWidth - 25, 15, 20, 20).build());
 
         // 蓝图列表 (右侧)
@@ -83,6 +85,7 @@ public class BlueprintMappingScreen extends Screen {
         // 添加蓝图按钮 (放在右侧列表下方，也就是 sidePanelWidth + 20 处)
         this.addRenderableWidget(Button.builder(Component.translatable("gui.mgmc.mapping.add_blueprint"), b -> {
             if (selectedId != null) {
+                this.setFocused(null); // 清除当前焦点
                 Minecraft.getInstance().setScreen(new BlueprintSelectionForMappingScreen(this, selectedId));
             }
         }).bounds(sidePanelWidth + 20, controlsY, 100, 20).build());
