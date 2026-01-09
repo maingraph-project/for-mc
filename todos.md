@@ -6,11 +6,10 @@
      - **原因**：当前的 `HashMap` 在多线程环境下（如 NeoForge 并行加载或异步脚本解析）会导致死循环或数据丢失。 
      - [x] **操作**：将 `NodeRegistry.java` 和 `NodeLogicRegistry.java` 的底层 `HashMap` 替换为 `ConcurrentHashMap`。 
      - [x] **细节**：确保在并发初始化时，`register` 和 `get` 操作是线程安全的。
-- [ ] **引入命名空间机制**
-    - **原因**：没有命名空间的 ID（如 `add_float`）极易与第三方插件冲突。确立 `modid:id` 契约是开放 API 的前提。
-    - [ ] **操作**：在 `NodeHelper.setup(id, ...)` 中增加逻辑，若 `id` 不包含 `:`，则自动补全为 `mgmc:id`。
-    - [ ] **操作**：在 `NodeRegistry.register` 中增加校验，强制要求所有注册的 ID 必须包含命名空间。
-    - [ ] **细节**：防止不同模组间的节点 ID 冲突，确立全局唯一的节点契约。
+- [x] **引入命名空间机制**
+     - **原因**：没有命名空间的 ID（如 `add_float`）极易与第三方插件冲突。确立 `modid:id` 契约是开放 API 的前提。
+     - [x] **操作**：增加逻辑，自动补全节点 ID ，格式：{获取到的modid，调用注册的（不是mgmc）}:{节点id}
+     - [x] **细节**：防止不同模组间的节点 ID 冲突，确立全局唯一的节点契约。
 - [ ] **增加重复注册校验**
     - **原因**：静默覆盖已注册节点会导致极难排查的 Bug。显式报错能让开发者在第一时间发现 ID 冲突。
     - [ ] **操作**：在 `NodeRegistry.register` 方法头部增加 `if (REGISTRY.containsKey(id)) throw new IllegalStateException(...)`。

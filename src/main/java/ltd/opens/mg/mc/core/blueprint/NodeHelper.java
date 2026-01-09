@@ -17,12 +17,25 @@ public class NodeHelper {
 
     /**
      * 开始配置一个新节点
-     * @param id 节点唯一标识
+     * @param id 节点唯一标识（若不包含 ":" 则自动补全为当前 ModID）
      * @param nameKey 节点名称的 i18n key
      * @return NodeHelper 实例
      */
     public static NodeHelper setup(String id, String nameKey) {
-        return new NodeHelper(id, nameKey);
+        String finalId = id;
+        if (!id.contains(":")) {
+            String namespace = "mgmc";
+            try {
+                String activeNamespace = net.neoforged.fml.ModLoadingContext.get().getActiveNamespace();
+                if (activeNamespace != null && !activeNamespace.isEmpty()) {
+                    namespace = activeNamespace;
+                }
+            } catch (Throwable ignored) {
+                // 忽略非 Mod 加载环境下的异常
+            }
+            finalId = namespace + ":" + id;
+        }
+        return new NodeHelper(finalId, nameKey);
     }
 
     /**
