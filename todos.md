@@ -17,6 +17,11 @@
 
 ## 第二阶段：初始化流程重构 (控制力与解耦)
 
+- [ ] **引入事件驱动的节点注册机制**
+    - **原因**：目前的 `NodeInitializer` 采用硬编码的手动调用方式，扩展性差且不支持第三方模组。通过事件总线可以实现自动发现和真正的模块化解耦。
+    - [ ] **操作**：定义 `MGMCNodeRegistrationEvent`（继承自 `net.neoforged.bus.api.Event`），并在 `NodeInitializer` 中发布该事件。
+    - [ ] **操作**：重构现有节点类（如 `MathNodes`）使用 `@SubscribeEvent` 监听该事件进行注册。
+    - [ ] **细节**：彻底摆脱对 `NodeInitializer` 的手动修改依赖，实现“插件式”节点注册。
 - [ ] **消除静态初始化风险**
     - **原因**：Java 静态块的加载时机不可控。在静态块中注册会导致类加载顺序错误，甚至在 NeoForge 准备好之前就尝试访问游戏资源。
     - [ ] **操作**：移除 `NodeRegistry.java` 中的 `static {}` 块及其中调用的 `NodeInitializer.init()`。
@@ -52,11 +57,6 @@
 
 ## 第四阶段：外部接入 (API 开放)
 
-- [ ] **实现自定义注册事件**
-    - **原因**：硬编码调用 `NodeInitializer.init()` 无法支持外部模组。通过事件驱动注册是现代模组开发的标准（如 NeoForge 的 `RegisterEvent`）。
-    - [ ] **操作**：创建 `RegisterNodesEvent` 类，继承自 `net.neoforged.bus.api.Event` 并实现 `IModBusEvent`。
-    - [ ] **操作**：在 `NodeInitializer` 中通过 `ModLoader.post(new RegisterNodesEvent())` 触发注册流程。
-    - [ ] **细节**：允许第三方插件以 NeoForge 标准方式扩展节点库。
 - [ ] **实现注册表冻结机制**
     - **原因**：允许在游戏运行时动态修改节点定义会带来不可预测的崩溃和安全隐患。
     - [ ] **操作**：在 `NodeRegistry` 中增加 `boolean frozen` 标志位。
