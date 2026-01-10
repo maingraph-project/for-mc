@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ public class BlueprintManager {
         return t;
     });
 
-    private final Map<String, CachedBlueprint> blueprintCache = new HashMap<>();
+    private final Map<String, CachedBlueprint> blueprintCache = new ConcurrentHashMap<>();
     private final List<JsonObject> allBlueprintsCache = new ArrayList<>();
     private long lastAllBlueprintsRefresh = 0;
     private static final long CACHE_REFRESH_INTERVAL = 1000; // 1 second
@@ -62,20 +63,29 @@ public class BlueprintManager {
     public JsonObject getBlueprint(ServerLevel level, String name) {
         if (!isValidFileName(name)) return null;
         try {
-            if (!name.endsWith(".json")) name += ".json";
-            Path dataFile = getBlueprintsDir(level).resolve(name);
+            final String fileName = name.endsWith(".json") ? name : name + ".json";
+            Path dataFile = getBlueprintsDir(level).resolve(fileName);
+            
             if (Files.exists(dataFile)) {
                 long lastModified = Files.getLastModifiedTime(dataFile).toMillis();
-                CachedBlueprint cached = blueprintCache.get(name);
+                CachedBlueprint cached = blueprintCache.get(fileName);
+                
+                // 如果缓存不存在或文件已更新，则重新加载
                 if (cached == null || lastModified > cached.lastModified) {
-                    String json = Files.readString(dataFile);
-                    JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-                    long version = 0;
-                    if (obj.has("_version") && obj.get("_version").isJsonPrimitive() && obj.get("_version").getAsJsonPrimitive().isNumber()) {
-                        version = obj.get("_version").getAsLong();
+                    synchronized (this) { // 简单同步防止并发重复读取同一文件
+                        // 双重检查
+                        cached = blueprintCache.get(fileName);
+                        if (cached == null || lastModified > cached.lastModified) {
+                            String json = Files.readString(dataFile);
+                            JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+                            long version = 0;
+                            if (obj.has("_version") && obj.get("_version").isJsonPrimitive() && obj.get("_version").getAsJsonPrimitive().isNumber()) {
+                                version = obj.get("_version").getAsLong();
+                            }
+                            cached = new CachedBlueprint(obj, lastModified, version);
+                            blueprintCache.put(fileName, cached);
+                        }
                     }
-                    cached = new CachedBlueprint(obj, lastModified, version);
-                    blueprintCache.put(name, cached);
                 }
                 return cached.json;
             }
@@ -87,9 +97,9 @@ public class BlueprintManager {
 
     public long getBlueprintVersion(ServerLevel level, String name) {
         if (!isValidFileName(name)) return -1;
-        if (!name.endsWith(".json")) name += ".json";
-        getBlueprint(level, name); // Ensure it's in cache
-        CachedBlueprint cached = blueprintCache.get(name);
+        String fileName = name.endsWith(".json") ? name : name + ".json";
+        getBlueprint(level, fileName); // Ensure it's in cache
+        CachedBlueprint cached = blueprintCache.get(fileName);
         return cached != null ? cached.version : -1;
     }
 
