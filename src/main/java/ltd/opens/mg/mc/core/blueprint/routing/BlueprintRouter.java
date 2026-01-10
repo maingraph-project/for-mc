@@ -1,7 +1,6 @@
 package ltd.opens.mg.mc.core.blueprint.routing;
 
 import com.google.gson.*;
-import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

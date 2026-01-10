@@ -1,6 +1,5 @@
 package ltd.opens.mg.mc.core.blueprint.nodes;
 
-import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeHelper;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;

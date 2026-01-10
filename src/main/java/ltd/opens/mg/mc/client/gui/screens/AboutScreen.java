@@ -9,7 +9,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
-import java.util.Optional;
 
 public class AboutScreen extends Screen {
     private final Screen parent;

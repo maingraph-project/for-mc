@@ -1,16 +1,11 @@
 package ltd.opens.mg.mc.client.gui.blueprint.handler;
 
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
-import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
-import ltd.opens.mg.mc.client.gui.blueprint.manager.*;
-import ltd.opens.mg.mc.client.gui.blueprint.render.*;
-import ltd.opens.mg.mc.client.gui.blueprint.io.*;
 
 
 import ltd.opens.mg.mc.client.gui.screens.*;
 import ltd.opens.mg.mc.client.gui.components.*;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

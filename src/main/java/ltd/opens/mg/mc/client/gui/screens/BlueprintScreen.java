@@ -1,15 +1,12 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
-import ltd.opens.mg.mc.MaingraphforMCClient;
 import ltd.opens.mg.mc.client.gui.blueprint.*;
 import ltd.opens.mg.mc.client.gui.blueprint.handler.*;
 import ltd.opens.mg.mc.client.gui.blueprint.io.*;
 import ltd.opens.mg.mc.client.gui.blueprint.render.*;
-import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
 import ltd.opens.mg.mc.client.gui.components.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;

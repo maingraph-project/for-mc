@@ -2,7 +2,6 @@ package ltd.opens.mg.mc.client.gui.blueprint;
 
 import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
 import ltd.opens.mg.mc.client.gui.components.*;
-import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import java.util.ArrayList;
 import java.util.List;
 

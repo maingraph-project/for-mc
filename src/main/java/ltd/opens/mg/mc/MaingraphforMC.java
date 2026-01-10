@@ -9,8 +9,6 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 import ltd.opens.mg.mc.core.blueprint.engine.BlueprintEngine;
 import ltd.opens.mg.mc.core.blueprint.routing.BlueprintRouter;

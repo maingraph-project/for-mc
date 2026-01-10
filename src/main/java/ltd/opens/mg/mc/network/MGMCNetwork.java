@@ -1,10 +1,7 @@
 package ltd.opens.mg.mc.network;
 
-import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.network.payloads.*;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
