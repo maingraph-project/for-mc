@@ -7,6 +7,7 @@ import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
+import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.events.RegisterMGMCNodesEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 
@@ -14,19 +15,16 @@ import net.neoforged.bus.api.SubscribeEvent;
  * 比较与布尔逻辑运算节点注册
  */
 public class LogicNodes {
-    private static final int COLOR_MATH = 0xFF888888;
-    private static final int COLOR_FLOAT = 0xFF00FF00;
-    private static final int COLOR_BOOLEAN = 0xFF920101;
 
     @SubscribeEvent
     public static void onRegister(RegisterMGMCNodesEvent event) {
         // --- 比较运算 ---
         NodeHelper.setup("compare_eq", "node.mgmc.compare_eq.name")
             .category("node_category.mgmc.logic.comparison")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 double b = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -35,10 +33,10 @@ public class LogicNodes {
 
         NodeHelper.setup("compare_neq", "node.mgmc.compare_neq.name")
             .category("node_category.mgmc.logic.comparison")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 double b = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -47,10 +45,10 @@ public class LogicNodes {
 
         NodeHelper.setup("compare_gt", "node.mgmc.compare_gt.name")
             .category("node_category.mgmc.logic.comparison")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 double b = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -59,10 +57,10 @@ public class LogicNodes {
 
         NodeHelper.setup("compare_gte", "node.mgmc.compare_gte.name")
             .category("node_category.mgmc.logic.comparison")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 double b = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -71,10 +69,10 @@ public class LogicNodes {
 
         NodeHelper.setup("compare_lt", "node.mgmc.compare_lt.name")
             .category("node_category.mgmc.logic.comparison")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 double b = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -83,10 +81,10 @@ public class LogicNodes {
 
         NodeHelper.setup("compare_lte", "node.mgmc.compare_lte.name")
             .category("node_category.mgmc.logic.comparison")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 double b = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -96,10 +94,10 @@ public class LogicNodes {
         // --- 布尔逻辑 ---
         NodeHelper.setup("logic_and", "node.mgmc.logic_and.name")
             .category("node_category.mgmc.logic.boolean")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, true)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, true)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, true)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, true)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 boolean a = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 boolean b = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -108,10 +106,10 @@ public class LogicNodes {
 
         NodeHelper.setup("logic_or", "node.mgmc.logic_or.name")
             .category("node_category.mgmc.logic.boolean")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, false)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, false)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, false)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, false)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 boolean a = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 boolean b = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -120,17 +118,17 @@ public class LogicNodes {
 
         NodeHelper.setup("logic_not", "node.mgmc.logic_not.name")
             .category("node_category.mgmc.logic.boolean")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, false)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, false)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> !TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx)));
 
         NodeHelper.setup("logic_xor", "node.mgmc.logic_xor.name")
             .category("node_category.mgmc.logic.boolean")
-            .color(COLOR_MATH)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, false)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, false)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, false)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, false)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 boolean a = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 boolean b = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeHelper;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
+import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
@@ -25,29 +26,25 @@ import java.util.UUID;
  * 独立类实现，方便维护复杂的输出逻辑
  */
 public class GetEntityInfoNode {
-    private static final int COLOR_ENTITY = 0xFF33CCCC; // 青色表示实体相关
-    private static final int COLOR_STRING = 0xFFFFAA00;
-    private static final int COLOR_FLOAT = 0xFF55FF55;
-    private static final int COLOR_BOOLEAN = 0xFF5555FF;
 
     @SubscribeEvent
     public static void onRegister(RegisterMGMCNodesEvent event) {
         NodeHelper.setup("get_entity_info", "node.mgmc.get_entity_info.name")
             .category("node_category.mgmc.variable.entity")
-            .color(COLOR_ENTITY)
-            .input(NodePorts.UUID, "node.mgmc.port.uuid", NodeDefinition.PortType.STRING, COLOR_STRING, "")
-            .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .output(NodePorts.TYPE, "node.mgmc.get_entity_info.port.type", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .output(NodePorts.REGISTRY_NAME, "node.mgmc.get_entity_info.port.registry_name", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .output(NodePorts.POS_X, "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
-            .output(NodePorts.POS_Y, "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
-            .output(NodePorts.POS_Z, "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
-            .output(NodePorts.HEALTH, "node.mgmc.get_entity_info.port.health", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
-            .output(NodePorts.MAX_HEALTH, "node.mgmc.get_entity_info.port.max_health", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
-            .output(NodePorts.IS_LIVING, "node.mgmc.get_entity_info.port.is_living", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
-            .output(NodePorts.IS_PLAYER, "node.mgmc.get_entity_info.port.is_player", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
-            .output(NodePorts.IS_ONLINE, "node.mgmc.get_entity_info.port.is_online", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
-            .output(NodePorts.PERMISSION_LEVEL, "node.mgmc.get_entity_info.port.permission_level", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
+            .color(NodeThemes.COLOR_NODE_ENTITY)
+            .input(NodePorts.UUID, "node.mgmc.port.uuid", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
+            .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.TYPE, "node.mgmc.get_entity_info.port.type", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.REGISTRY_NAME, "node.mgmc.get_entity_info.port.registry_name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.POS_X, "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.POS_Y, "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.POS_Z, "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.HEALTH, "node.mgmc.get_entity_info.port.health", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.MAX_HEALTH, "node.mgmc.get_entity_info.port.max_health", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.IS_LIVING, "node.mgmc.get_entity_info.port.is_living", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
+            .output(NodePorts.IS_PLAYER, "node.mgmc.get_entity_info.port.is_player", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
+            .output(NodePorts.IS_ONLINE, "node.mgmc.get_entity_info.port.is_online", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
+            .output(NodePorts.PERMISSION_LEVEL, "node.mgmc.get_entity_info.port.permission_level", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
             .registerValue((node, pinId, ctx) -> {
                 String uuidStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.UUID, ctx));
                 if (uuidStr == null || uuidStr.isEmpty()) return getDefaultValue(pinId);

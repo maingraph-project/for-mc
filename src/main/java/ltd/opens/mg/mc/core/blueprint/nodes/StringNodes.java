@@ -3,6 +3,7 @@ package ltd.opens.mg.mc.core.blueprint.nodes;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeHelper;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
+import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 
@@ -16,20 +17,16 @@ import java.util.List;
  * 字符串操作相关节点
  */
 public class StringNodes {
-    private static final int COLOR_STRING = 0xFF66AAFF;
-    private static final int COLOR_BOOLEAN = 0xFF4444FF;
-    private static final int COLOR_FLOAT = 0xFFFFCC00;
-    private static final int COLOR_LIST = 0xFF44AA44;
 
     @SubscribeEvent
     public static void onRegister(RegisterMGMCNodesEvent event) {
         // 字符串连接 (Concat)
         NodeHelper.setup("string_concat", "node.mgmc.string_concat.name")
             .category("node_category.mgmc.variable.string")
-            .color(COLOR_STRING)
-            .input(NodePorts.A, "node.mgmc.string_concat.port.a", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .input(NodePorts.B, "node.mgmc.string_concat.port.b", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, COLOR_STRING)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .input(NodePorts.A, "node.mgmc.string_concat.port.a", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .input(NodePorts.B, "node.mgmc.string_concat.port.b", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 String a = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 String b = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
@@ -39,9 +36,9 @@ public class StringNodes {
         // 字符串组合 (Combine) - 修复硬编码，支持动态输入
         NodeHelper.setup("string_combine", "node.mgmc.string_combine.name")
             .category("node_category.mgmc.variable.string")
-            .color(COLOR_STRING)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("dynamic_inputs", true) // 允许 UI 动态添加输入
-            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, COLOR_STRING)
+            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 StringBuilder sb = new StringBuilder();
                 if (node.has("inputs")) {
@@ -70,9 +67,9 @@ public class StringNodes {
         // 字符串长度 (Length)
         NodeHelper.setup("string_length", "node.mgmc.string_length.name")
             .category("node_category.mgmc.variable.string")
-            .color(COLOR_STRING)
-            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .output(NodePorts.LENGTH, "node.mgmc.port.length", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.LENGTH, "node.mgmc.port.length", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
             .registerValue((node, portId, ctx) -> {
                 String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
                 return s == null ? 0.0 : (double) s.length();
@@ -81,10 +78,10 @@ public class StringNodes {
         // 字符串包含 (Contains)
         NodeHelper.setup("string_contains", "node.mgmc.string_contains.name")
             .category("node_category.mgmc.variable.string")
-            .color(COLOR_STRING)
-            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .input(NodePorts.SUBSTRING, "node.mgmc.string_contains.port.substring", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .input(NodePorts.SUBSTRING, "node.mgmc.string_contains.port.substring", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
                 String sub = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.SUBSTRING, ctx));
@@ -94,11 +91,11 @@ public class StringNodes {
         // 字符串替换 (Replace)
         NodeHelper.setup("string_replace", "node.mgmc.string_replace.name")
             .category("node_category.mgmc.variable.string")
-            .color(COLOR_STRING)
-            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .input(NodePorts.OLD, "node.mgmc.string_replace.port.old", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .input(NodePorts.NEW, "node.mgmc.string_replace.port.new", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, COLOR_STRING)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .input(NodePorts.OLD, "node.mgmc.string_replace.port.old", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .input(NodePorts.NEW, "node.mgmc.string_replace.port.new", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
                 String oldS = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.OLD, ctx));
@@ -110,11 +107,11 @@ public class StringNodes {
         // 字符串截取 (Substring)
         NodeHelper.setup("string_substring", "node.mgmc.string_substring.name")
             .category("node_category.mgmc.variable.string")
-            .color(COLOR_STRING)
-            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .input(NodePorts.START, "node.mgmc.string_substring.port.start", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, true, 0.0)
-            .input(NodePorts.END, "node.mgmc.string_substring.port.end", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, true, 5.0)
-            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, COLOR_STRING)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .input(NodePorts.START, "node.mgmc.string_substring.port.start", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 0.0)
+            .input(NodePorts.END, "node.mgmc.string_substring.port.end", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 5.0)
+            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
                 int start = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.START, ctx));
@@ -128,11 +125,11 @@ public class StringNodes {
         // 字符串大小写转换 (Case)
         NodeHelper.setup("string_case", "node.mgmc.string_case.name")
             .category("node_category.mgmc.variable.string")
-            .color(COLOR_STRING)
-            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .input(NodePorts.MODE, "node.mgmc.string_case.port.mode", NodeDefinition.PortType.STRING, COLOR_STRING, true, "UPPER",
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .input(NodePorts.MODE, "node.mgmc.string_case.port.mode", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, true, "UPPER",
                 new String[]{"UPPER", "LOWER", "TRIM"})
-            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, COLOR_STRING)
+            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
                 String mode = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MODE, ctx));
@@ -147,10 +144,10 @@ public class StringNodes {
         // 字符串分割 (Split) - 归类到列表，因为输出是列表
         NodeHelper.setup("string_split", "node.mgmc.string_split.name")
             .category("node_category.mgmc.variable.list")
-            .color(COLOR_LIST)
-            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, COLOR_STRING)
-            .input(NodePorts.DELIMITER, "node.mgmc.port.delimiter", NodeDefinition.PortType.STRING, COLOR_STRING, true, ",")
-            .output(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, COLOR_LIST)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .input(NodePorts.DELIMITER, "node.mgmc.port.delimiter", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, true, ",")
+            .output(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
             .registerValue((node, portId, ctx) -> {
                 String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
                 String delim = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.DELIMITER, ctx));

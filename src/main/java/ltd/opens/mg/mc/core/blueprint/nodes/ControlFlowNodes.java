@@ -7,6 +7,7 @@ import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
+import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.events.RegisterMGMCNodesEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 
@@ -14,21 +15,17 @@ import net.neoforged.bus.api.SubscribeEvent;
  * 控制流相关节点
  */
 public class ControlFlowNodes {
-    private static final int COLOR_CONTROL = 0xFF888888;
-    private static final int COLOR_EXEC = 0xFFFFFFFF;
-    private static final int COLOR_BOOLEAN = 0xFF4444FF;
-    private static final int COLOR_FLOAT = 0xFFFFCC00;
 
     @SubscribeEvent
     public static void onRegister(RegisterMGMCNodesEvent event) {
         // 分支节点 (Branch)
         NodeHelper.setup("branch", "node.mgmc.branch.name")
             .category("node_category.mgmc.logic.control")
-            .color(COLOR_CONTROL)
-            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, COLOR_EXEC)
-            .input(NodePorts.CONDITION, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, true, true)
-            .output(NodePorts.TRUE, "node.mgmc.port.true", NodeDefinition.PortType.EXEC, COLOR_EXEC)
-            .output(NodePorts.FALSE, "node.mgmc.port.false", NodeDefinition.PortType.EXEC, COLOR_EXEC)
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.CONDITION, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, true, true)
+            .output(NodePorts.TRUE, "node.mgmc.port.true", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.FALSE, "node.mgmc.port.false", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 boolean condition = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.CONDITION, ctx));
                 NodeLogicRegistry.triggerExec(node, condition ? NodePorts.TRUE : NodePorts.FALSE, ctx);
@@ -37,11 +34,11 @@ public class ControlFlowNodes {
         // 切换器节点 (Switch) - 修复硬编码，标记为动态节点
         NodeHelper.setup("switch", "node.mgmc.switch.name")
             .category("node_category.mgmc.logic.control")
-            .color(COLOR_CONTROL)
+            .color(NodeThemes.COLOR_NODE_CONTROL)
             .property("dynamic_outputs", true) // 标记为动态输出端口节点
-            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, COLOR_EXEC)
-            .input(NodePorts.CONTROL, "node.mgmc.switch.port.control", NodeDefinition.PortType.ANY, 0xFFAAAAAA)
-            .output(NodePorts.DEFAULT, "node.mgmc.switch.port.default", NodeDefinition.PortType.EXEC, COLOR_EXEC)
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.CONTROL, "node.mgmc.switch.port.control", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
+            .output(NodePorts.DEFAULT, "node.mgmc.switch.port.default", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 String controlValue = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.CONTROL, ctx));
                 if (node.has("outputs")) {
@@ -60,14 +57,14 @@ public class ControlFlowNodes {
         // 循环节点 (For Loop)
         NodeHelper.setup("for_loop", "node.mgmc.for_loop.name")
             .category("node_category.mgmc.logic.control")
-            .color(COLOR_CONTROL)
-            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, COLOR_EXEC)
-            .input(NodePorts.START, "node.mgmc.for_loop.port.start", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, true, 0)
-            .input(NodePorts.END, "node.mgmc.for_loop.port.end", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, true, 10)
-            .input(NodePorts.BREAK, "node.mgmc.for_loop.port.break", NodeDefinition.PortType.EXEC, COLOR_EXEC)
-            .output(NodePorts.LOOP_BODY, "node.mgmc.for_loop.port.loop_body", NodeDefinition.PortType.EXEC, COLOR_EXEC)
-            .output(NodePorts.COMPLETED, "node.mgmc.for_loop.port.completed", NodeDefinition.PortType.EXEC, COLOR_EXEC)
-            .output(NodePorts.INDEX, "node.mgmc.for_loop.port.index", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.START, "node.mgmc.for_loop.port.start", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 0)
+            .input(NodePorts.END, "node.mgmc.for_loop.port.end", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 10)
+            .input(NodePorts.BREAK, "node.mgmc.for_loop.port.break", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.LOOP_BODY, "node.mgmc.for_loop.port.loop_body", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.COMPLETED, "node.mgmc.for_loop.port.completed", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.INDEX, "node.mgmc.for_loop.port.index", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
             .register(new NodeHelper.NodeHandlerAdapter() {
                 @Override
                 public void execute(JsonObject node, NodeContext ctx) {
@@ -103,9 +100,9 @@ public class ControlFlowNodes {
         // 中断节点 (Break Loop)
         NodeHelper.setup("break_loop", "node.mgmc.break_loop.name")
             .category("node_category.mgmc.logic.control")
-            .color(COLOR_CONTROL)
-            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, COLOR_EXEC)
-            .output(NodePorts.BREAK, "node.mgmc.break_loop.port.break", NodeDefinition.PortType.EXEC, COLOR_EXEC)
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.BREAK, "node.mgmc.break_loop.port.break", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 ctx.breakRequested = true;
             });

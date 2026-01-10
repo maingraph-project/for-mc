@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeHelper;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
+import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
@@ -15,41 +16,36 @@ import net.neoforged.bus.api.SubscribeEvent;
  * 变量与常量类节点注册
  */
 public class VariableNodes {
-    private static final int COLOR_VARIABLE = 0xFFFFAA00;
-    private static final int COLOR_STRING = 0xFFDA00DA;
-    private static final int COLOR_FLOAT = 0xFF00FF00;
-    private static final int COLOR_BOOLEAN = 0xFF920101;
-    private static final int COLOR_EXEC = 0xFFFFFFFF;
 
     @SubscribeEvent
     public static void onRegister(RegisterMGMCNodesEvent event) {
         // --- 常量节点 ---
         NodeHelper.setup("float", "node.mgmc.float.name")
             .category("node_category.mgmc.variable.float")
-            .color(COLOR_FLOAT)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("input_type", "float")
-            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.FLOAT, COLOR_FLOAT, 0.0)
-            .output(NodePorts.VALUE, "node.mgmc.port.output", NodeDefinition.PortType.FLOAT, COLOR_FLOAT)
+            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.VALUE, "node.mgmc.port.output", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
             .registerValue((node, portId, ctx) -> {
                 return TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx));
             });
 
         NodeHelper.setup("boolean", "node.mgmc.boolean.name")
             .category("node_category.mgmc.variable.boolean")
-            .color(COLOR_BOOLEAN)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("input_type", "boolean")
-            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN, false)
-            .output(NodePorts.VALUE, "node.mgmc.port.output", NodeDefinition.PortType.BOOLEAN, COLOR_BOOLEAN)
+            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, false)
+            .output(NodePorts.VALUE, "node.mgmc.port.output", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 return TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx));
             });
 
         NodeHelper.setup("string", "node.mgmc.string.name")
             .category("node_category.mgmc.variable.string")
-            .color(COLOR_STRING)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("input_type", "multiline_text")
-            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.STRING, COLOR_STRING, "")
-            .output(NodePorts.VALUE, "node.mgmc.port.output", NodeDefinition.PortType.STRING, COLOR_STRING)
+            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
+            .output(NodePorts.VALUE, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 return TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx));
             });
@@ -57,9 +53,9 @@ public class VariableNodes {
         // --- 变量操作 ---
         NodeHelper.setup("get_variable", "node.mgmc.get_variable.name")
             .category("node_category.mgmc.variable")
-            .color(COLOR_VARIABLE)
-            .input(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, COLOR_STRING, "")
-            .output(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.OBJECT, 0xFFFFFFFF)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .input(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
+            .output(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.OBJECT, NodeThemes.COLOR_PORT_ANY)
             .registerValue((node, portId, ctx) -> {
                 String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx));
                 if (name == null || name.trim().isEmpty()) return null;
@@ -68,12 +64,12 @@ public class VariableNodes {
 
         NodeHelper.setup("set_variable", "node.mgmc.set_variable.name")
             .category("node_category.mgmc.variable")
-            .color(COLOR_VARIABLE)
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
             .execIn()
             .execOut()
-            .input(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, COLOR_STRING, "")
-            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.OBJECT, 0xFFFFFFFF)
-            .output(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.OBJECT, 0xFFFFFFFF)
+            .input(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
+            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.OBJECT, NodeThemes.COLOR_PORT_ANY)
+            .output(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.OBJECT, NodeThemes.COLOR_PORT_ANY)
             .register(new NodeHelper.NodeHandlerAdapter() {
                 @Override
                 public void execute(JsonObject node, NodeContext ctx) {

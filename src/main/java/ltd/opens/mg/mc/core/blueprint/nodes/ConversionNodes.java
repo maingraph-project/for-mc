@@ -7,6 +7,7 @@ import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
+import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.events.RegisterMGMCNodesEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 
@@ -16,7 +17,6 @@ import java.util.Arrays;
  * 类型转换相关节点
  */
 public class ConversionNodes {
-    private static final int COLOR_CONVERSION = 0xFF888888;
 
     @SubscribeEvent
     public static void onRegister(RegisterMGMCNodesEvent event) {
@@ -29,10 +29,10 @@ public class ConversionNodes {
         // 强制转换节点 (Cast)
         NodeHelper.setup("cast", "node.mgmc.cast.name")
             .category("node_category.mgmc.logic.math")
-            .color(COLOR_CONVERSION)
-            .input(NodePorts.INPUT, "node.mgmc.cast.port.input", NodeDefinition.PortType.ANY, 0xFFAAAAAA)
-            .input(NodePorts.TO_TYPE, "node.mgmc.cast.port.to_type", NodeDefinition.PortType.STRING, 0xFFFFFFFF, true, "STRING", typeOptions)
-            .output(NodePorts.OUTPUT, "node.mgmc.cast.port.output", NodeDefinition.PortType.ANY, 0xFFAAAAAA)
+            .color(NodeThemes.COLOR_NODE_CONVERSION)
+            .input(NodePorts.INPUT, "node.mgmc.cast.port.input", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
+            .input(NodePorts.TO_TYPE, "node.mgmc.cast.port.to_type", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, true, "STRING", typeOptions)
+            .output(NodePorts.OUTPUT, "node.mgmc.cast.port.output", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
             .registerValue((node, portId, ctx) -> {
                 Object input = NodeLogicRegistry.evaluateInput(node, NodePorts.INPUT, ctx);
                 String targetType = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TO_TYPE, ctx));
