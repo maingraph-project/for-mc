@@ -41,6 +41,12 @@ public class BlueprintManager {
         return router;
     }
 
+    public void clearCaches() {
+        blueprintCache.clear();
+        allBlueprintsCache.clear();
+        lastAllBlueprintsRefresh = 0;
+    }
+
     private static record CachedBlueprint(JsonObject json, long lastModified, long version) {}
 
     private boolean isValidFileName(String name) {

@@ -43,6 +43,12 @@ public class EventDispatcher {
         MaingraphforMC.LOGGER.info("EventDispatcher initialized with {} event types", EVENT_NODES.size());
     }
 
+    public static void clear() {
+        EVENT_NODES.clear();
+        REGISTERED_CLASSES.clear();
+        CONCRETE_CACHE.clear();
+    }
+
     private static <T extends Event> void registerListener(Class<T> eventClass) {
         if (REGISTERED_CLASSES.contains(eventClass)) return;
         

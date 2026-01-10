@@ -56,6 +56,11 @@ public class BlueprintEngine {
         execute(level, root, eventType, builder);
     }
 
+    public static void clearCaches() {
+        EVENT_INDEX_CACHE.clear();
+        NODE_MAP_CACHE.clear();
+    }
+
     public static void execute(Level level, JsonObject root, String eventType, NodeContext.Builder contextBuilder) {
         if (RECURSION_DEPTH.get() >= ltd.opens.mg.mc.Config.getMaxRecursionDepth()) {
             return;

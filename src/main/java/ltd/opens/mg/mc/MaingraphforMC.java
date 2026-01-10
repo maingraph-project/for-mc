@@ -67,8 +67,14 @@ public class MaingraphforMC {
 
     @SubscribeEvent
     public void onServerStopping(ServerStoppingEvent event) {
+        if (serverManager != null) {
+            serverManager.clearCaches();
+        }
+        ltd.opens.mg.mc.core.blueprint.engine.BlueprintEngine.clearCaches();
+        ltd.opens.mg.mc.core.blueprint.EventDispatcher.clear();
+        
         serverManager = null;
-        LOGGER.info("MGMC: Blueprint manager cleared.");
+        LOGGER.info("MGMC: Blueprint manager and global caches cleared.");
     }
 
     public static BlueprintManager getServerManager() {
