@@ -9,6 +9,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.KeyEvent;
+import org.lwjgl.glfw.GLFW;
 
 public class BlueprintEventHandler {
     private final BlueprintState state;
@@ -123,6 +124,10 @@ public class BlueprintEventHandler {
     }
 
     public boolean keyPressed(KeyEvent event) {
+        if (event.key() == GLFW.GLFW_KEY_M) {
+            state.showMinimap = !state.showMinimap;
+            return true;
+        }
         if (state.readOnly) return false;
         if (menuHandler.keyPressed(event)) return true;
         return nodeHandler.keyPressed(event);

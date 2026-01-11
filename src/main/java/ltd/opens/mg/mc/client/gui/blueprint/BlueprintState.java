@@ -46,6 +46,7 @@ public class BlueprintState {
     public String notificationMessage = null;
     public int notificationTimer = 0;
     public boolean readOnly = false;
+    public boolean showMinimap = true;
     public long version = 0;
 
     // Undo/Redo history

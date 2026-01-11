@@ -160,6 +160,9 @@ public class BlueprintScreen extends Screen {
         // Selection Box (Screen Space)
         BlueprintRenderer.drawSelectionBox(guiGraphics, state);
         
+        // Minimap
+        BlueprintRenderer.drawMinimap(guiGraphics, state, this.width, this.height);
+        
         // --- Modern Top Bar (Narrower) ---
         int barHeight = 26;
         guiGraphics.fill(0, 0, this.width, barHeight, 0xF0121212); 

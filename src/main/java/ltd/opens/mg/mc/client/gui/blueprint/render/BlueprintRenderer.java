@@ -148,6 +148,75 @@ public class BlueprintRenderer {
         // Draw outline
         guiGraphics.renderOutline(minX, minY, maxX - minX, maxY - minY, 0xFF4488FF);
     }
+
+    public static void drawMinimap(GuiGraphics guiGraphics, BlueprintState state, int screenWidth, int screenHeight) {
+        if (!state.showMinimap || state.nodes.isEmpty()) return;
+
+        // Minimap settings
+        int minimapWidth = 120;
+        int minimapHeight = 80;
+        int margin = 10;
+        int x = screenWidth - minimapWidth - margin;
+        int y = screenHeight - minimapHeight - margin;
+
+        // Draw background
+        guiGraphics.fill(x, y, x + minimapWidth, y + minimapHeight, 0xAA121212);
+        guiGraphics.renderOutline(x, y, minimapWidth, minimapHeight, 0xFF444444);
+
+        // Find bounds of all nodes
+        float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
+        float maxX = Float.MIN_VALUE, maxY = Float.MIN_VALUE;
+        for (GuiNode node : state.nodes) {
+            minX = Math.min(minX, node.x);
+            minY = Math.min(minY, node.y);
+            maxX = Math.max(maxX, node.x + node.width);
+            maxY = Math.max(maxY, node.y + node.height);
+        }
+
+        // Add some padding to bounds
+        float padding = 100;
+        minX -= padding; minY -= padding;
+        maxX += padding; maxY += padding;
+
+        float contentWidth = maxX - minX;
+        float contentHeight = maxY - minY;
+        float scale = Math.min(minimapWidth / contentWidth, minimapHeight / contentHeight);
+
+        // Center content in minimap
+        float offsetX = x + (minimapWidth - contentWidth * scale) / 2f - minX * scale;
+        float offsetY = y + (minimapHeight - contentHeight * scale) / 2f - minY * scale;
+
+        // Draw nodes as small dots/rects
+        for (GuiNode node : state.nodes) {
+            int nx = (int) (node.x * scale + offsetX);
+            int ny = (int) (node.y * scale + offsetY);
+            int nw = (int) Math.max(1, node.width * scale);
+            int nh = (int) Math.max(1, node.height * scale);
+            guiGraphics.fill(nx, ny, nx + nw, ny + nh, 0xCC888888);
+        }
+
+        // Draw current view area
+        float viewX = (-state.panX / state.zoom);
+        float viewY = (-state.panY / state.zoom);
+        float viewW = (screenWidth / state.zoom);
+        float viewH = (screenHeight / state.zoom);
+
+        int vx = (int) (viewX * scale + offsetX);
+        int vy = (int) (viewY * scale + offsetY);
+        int vw = (int) (viewW * scale);
+        int vh = (int) (viewH * scale);
+
+        // Clip view area to minimap bounds
+        int cvx = Math.max(x, vx);
+        int cvy = Math.max(y, vy);
+        int cvw = Math.min(x + minimapWidth, vx + vw) - cvx;
+        int cvh = Math.min(y + minimapHeight, vy + vh) - cvy;
+
+        if (cvw > 0 && cvh > 0) {
+            guiGraphics.fill(cvx, cvy, cvx + cvw, cvy + cvh, 0x22FFFFFF);
+            guiGraphics.renderOutline(cvx, cvy, cvw, cvh, 0x66FFFFFF);
+        }
+    }
 }
 
 
