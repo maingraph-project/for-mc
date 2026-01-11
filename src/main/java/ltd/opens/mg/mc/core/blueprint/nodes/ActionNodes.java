@@ -15,6 +15,7 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.registries.BuiltInRegistries;
 
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 import ltd.opens.mg.mc.core.blueprint.events.RegisterMGMCNodesEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 
@@ -98,15 +99,11 @@ public class ActionNodes {
             .color(NodeThemes.COLOR_NODE_ACTION)
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .input(NodePorts.EFFECT, "node.mgmc.port.effect", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "minecraft:heart")
-            .input(NodePorts.X, "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
-            .input(NodePorts.Y, "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
-            .input(NodePorts.Z, "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ, XYZ.ZERO)
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 String effectName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EFFECT, ctx));
-                double x = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.X, ctx));
-                double y = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.Y, ctx));
-                double z = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.Z, ctx));
+                XYZ pos = TypeConverter.toXYZ(NodeLogicRegistry.evaluateInput(node, NodePorts.XYZ, ctx));
 
                 try {
                     if (ctx.level instanceof ServerLevel serverLevel) {
@@ -115,7 +112,7 @@ public class ActionNodes {
                         if (particleTypeOptional.isPresent()) {
                             ParticleType<?> type = particleTypeOptional.get();
                             if (type instanceof ParticleOptions options) {
-                                serverLevel.sendParticles(options, x, y, z, 20, 0.5, 0.5, 0.5, 0.05);
+                                serverLevel.sendParticles(options, pos.x(), pos.y(), pos.z(), 20, 0.5, 0.5, 0.5, 0.05);
                             }
                         }
                     }
@@ -129,20 +126,16 @@ public class ActionNodes {
             .color(NodeThemes.COLOR_NODE_ACTION)
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .input(NodePorts.RADIUS, "node.mgmc.port.radius", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 3.0)
-            .input(NodePorts.X, "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
-            .input(NodePorts.Y, "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
-            .input(NodePorts.Z, "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ, XYZ.ZERO)
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
-                double x = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.X, ctx));
-                double y = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.Y, ctx));
-                double z = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.Z, ctx));
+                XYZ pos = TypeConverter.toXYZ(NodeLogicRegistry.evaluateInput(node, NodePorts.XYZ, ctx));
                 float radius = (float) TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.RADIUS, ctx));
                 if (radius <= 0) radius = 3.0f;
 
                 try {
                     if (ctx.level != null) {
-                        ctx.level.explode(null, x, y, z, radius, Level.ExplosionInteraction.TNT);
+                        ctx.level.explode(null, pos.x(), pos.y(), pos.z(), radius, Level.ExplosionInteraction.TNT);
                     }
                 } catch (Exception ignored) {}
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);

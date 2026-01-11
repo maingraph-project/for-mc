@@ -2,6 +2,7 @@ package ltd.opens.mg.mc.core.blueprint.engine;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +42,12 @@ public class TypeConverter {
         if (value == null) return 0;
         if (value instanceof Number) return ((Number) value).intValue();
         return (int) Math.round(toDouble(value));
+    }
+
+    public static XYZ toXYZ(Object value) {
+        if (value == null) return XYZ.ZERO;
+        if (value instanceof XYZ xyz) return xyz;
+        return XYZ.fromString(toString(value));
     }
 
     public static List<Object> toList(Object value) {
@@ -96,6 +103,9 @@ public class TypeConverter {
                 
             case "BOOLEAN":
                 return toBoolean(value);
+                
+            case "XYZ":
+                return toXYZ(value);
                 
             case "INT":
                 return toInt(value);

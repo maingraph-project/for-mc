@@ -1,6 +1,7 @@
 package ltd.opens.mg.mc.core.blueprint.engine;
 
 import com.google.gson.JsonObject;
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 import net.minecraft.world.level.Level;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class NodeContext {
     public final double triggerX;
     public final double triggerY;
     public final double triggerZ;
+    public final XYZ triggerXYZ;
     public final double triggerSpeed;
     public final String triggerBlockId;
     public final String triggerItemId;
@@ -49,6 +51,7 @@ public class NodeContext {
         this.triggerX = triggerX;
         this.triggerY = triggerY;
         this.triggerZ = triggerZ;
+        this.triggerXYZ = new XYZ(triggerX, triggerY, triggerZ);
         this.triggerSpeed = triggerSpeed;
         this.triggerBlockId = triggerBlockId;
         this.triggerItemId = triggerItemId;

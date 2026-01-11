@@ -4,6 +4,7 @@ import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeHelper;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
@@ -35,9 +36,7 @@ public class GetEntityInfoNode {
             .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .output(NodePorts.TYPE, "node.mgmc.get_entity_info.port.type", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .output(NodePorts.REGISTRY_NAME, "node.mgmc.get_entity_info.port.registry_name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
-            .output(NodePorts.POS_X, "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
-            .output(NodePorts.POS_Y, "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
-            .output(NodePorts.POS_Z, "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
             .output(NodePorts.HEALTH, "node.mgmc.get_entity_info.port.health", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
             .output(NodePorts.MAX_HEALTH, "node.mgmc.get_entity_info.port.max_health", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
             .output(NodePorts.IS_LIVING, "node.mgmc.get_entity_info.port.is_living", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
@@ -58,9 +57,7 @@ public class GetEntityInfoNode {
                             case NodePorts.TYPE: return entity.getType().getDescription().getString();
                             case NodePorts.REGISTRY_NAME: 
                                 return BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
-                            case NodePorts.POS_X: return entity.getX();
-                            case NodePorts.POS_Y: return entity.getY();
-                            case NodePorts.POS_Z: return entity.getZ();
+                            case NodePorts.XYZ: return new XYZ(entity.getX(), entity.getY(), entity.getZ());
                             case NodePorts.HEALTH:
                                 if (entity instanceof LivingEntity) {
                                     return (double) ((LivingEntity) entity).getHealth();
@@ -100,9 +97,8 @@ public class GetEntityInfoNode {
 
     private static Object getDefaultValue(String pinId) {
         switch (pinId) {
-            case NodePorts.POS_X:
-            case NodePorts.POS_Y:
-            case NodePorts.POS_Z:
+            case NodePorts.XYZ:
+                return XYZ.ZERO;
             case NodePorts.HEALTH:
             case NodePorts.MAX_HEALTH:
             case NodePorts.PERMISSION_LEVEL:

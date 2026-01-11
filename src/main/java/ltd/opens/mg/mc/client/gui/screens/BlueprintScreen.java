@@ -84,7 +84,7 @@ public class BlueprintScreen extends Screen {
 
     public void loadFromNetwork(String json, long version) {
         int formatVersion = BlueprintIO.getFormatVersion(json);
-        if (!forceOpen && formatVersion < 4) {
+        if (!forceOpen && formatVersion < 5) {
             Minecraft.getInstance().setScreen(new VersionWarningScreen(this.parent, this.blueprintName, formatVersion));
             return;
         }

@@ -51,6 +51,7 @@ public class NodePorts {
     public static final String PLAYER = "player";
     public static final String TARGET = "target";
     public static final String POSITION = "position";
+    public static final String XYZ = "xyz";
     public static final String X = "x";
     public static final String Y = "y";
     public static final String Z = "z";

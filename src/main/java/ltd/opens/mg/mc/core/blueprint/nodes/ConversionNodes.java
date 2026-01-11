@@ -6,6 +6,7 @@ import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 import ltd.opens.mg.mc.core.blueprint.events.RegisterMGMCNodesEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 
@@ -35,6 +36,39 @@ public class ConversionNodes {
                 Object input = NodeLogicRegistry.evaluateInput(node, NodePorts.INPUT, ctx);
                 String targetType = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TO_TYPE, ctx));
                 return TypeConverter.cast(input, targetType);
+            });
+
+        // make_xyz (浮点数到XYZ)
+        NodeHelper.setup("make_xyz", "node.mgmc.make_xyz.name")
+            .category("node_category.mgmc.logic.math")
+            .color(NodeThemes.COLOR_NODE_CONVERSION)
+            .input(NodePorts.X, "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.Y, "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.Z, "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .registerValue((node, portId, ctx) -> {
+                double x = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.X, ctx));
+                double y = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.Y, ctx));
+                double z = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.Z, ctx));
+                return new XYZ(x, y, z);
+            });
+
+        // break_xyz (XYZ到浮点数)
+        NodeHelper.setup("break_xyz", "node.mgmc.break_xyz.name")
+            .category("node_category.mgmc.logic.math")
+            .color(NodeThemes.COLOR_NODE_CONVERSION)
+            .input(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ, XYZ.ZERO)
+            .output(NodePorts.X, "node.mgmc.port.x", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.Y, "node.mgmc.port.y", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.Z, "node.mgmc.port.z", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .registerValue((node, portId, ctx) -> {
+                XYZ xyz = TypeConverter.toXYZ(NodeLogicRegistry.evaluateInput(node, NodePorts.XYZ, ctx));
+                return switch (portId) {
+                    case NodePorts.X -> xyz.x();
+                    case NodePorts.Y -> xyz.y();
+                    case NodePorts.Z -> xyz.z();
+                    default -> 0.0;
+                };
             });
     }
 }

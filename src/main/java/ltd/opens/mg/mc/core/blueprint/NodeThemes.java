@@ -24,6 +24,7 @@ public class NodeThemes {
     public static final int COLOR_PORT_BOOLEAN = 0xFF920101;  // 深红 - 布尔
     public static final int COLOR_PORT_LIST = 0xFF00FFFF;     // 青蓝 - 列表
     public static final int COLOR_PORT_UUID = 0xFFCC00FF;     // 紫色 - UUID
+    public static final int COLOR_PORT_XYZ = 0xFF55FFCC;      // 蓝绿 - XYZ
     public static final int COLOR_PORT_OBJECT = 0xFFFFFFFF;   // 白色 - 通用对象
     public static final int COLOR_PORT_ANY = 0xFFAAAAAA;      // 浅灰 - 任意类型
 }

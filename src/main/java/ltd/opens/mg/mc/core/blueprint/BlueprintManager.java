@@ -128,7 +128,7 @@ public class BlueprintManager {
                 JsonObject obj = JsonParser.parseString(data).getAsJsonObject();
                 long newVersion = (currentVersion == -1 ? 0 : currentVersion) + 1;
                 obj.addProperty("_version", newVersion);
-                obj.addProperty("format_version", 4);
+                obj.addProperty("format_version", 5);
                 
                 Files.writeString(dataFile, obj.toString());
                 

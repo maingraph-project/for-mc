@@ -91,7 +91,7 @@ public class BlueprintSelectionScreen extends Screen {
                 this.setFocused(null);
                 if (entry.path != null) {
                     int version = ltd.opens.mg.mc.client.gui.blueprint.io.BlueprintIO.getFormatVersion(entry.path);
-                    if (version < 4) {
+                    if (version < 5) {
                         Minecraft.getInstance().setScreen(new VersionWarningScreen(this, entry.path, version));
                     } else {
                         Minecraft.getInstance().setScreen(new BlueprintScreen(this, entry.path));

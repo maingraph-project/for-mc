@@ -135,7 +135,7 @@ public class BlueprintIO {
             }
             ui.add("connections", connArray);
             root.add("ui", ui);
-            root.addProperty("format_version", 4);
+            root.addProperty("format_version", 5);
             if (!root.has("_version")) {
                 root.addProperty("_version", 0);
             }
@@ -358,6 +358,7 @@ public class BlueprintIO {
             case BOOLEAN: return 0xFF920101;
             case LIST: return 0xFFFFCC00;
             case UUID: return 0xFF55FF55;
+            case XYZ: return 0xFF55FFCC;
             case ANY: return 0xFFAAAAAA;
             default: return 0xFFFFFFFF;
         }
