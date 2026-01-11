@@ -75,6 +75,7 @@ public class BlueprintState {
     public float searchConfirmProgress = 0f; // 0 to 1
     public int lastHistorySelectedIndex = -1;
     public boolean isEnterDown = false;
+    public boolean isMouseDown = false;
 
     public void addToHistory(GuiNode node) {
         searchHistory.remove(node);
@@ -88,13 +89,14 @@ public class BlueprintState {
         cursorTick++;
         if (highlightTimer > 0) highlightTimer--;
         
-        // Confirm progress logic (Long press Enter for history)
+        // Confirm progress logic (Long press Enter or Mouse for history)
         if (showQuickSearch && quickSearchEditBox != null && quickSearchEditBox.getValue().isEmpty()) {
-            if (isEnterDown && quickSearchSelectedIndex >= 0 && quickSearchSelectedIndex < searchHistory.size()) {
+            if ((isEnterDown || isMouseDown) && quickSearchSelectedIndex >= 0 && quickSearchSelectedIndex < searchHistory.size()) {
                 searchConfirmProgress += 0.05f; // Fill in 20 ticks (1 second)
                 if (searchConfirmProgress >= 1.0f) {
                     searchConfirmProgress = 0f;
                     isEnterDown = false;
+                    isMouseDown = false;
                     jumpToNode(searchHistory.get(quickSearchSelectedIndex), screenWidth, screenHeight);
                     showQuickSearch = false;
                 }

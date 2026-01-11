@@ -49,12 +49,18 @@ public class BlueprintEventHandler {
                 int y = screen.height / 4;
                 int itemHeight = 18;
                 int listY = y + 42; // Match BlueprintRenderer listY
+                List<GuiNode> displayList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
                 
-                if (mouseX >= x && mouseX <= x + searchW && !state.quickSearchMatches.isEmpty()) {
+                if (mouseX >= x && mouseX <= x + searchW && !displayList.isEmpty()) {
                     int clickedIdx = (int) ((mouseY - (listY + 3)) / itemHeight);
-                    if (clickedIdx >= 0 && clickedIdx < Math.min(state.quickSearchMatches.size(), 10)) {
-                        state.jumpToNode(state.quickSearchMatches.get(clickedIdx), screen.width, screen.height);
-                        state.showQuickSearch = false;
+                    if (clickedIdx >= 0 && clickedIdx < Math.min(displayList.size(), 10)) {
+                        state.quickSearchSelectedIndex = clickedIdx;
+                        if (state.quickSearchEditBox.getValue().isEmpty()) {
+                            state.isMouseDown = true;
+                        } else {
+                            state.jumpToNode(displayList.get(clickedIdx), screen.width, screen.height);
+                            state.showQuickSearch = false;
+                        }
                         return true;
                     }
                 }
@@ -125,6 +131,10 @@ public class BlueprintEventHandler {
         double mouseX = event.x();
         double mouseY = event.y();
         int button = event.buttonInfo().button();
+
+        if (state.showQuickSearch) {
+            state.isMouseDown = false;
+        }
 
         // 1. View interactions (panning end)
         if (viewHandler.mouseReleased(mouseX, mouseY, button)) return true;
