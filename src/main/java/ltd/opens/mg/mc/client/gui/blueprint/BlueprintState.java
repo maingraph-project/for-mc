@@ -54,6 +54,10 @@ public class BlueprintState {
     public int quickSearchSelectedIndex = -1;
     public long version = 0;
 
+    // Marker Editing
+    public GuiNode editingMarkerNode = null;
+    public EditBox markerEditBox = null;
+
     // View Animation
     public boolean isAnimatingView = false;
     public float targetPanX = 0;

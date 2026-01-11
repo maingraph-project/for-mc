@@ -50,9 +50,10 @@ public class GuiNodeRenderer {
             if (zoom > 0.2f) {
                 String text = node.inputValues.has(NodePorts.COMMENT) ? node.inputValues.get(NodePorts.COMMENT).getAsString() : "";
                 if (!text.isEmpty()) {
-                    List<FormattedCharSequence> lines = font.split(Component.literal(text), (int) node.width - 10);
+                    int maxWidth = 250;
+                    List<FormattedCharSequence> lines = font.split(Component.literal(text), maxWidth - 20);
                     for (int i = 0; i < lines.size(); i++) {
-                        guiGraphics.drawString(font, lines.get(i), (int) node.x + 5, (int) (node.y + node.headerHeight + 5 + i * 10), 0xFFAAAAAA, false);
+                        guiGraphics.drawString(font, lines.get(i), (int) node.x + 10, (int) (node.y + node.headerHeight + 10 + i * 10), 0xFFAAAAAA, false);
                     }
                 }
             }

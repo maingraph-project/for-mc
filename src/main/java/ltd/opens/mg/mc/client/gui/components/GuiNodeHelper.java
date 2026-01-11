@@ -14,11 +14,16 @@ public class GuiNodeHelper {
         if (node.definition.properties().containsKey("is_marker")) {
             String text = node.inputValues.has(NodePorts.COMMENT) ? node.inputValues.get(NodePorts.COMMENT).getAsString() : "";
             if (text.isEmpty()) {
-                node.width = 120;
+                node.width = 100;
                 node.height = 40;
             } else {
-                List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(text), 200);
-                node.width = 210;
+                int maxWidth = 250;
+                List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(text), maxWidth - 20);
+                int textWidth = 0;
+                for (net.minecraft.util.FormattedCharSequence line : lines) {
+                    textWidth = Math.max(textWidth, font.width(line));
+                }
+                node.width = Math.max(100, textWidth + 20);
                 node.height = node.headerHeight + 10 + lines.size() * 10 + 10;
             }
             node.setSizeDirty(false);

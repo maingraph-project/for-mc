@@ -4,7 +4,6 @@ package ltd.opens.mg.mc.client.gui.blueprint.render;
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 import ltd.opens.mg.mc.client.gui.components.*;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import java.util.List;
 
@@ -223,6 +222,30 @@ public class BlueprintRenderer {
             guiGraphics.fill(cvx, cvy, cvx + cvw, cvy + cvh, 0x22FFFFFF);
             guiGraphics.renderOutline(cvx, cvy, cvw, cvh, 0x66FFFFFF);
         }
+    }
+
+    public static void drawMarkerEditing(GuiGraphics guiGraphics, BlueprintState state, net.minecraft.client.gui.Font font) {
+        if (state.editingMarkerNode == null || state.markerEditBox == null) return;
+
+        GuiNode node = state.editingMarkerNode;
+        // Project node to screen space
+        int sx = (int) (node.x * state.zoom + state.panX);
+        int sy = (int) (node.y * state.zoom + state.panY);
+        int sw = (int) (node.width * state.zoom);
+
+        // Header height in screen space
+        int headerH = (int) (node.headerHeight * state.zoom);
+
+        // Position EditBox in the content area of the node
+        state.markerEditBox.setX(sx + (int)(10 * state.zoom));
+        state.markerEditBox.setY(sy + headerH + (int)(10 * state.zoom));
+        state.markerEditBox.setWidth(sw - (int)(20 * state.zoom));
+        // EditBox height is fixed for single line, but we might want it to look okay
+        // Minecraft's EditBox doesn't natively support multiline well, but for input it's fine.
+        // If we want multiline editing, we might need a custom component, 
+        // but let's stick with EditBox for now as it's better than a modal.
+        
+        state.markerEditBox.render(guiGraphics, 0, 0, 0);
     }
 
     public static void drawQuickSearch(GuiGraphics guiGraphics, BlueprintState state, int width, int height, net.minecraft.client.gui.Font font) {

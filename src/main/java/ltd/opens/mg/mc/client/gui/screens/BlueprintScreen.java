@@ -166,6 +166,9 @@ public class BlueprintScreen extends Screen {
         // Quick Search
         BlueprintRenderer.drawQuickSearch(guiGraphics, state, this.width, this.height, this.font);
         
+        // Marker Editing
+        BlueprintRenderer.drawMarkerEditing(guiGraphics, state, this.font);
+        
         // --- Modern Top Bar (Narrower) ---
         int barHeight = 26;
         guiGraphics.fill(0, 0, this.width, barHeight, 0xF0121212); 

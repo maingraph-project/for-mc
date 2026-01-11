@@ -10,6 +10,7 @@ import ltd.opens.mg.mc.client.gui.blueprint.io.BlueprintIO;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -205,6 +206,26 @@ public class BlueprintNodeHandler {
                 state.nodes.remove(i);
                 state.nodes.add(node);
                 return true;
+            }
+
+            // --- Marker Editing ---
+            if (node.definition.properties().containsKey("is_marker")) {
+                if (worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height) {
+                    // Start editing marker in-place
+                    state.editingMarkerNode = node;
+                    if (state.markerEditBox == null) {
+                        state.markerEditBox = new EditBox(font, 0, 0, 200, 20, Component.empty());
+                        state.markerEditBox.setBordered(false);
+                        state.markerEditBox.setMaxLength(500); // Increased limit as requested
+                        state.markerEditBox.setTextColor(0xFFFFFFFF); // Brighter text for editing
+                    }
+                    String current = node.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 
+                                     node.inputValues.get(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT).getAsString() : "";
+                    state.markerEditBox.setValue(current);
+                    state.markerEditBox.setFocused(true);
+                    state.markerEditBox.setCursorPosition(current.length()); // Move cursor to end
+                    return true;
+                }
             }
         }
 

@@ -2,6 +2,7 @@ package ltd.opens.mg.mc.client.gui.blueprint.handler;
 
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
+import ltd.opens.mg.mc.client.gui.components.GuiNode;
 
 
 import ltd.opens.mg.mc.client.gui.screens.*;
@@ -59,6 +60,21 @@ public class BlueprintEventHandler {
             // Clicked outside, close search
             state.showQuickSearch = false;
             return true;
+        }
+
+        // 0.1 Marker Editing interactions
+        if (state.editingMarkerNode != null) {
+            if (state.markerEditBox != null) {
+                // If clicked outside the node, finish editing
+                double worldMouseX = (mouseX - state.panX) / state.zoom;
+                double worldMouseY = (mouseY - state.panY) / state.zoom;
+                GuiNode node = state.editingMarkerNode;
+                if (!(worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height)) {
+                    finishMarkerEditing();
+                } else {
+                    return true; // Clicked inside, keep focus
+                }
+            }
         }
 
         // Block all blueprint interactions if clicking the top bar
@@ -153,6 +169,23 @@ public class BlueprintEventHandler {
         return viewHandler.mouseScrolled(mouseX, mouseY, scrollY);
     }
 
+    private void finishMarkerEditing() {
+        if (state.editingMarkerNode != null && state.markerEditBox != null) {
+            String newVal = state.markerEditBox.getValue();
+            String oldVal = state.editingMarkerNode.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 
+                             state.editingMarkerNode.inputValues.get(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT).getAsString() : "";
+            
+            if (!newVal.equals(oldVal)) {
+                state.pushHistory();
+                state.editingMarkerNode.inputValues.addProperty(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT, newVal);
+                state.editingMarkerNode.setSizeDirty(true);
+                state.markDirty();
+            }
+            state.editingMarkerNode = null;
+            state.markerEditBox.setFocused(false);
+        }
+    }
+
     public boolean keyPressed(KeyEvent event, BlueprintScreen screen) {
         if (event.key() == GLFW.GLFW_KEY_M) {
             state.showMinimap = !state.showMinimap;
@@ -218,6 +251,21 @@ public class BlueprintEventHandler {
             return true; // Block other keys when search is open
         }
 
+        // Marker Editing keys
+        if (state.editingMarkerNode != null && state.markerEditBox != null) {
+            if (event.key() == GLFW.GLFW_KEY_ESCAPE || event.key() == GLFW.GLFW_KEY_ENTER) {
+                finishMarkerEditing();
+                return true;
+            }
+            if (state.markerEditBox.keyPressed(event)) {
+                // Real-time size update
+                state.editingMarkerNode.inputValues.addProperty(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT, state.markerEditBox.getValue());
+                state.editingMarkerNode.setSizeDirty(true);
+                return true;
+            }
+            return true;
+        }
+
         if (state.readOnly) return false;
         if (menuHandler.keyPressed(event)) return true;
         return nodeHandler.keyPressed(event);
@@ -234,6 +282,15 @@ public class BlueprintEventHandler {
                 return handled;
             }
             return true;
+        }
+
+        if (state.editingMarkerNode != null && state.markerEditBox != null) {
+            boolean handled = state.markerEditBox.charTyped(event);
+            if (handled) {
+                state.editingMarkerNode.inputValues.addProperty(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT, state.markerEditBox.getValue());
+                state.editingMarkerNode.setSizeDirty(true);
+            }
+            return handled;
         }
         if (state.readOnly) return false;
         return menuHandler.charTyped(event);
