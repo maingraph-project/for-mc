@@ -10,16 +10,13 @@ import ltd.opens.mg.mc.client.gui.blueprint.io.BlueprintIO;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BlueprintNodeHandler {
     private final BlueprintState state;
