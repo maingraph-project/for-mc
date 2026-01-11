@@ -65,6 +65,10 @@ public class BlueprintConnectionHandler {
                                 // Remove existing connections to this input if it's not EXEC
                                 if (targetPort.type != NodeDefinition.PortType.EXEC) {
                                     state.connections.removeIf(c -> c.to == node && c.toPort.equals(targetPort.id));
+                                } else {
+                                    // For EXEC, if a connection already exists between the same ports, remove it first to "cover" it
+                                    state.connections.removeIf(c -> c.from == state.connectionStartNode && c.fromPort.equals(state.connectionStartPort) 
+                                        && c.to == node && c.toPort.equals(targetPort.id));
                                 }
                                 state.connections.add(new GuiConnection(state.connectionStartNode, state.connectionStartPort, node, targetPort.id));
                                 state.markDirty();
@@ -83,6 +87,10 @@ public class BlueprintConnectionHandler {
                                 // Remove existing connections to the start input if it's not EXEC
                                 if (startPort.type != NodeDefinition.PortType.EXEC) {
                                     state.connections.removeIf(c -> c.to == state.connectionStartNode && c.toPort.equals(startPort.id));
+                                } else {
+                                    // For EXEC, if a connection already exists between the same ports, remove it first to "cover" it
+                                    state.connections.removeIf(c -> c.from == node && c.fromPort.equals(targetPort.id) 
+                                        && c.to == state.connectionStartNode && c.toPort.equals(startPort.id));
                                 }
                                 state.connections.add(new GuiConnection(node, targetPort.id, state.connectionStartNode, state.connectionStartPort));
                                 state.markDirty();
