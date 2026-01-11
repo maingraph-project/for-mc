@@ -86,6 +86,27 @@ public class ActionNodes {
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
             });
 
+        // run_command_as_server (以服务器身份运行命令)
+        NodeHelper.setup("run_command_as_server", "node.mgmc.run_command_as_server.name")
+            .category("node_category.mgmc.action.world")
+            .color(NodeThemes.COLOR_NODE_ACTION)
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.COMMAND, "node.mgmc.port.command", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
+            .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .registerExec((node, ctx) -> {
+                String command = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.COMMAND, ctx));
+
+                if (ctx.level != null && !ctx.level.isClientSide() && ctx.level.getServer() != null) {
+                    if (command != null && !command.isEmpty()) {
+                        if (command.startsWith("/")) {
+                            command = command.substring(1);
+                        }
+                        ctx.level.getServer().getCommands().performPrefixedCommand(ctx.level.getServer().createCommandSourceStack(), command);
+                    }
+                }
+                NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+            });
+
         // play_effect (播放特效)
         NodeHelper.setup("play_effect", "node.mgmc.play_effect.name")
             .category("node_category.mgmc.action.world")
