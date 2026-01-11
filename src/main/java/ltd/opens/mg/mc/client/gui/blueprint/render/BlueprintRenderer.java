@@ -280,16 +280,21 @@ public class BlueprintRenderer {
         if (!displayList.isEmpty()) {
             int itemHeight = 18;
             int listY = y + searchH + 2;
-            int listHeight = Math.min(displayList.size(), 10) * itemHeight + 6;
+            int visibleCount = Math.min(displayList.size(), BlueprintState.MAX_QUICK_SEARCH_VISIBLE);
+            int listHeight = visibleCount * itemHeight + 6;
             
             // List Background
             guiGraphics.fill(x, listY, x + searchW, listY + listHeight, 0xF01A1A1A);
             guiGraphics.renderOutline(x, listY, searchW, listHeight, 0xFF555555);
             
-            for (int i = 0; i < Math.min(displayList.size(), 10); i++) {
-                GuiNode node = displayList.get(i);
+            // Draw Items
+            for (int i = 0; i < visibleCount; i++) {
+                int actualIdx = i + state.quickSearchScrollOffset;
+                if (actualIdx >= displayList.size()) break;
+
+                GuiNode node = displayList.get(actualIdx);
                 int itemTop = listY + 3 + i * itemHeight;
-                boolean selected = i == state.quickSearchSelectedIndex;
+                boolean selected = actualIdx == state.quickSearchSelectedIndex;
                 
                 // Selection Highlight
                 if (selected) {
@@ -334,6 +339,18 @@ public class BlueprintRenderer {
                         }
                     }
                 }
+            }
+
+            // Scrollbar
+            if (displayList.size() > BlueprintState.MAX_QUICK_SEARCH_VISIBLE) {
+                int scrollbarX = x + searchW - 4;
+                int scrollbarY = listY + 3;
+                int scrollbarHeight = listHeight - 6;
+                int thumbHeight = (int) ((float) BlueprintState.MAX_QUICK_SEARCH_VISIBLE / displayList.size() * scrollbarHeight);
+                int thumbY = scrollbarY + (int) ((float) state.quickSearchScrollOffset / (displayList.size() - BlueprintState.MAX_QUICK_SEARCH_VISIBLE) * (scrollbarHeight - thumbHeight));
+                
+                guiGraphics.fill(scrollbarX, scrollbarY, scrollbarX + 2, scrollbarY + scrollbarHeight, 0x44000000);
+                guiGraphics.fill(scrollbarX, thumbY, scrollbarX + 2, thumbY + thumbHeight, 0xFFAAAAAA);
             }
         } else if (state.quickSearchEditBox != null && !state.quickSearchEditBox.getValue().isEmpty()) {
             // No matches hint

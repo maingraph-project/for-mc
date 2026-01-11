@@ -52,8 +52,9 @@ public class BlueprintEventHandler {
                 List<GuiNode> displayList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
                 
                 if (mouseX >= x && mouseX <= x + searchW && !displayList.isEmpty()) {
-                    int clickedIdx = (int) ((mouseY - (listY + 3)) / itemHeight);
-                    if (clickedIdx >= 0 && clickedIdx < Math.min(displayList.size(), 10)) {
+                    int clickedVisibleIdx = (int) ((mouseY - (listY + 3)) / itemHeight);
+                    int clickedIdx = clickedVisibleIdx + state.quickSearchScrollOffset;
+                    if (clickedVisibleIdx >= 0 && clickedVisibleIdx < Math.min(displayList.size() - state.quickSearchScrollOffset, BlueprintState.MAX_QUICK_SEARCH_VISIBLE)) {
                         state.quickSearchSelectedIndex = clickedIdx;
                         if (state.quickSearchEditBox.getValue().isEmpty()) {
                             state.isMouseDown = true;
@@ -177,8 +178,26 @@ public class BlueprintEventHandler {
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY, BlueprintScreen screen) {
+        if (state.showQuickSearch) {
+            List<GuiNode> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
+            if (!currentList.isEmpty() && currentList.size() > BlueprintState.MAX_QUICK_SEARCH_VISIBLE) {
+                state.quickSearchScrollOffset = Math.max(0, Math.min(currentList.size() - BlueprintState.MAX_QUICK_SEARCH_VISIBLE, state.quickSearchScrollOffset - (int) scrollY));
+                return true;
+            }
+        }
         if (menuHandler.mouseScrolled(mouseX, mouseY, screen.width, screen.height, scrollY)) return true;
         return viewHandler.mouseScrolled(mouseX, mouseY, scrollY);
+    }
+
+    private void ensureQuickSearchSelectionVisible() {
+        List<GuiNode> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
+        if (currentList.isEmpty()) return;
+        
+        if (state.quickSearchSelectedIndex < state.quickSearchScrollOffset) {
+            state.quickSearchScrollOffset = state.quickSearchSelectedIndex;
+        } else if (state.quickSearchSelectedIndex >= state.quickSearchScrollOffset + BlueprintState.MAX_QUICK_SEARCH_VISIBLE) {
+            state.quickSearchScrollOffset = state.quickSearchSelectedIndex - BlueprintState.MAX_QUICK_SEARCH_VISIBLE + 1;
+        }
     }
 
     private void finishMarkerEditing() {
@@ -255,6 +274,7 @@ public class BlueprintEventHandler {
                     if (!currentList.isEmpty()) {
                         state.quickSearchSelectedIndex = (state.quickSearchSelectedIndex - 1 + currentList.size()) % currentList.size();
                         state.searchConfirmProgress = 0f; // Reset on selection change
+                        ensureQuickSearchSelectionVisible();
                     }
                     return true;
                 }
@@ -264,6 +284,7 @@ public class BlueprintEventHandler {
                     if (!currentList.isEmpty()) {
                         state.quickSearchSelectedIndex = (state.quickSearchSelectedIndex + 1) % currentList.size();
                         state.searchConfirmProgress = 0f; // Reset on selection change
+                        ensureQuickSearchSelectionVisible();
                     }
                     return true;
                 }

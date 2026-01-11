@@ -53,6 +53,8 @@ public class BlueprintState {
     public EditBox quickSearchEditBox = null;
     public final List<GuiNode> quickSearchMatches = new ArrayList<>();
     public int quickSearchSelectedIndex = -1;
+    public int quickSearchScrollOffset = 0;
+    public static final int MAX_QUICK_SEARCH_VISIBLE = 8;
     public long version = 0;
 
     // Marker Editing
@@ -142,12 +144,14 @@ public class BlueprintState {
         String query = quickSearchEditBox.getValue();
         if (query.isEmpty()) {
             quickSearchSelectedIndex = searchHistory.isEmpty() ? -1 : 0;
+            quickSearchScrollOffset = 0;
             searchConfirmProgress = 0f;
             return;
         }
 
         quickSearchMatches.addAll(MarkerSearchManager.performSearch(nodes, query));
         
+        quickSearchScrollOffset = 0;
         if (!quickSearchMatches.isEmpty()) {
             quickSearchSelectedIndex = 0;
         } else {
