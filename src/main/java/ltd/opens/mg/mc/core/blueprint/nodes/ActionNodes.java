@@ -22,8 +22,6 @@ import ltd.opens.mg.mc.core.blueprint.events.RegisterMGMCNodesEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -31,7 +29,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * 动作节点 (Action Nodes)
@@ -176,7 +173,9 @@ public class ActionNodes {
                 else if (ctx.triggerEntity != null) entity = ctx.triggerEntity;
 
                 if (entity != null && amount > 0) {
-                    entity.hurt(entity.damageSources().generic(), amount);
+                    if (entity.level() instanceof ServerLevel sl) {
+                        entity.hurtServer(sl, entity.damageSources().generic(), amount);
+                    }
                 }
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
             });

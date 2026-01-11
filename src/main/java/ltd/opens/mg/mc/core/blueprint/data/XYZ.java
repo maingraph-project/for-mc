@@ -1,6 +1,5 @@
 package ltd.opens.mg.mc.core.blueprint.data;
 
-import java.util.Objects;
 
 /**
  * 代表一个三维向量或坐标，存储三个浮点数。
