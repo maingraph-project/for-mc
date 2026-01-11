@@ -4,6 +4,8 @@ package ltd.opens.mg.mc.client.gui.blueprint.render;
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 import ltd.opens.mg.mc.client.gui.components.*;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
 import java.util.List;
 
 public class BlueprintRenderer {
@@ -192,7 +194,12 @@ public class BlueprintRenderer {
             int ny = (int) (node.y * scale + offsetY);
             int nw = (int) Math.max(1, node.width * scale);
             int nh = (int) Math.max(1, node.height * scale);
-            guiGraphics.fill(nx, ny, nx + nw, ny + nh, 0xCC888888);
+            
+            int color = 0xCC888888;
+            if (node.definition.properties().containsKey("is_marker")) {
+                color = 0xCC448844; // Marker color in minimap
+            }
+            guiGraphics.fill(nx, ny, nx + nw, ny + nh, color);
         }
 
         // Draw current view area
@@ -215,6 +222,80 @@ public class BlueprintRenderer {
         if (cvw > 0 && cvh > 0) {
             guiGraphics.fill(cvx, cvy, cvx + cvw, cvy + cvh, 0x22FFFFFF);
             guiGraphics.renderOutline(cvx, cvy, cvw, cvh, 0x66FFFFFF);
+        }
+    }
+
+    public static void drawQuickSearch(GuiGraphics guiGraphics, BlueprintState state, int width, int height, net.minecraft.client.gui.Font font) {
+        if (!state.showQuickSearch) return;
+
+        int searchW = 200;
+        int searchH = 40;
+        int x = (width - searchW) / 2;
+        int y = height / 4;
+
+        // Overlay
+        guiGraphics.fill(0, 0, width, height, 0x44000000);
+
+        // Background
+        guiGraphics.fill(x, y, x + searchW, y + searchH, 0xF01A1A1A);
+        guiGraphics.renderOutline(x, y, searchW, searchH, 0xFFFFFFFF);
+
+        // Label
+        String label = Component.translatable("gui.mgmc.quick_search.label").getString();
+        guiGraphics.drawString(font, label, x + 10, y + 8, 0xFFAAAAAA, false);
+
+        // Search text
+        if (state.quickSearchEditBox != null) {
+            state.quickSearchEditBox.setX(x + 10);
+            state.quickSearchEditBox.setY(y + 22);
+            state.quickSearchEditBox.render(guiGraphics, 0, 0, 0);
+        }
+
+        // Candidates list
+        if (!state.quickSearchMatches.isEmpty()) {
+            int itemHeight = 18;
+            int listY = y + searchH + 2;
+            int listHeight = Math.min(state.quickSearchMatches.size(), 10) * itemHeight + 6;
+            
+            // List Background
+            guiGraphics.fill(x, listY, x + searchW, listY + listHeight, 0xF01A1A1A);
+            guiGraphics.renderOutline(x, listY, searchW, listHeight, 0xFF555555);
+            
+            for (int i = 0; i < Math.min(state.quickSearchMatches.size(), 10); i++) {
+                GuiNode node = state.quickSearchMatches.get(i);
+                int itemTop = listY + 3 + i * itemHeight;
+                
+                // Selection Highlight
+                if (i == state.quickSearchSelectedIndex) {
+                    guiGraphics.fill(x + 2, itemTop, x + searchW - 2, itemTop + itemHeight, 0x44FFFFFF);
+                }
+                
+                String comment = node.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 
+                                 node.inputValues.get(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT).getAsString() : "Marker";
+                
+                // Truncate comment if too long
+                if (font.width(comment) > searchW - 20) {
+                    comment = font.plainSubstrByWidth(comment, searchW - 30) + "...";
+                }
+                
+                guiGraphics.drawString(font, comment, x + 8, itemTop + 4, 0xFFFFFFFF, false);
+            }
+        } else if (state.quickSearchEditBox != null && !state.quickSearchEditBox.getValue().isEmpty()) {
+            // No matches hint
+            int listY = y + searchH + 2;
+            int listHeight = 24;
+            guiGraphics.fill(x, listY, x + searchW, listY + listHeight, 0xF01A1A1A);
+            guiGraphics.renderOutline(x, listY, searchW, listHeight, 0xFF555555);
+            guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_editor.no_nodes_found"), x + 8, listY + 8, 0xFF888888, false);
+        }
+
+        // Results summary
+        int count = state.quickSearchMatches.size();
+        String query = state.quickSearchEditBox != null ? state.quickSearchEditBox.getValue() : "";
+        
+        if (!query.isEmpty()) {
+            String results = Component.translatable("gui.mgmc.quick_search.results", count).getString();
+            guiGraphics.drawString(font, results, x + searchW - font.width(results) - 10, y + 8, 0xFF55FF55, false);
         }
     }
 }

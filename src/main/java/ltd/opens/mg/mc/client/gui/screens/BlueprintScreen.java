@@ -118,7 +118,7 @@ public class BlueprintScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        state.cursorTick++;
+        state.tick();
         state.menu.tick();
     }
 
@@ -162,6 +162,9 @@ public class BlueprintScreen extends Screen {
         
         // Minimap
         BlueprintRenderer.drawMinimap(guiGraphics, state, this.width, this.height);
+        
+        // Quick Search
+        BlueprintRenderer.drawQuickSearch(guiGraphics, state, this.width, this.height, this.font);
         
         // --- Modern Top Bar (Narrower) ---
         int barHeight = 26;
@@ -304,7 +307,7 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        return eventHandler.keyPressed(event) || super.keyPressed(event);
+        return eventHandler.keyPressed(event, this) || super.keyPressed(event);
     }
 
     @Override

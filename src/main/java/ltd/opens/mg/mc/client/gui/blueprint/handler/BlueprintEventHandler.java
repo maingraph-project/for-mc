@@ -6,6 +6,8 @@ import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
 
 import ltd.opens.mg.mc.client.gui.screens.*;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -30,6 +32,34 @@ public class BlueprintEventHandler {
         double mouseX = event.x();
         double mouseY = event.y();
         int button = event.buttonInfo().button();
+
+        // 0. Quick Search interactions
+        if (state.showQuickSearch) {
+            if (state.quickSearchEditBox != null) {
+                if (state.quickSearchEditBox.mouseClicked(event, false)) {
+                    return true;
+                }
+                
+                // Check if clicked on a candidate
+                int searchW = 200;
+                int x = (screen.width - searchW) / 2;
+                int y = screen.height / 4;
+                int itemHeight = 18;
+                int listY = y + 42; // Match BlueprintRenderer listY
+                
+                if (mouseX >= x && mouseX <= x + searchW && !state.quickSearchMatches.isEmpty()) {
+                    int clickedIdx = (int) ((mouseY - (listY + 3)) / itemHeight);
+                    if (clickedIdx >= 0 && clickedIdx < Math.min(state.quickSearchMatches.size(), 10)) {
+                        state.jumpToNode(state.quickSearchMatches.get(clickedIdx), screen.width, screen.height);
+                        state.showQuickSearch = false;
+                        return true;
+                    }
+                }
+            }
+            // Clicked outside, close search
+            state.showQuickSearch = false;
+            return true;
+        }
 
         // Block all blueprint interactions if clicking the top bar
         if (mouseY < 26) return false;
@@ -123,17 +153,88 @@ public class BlueprintEventHandler {
         return viewHandler.mouseScrolled(mouseX, mouseY, scrollY);
     }
 
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(KeyEvent event, BlueprintScreen screen) {
         if (event.key() == GLFW.GLFW_KEY_M) {
             state.showMinimap = !state.showMinimap;
             return true;
         }
+        
+        // Ctrl + P: Quick Search Markers
+        if (event.key() == GLFW.GLFW_KEY_P && (event.modifiers() & GLFW.GLFW_MOD_CONTROL) != 0) {
+            state.showQuickSearch = !state.showQuickSearch;
+            if (state.showQuickSearch) {
+                if (state.quickSearchEditBox == null) {
+                    state.quickSearchEditBox = new EditBox(screen.getFont(), 0, 0, 180, 12, Component.empty());
+                    state.quickSearchEditBox.setBordered(false);
+                    state.quickSearchEditBox.setMaxLength(100);
+                    state.quickSearchEditBox.setTextColor(0xFFFFFFFF);
+                }
+                state.quickSearchEditBox.setValue("");
+                state.quickSearchEditBox.setFocused(true);
+                state.updateQuickSearchMatches();
+                state.showNodeMenu = false;
+                state.showNodeContextMenu = false;
+            }
+            return true;
+        }
+
+        if (state.showQuickSearch) {
+            if (event.key() == GLFW.GLFW_KEY_ESCAPE) {
+                state.showQuickSearch = false;
+                return true;
+            }
+            
+            if (state.quickSearchEditBox != null) {
+                if (event.key() == GLFW.GLFW_KEY_ENTER) {
+                    if (state.quickSearchSelectedIndex >= 0 && state.quickSearchSelectedIndex < state.quickSearchMatches.size()) {
+                        state.jumpToNode(state.quickSearchMatches.get(state.quickSearchSelectedIndex), screen.width, screen.height);
+                        state.showQuickSearch = false;
+                    }
+                    return true;
+                }
+                
+                if (event.key() == GLFW.GLFW_KEY_UP) {
+                    if (!state.quickSearchMatches.isEmpty()) {
+                        state.quickSearchSelectedIndex = (state.quickSearchSelectedIndex - 1 + state.quickSearchMatches.size()) % state.quickSearchMatches.size();
+                    }
+                    return true;
+                }
+                
+                if (event.key() == GLFW.GLFW_KEY_DOWN) {
+                    if (!state.quickSearchMatches.isEmpty()) {
+                        state.quickSearchSelectedIndex = (state.quickSearchSelectedIndex + 1) % state.quickSearchMatches.size();
+                    }
+                    return true;
+                }
+                
+                String oldVal = state.quickSearchEditBox.getValue();
+                if (state.quickSearchEditBox.keyPressed(event)) {
+                    if (!state.quickSearchEditBox.getValue().equals(oldVal)) {
+                        state.updateQuickSearchMatches();
+                    }
+                    return true;
+                }
+            }
+            return true; // Block other keys when search is open
+        }
+
         if (state.readOnly) return false;
         if (menuHandler.keyPressed(event)) return true;
         return nodeHandler.keyPressed(event);
     }
 
     public boolean charTyped(CharacterEvent event) {
+        if (state.showQuickSearch) {
+            if (state.quickSearchEditBox != null) {
+                String oldVal = state.quickSearchEditBox.getValue();
+                boolean handled = state.quickSearchEditBox.charTyped(event);
+                if (handled && !state.quickSearchEditBox.getValue().equals(oldVal)) {
+                    state.updateQuickSearchMatches();
+                }
+                return handled;
+            }
+            return true;
+        }
         if (state.readOnly) return false;
         return menuHandler.charTyped(event);
     }

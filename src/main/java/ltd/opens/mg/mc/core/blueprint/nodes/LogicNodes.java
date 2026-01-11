@@ -105,8 +105,8 @@ public class LogicNodes {
         NodeHelper.setup("logic_or", "node.mgmc.logic_or.name")
             .category("node_category.mgmc.logic.boolean")
             .color(NodeThemes.COLOR_NODE_LOGIC)
-            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, false)
-            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, false)
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, true)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, true)
             .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
                 boolean a = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));

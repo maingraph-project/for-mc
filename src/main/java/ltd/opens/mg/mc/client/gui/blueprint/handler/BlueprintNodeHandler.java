@@ -197,6 +197,7 @@ public class BlueprintNodeHandler {
                 }
 
                 state.draggingNode = node;
+                state.isAnimatingView = false; // Stop animation if user starts dragging a node
                 state.dragOffsetX = (float) (worldMouseX - node.x);
                 state.dragOffsetY = (float) (worldMouseY - node.y);
                 state.startMouseX = node.x;

@@ -1,9 +1,12 @@
 package ltd.opens.mg.mc.client.gui.components;
 
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
+import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
+
 import com.google.gson.JsonElement;
 import java.util.List;
 
@@ -40,6 +43,20 @@ public class GuiNodeRenderer {
         // Title - hide if too small
         if (zoom > 0.3f) {
             guiGraphics.drawString(font, Component.translatable(node.title), (int) node.x + 5, (int) node.y + 4, 0xFFFFFFFF, false);
+        }
+
+        // Marker Special Rendering
+        if (node.definition.properties().containsKey("is_marker")) {
+            if (zoom > 0.2f) {
+                String text = node.inputValues.has(NodePorts.COMMENT) ? node.inputValues.get(NodePorts.COMMENT).getAsString() : "";
+                if (!text.isEmpty()) {
+                    List<FormattedCharSequence> lines = font.split(Component.literal(text), (int) node.width - 10);
+                    for (int i = 0; i < lines.size(); i++) {
+                        guiGraphics.drawString(font, lines.get(i), (int) node.x + 5, (int) (node.y + node.headerHeight + 5 + i * 10), 0xFFAAAAAA, false);
+                    }
+                }
+            }
+            return;
         }
 
         // Render Ports - Skip entirely if very zoomed out

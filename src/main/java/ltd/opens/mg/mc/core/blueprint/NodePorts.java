@@ -73,6 +73,7 @@ public class NodePorts {
     public static final String BLOCK_ID = "block_id";
     public static final String DAMAGE_AMOUNT = "damage_amount";
     public static final String HEAL_AMOUNT = "heal_amount";
+    public static final String COMMENT = "comment";
     public static final String ATTACKER_UUID = "attacker_uuid";
     public static final String VICTIM_UUID = "victim_uuid";
     public static final String ATTACKER_ENTITY = "attacker_entity";
@@ -84,6 +85,7 @@ public class NodePorts {
     public static final String AMPLIFIER = "amplifier";
     public static final String SHOW_PARTICLES = "show_particles";
     public static final String SECONDS = "seconds";
+    public static final String VELOCITY = "velocity";
     
     // 实体属性
     public static final String TYPE = "type";
@@ -97,7 +99,4 @@ public class NodePorts {
     public static final String POS_X = "pos_x";
     public static final String POS_Y = "pos_y";
     public static final String POS_Z = "pos_z";
-    
-    // 物品相关
-    public static final String ITEM_STACK = "item_stack";
 }

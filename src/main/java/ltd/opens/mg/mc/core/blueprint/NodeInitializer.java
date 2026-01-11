@@ -23,6 +23,7 @@ public class NodeInitializer {
         modEventBus.register(ActionNodes.class);
         modEventBus.register(EventNodes.class);
         modEventBus.register(GetEntityInfoNode.class);
+        modEventBus.register(SpecialNodes.class);
 
         // 发布注册事件，通知外部模块
         modEventBus.post(new RegisterMGMCNodesEvent());

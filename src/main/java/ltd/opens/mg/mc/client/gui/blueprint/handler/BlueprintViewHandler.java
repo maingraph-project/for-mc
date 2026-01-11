@@ -13,6 +13,7 @@ public class BlueprintViewHandler {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 2 || button == 1) { // Middle click or Right click for panning
             state.isPanning = true;
+            state.isAnimatingView = false; // Stop animation if user starts manual panning
             state.lastMouseX = mouseX;
             state.lastMouseY = mouseY;
             state.startMouseX = mouseX;
@@ -50,6 +51,7 @@ public class BlueprintViewHandler {
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        state.isAnimatingView = false; // Stop animation if user starts zooming
         float zoomSensitivity = 0.1f;
         float oldZoom = state.zoom;
         if (scrollY > 0) {

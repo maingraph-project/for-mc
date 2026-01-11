@@ -2,6 +2,7 @@ package ltd.opens.mg.mc.client.gui.blueprint;
 
 import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
 import ltd.opens.mg.mc.client.gui.components.*;
+import net.minecraft.client.gui.components.EditBox;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +48,72 @@ public class BlueprintState {
     public int notificationTimer = 0;
     public boolean readOnly = false;
     public boolean showMinimap = true;
+    public boolean showQuickSearch = false;
+    public EditBox quickSearchEditBox = null;
+    public final List<GuiNode> quickSearchMatches = new ArrayList<>();
+    public int quickSearchSelectedIndex = -1;
     public long version = 0;
+
+    // View Animation
+    public boolean isAnimatingView = false;
+    public float targetPanX = 0;
+    public float targetPanY = 0;
+    public float targetZoom = 1.0f;
+    private static final float PAN_SMOOTHING = 0.2f;
+    private static final float ZOOM_SMOOTHING = 0.15f;
+
+    public void tick() {
+        cursorTick++;
+        if (isAnimatingView) {
+            float dx = targetPanX - panX;
+            float dy = targetPanY - panY;
+            float dz = targetZoom - zoom;
+            
+            if (Math.abs(dx) < 0.1f && Math.abs(dy) < 0.1f && Math.abs(dz) < 0.005f) {
+                panX = targetPanX;
+                panY = targetPanY;
+                zoom = targetZoom;
+                isAnimatingView = false;
+            } else {
+                panX += dx * PAN_SMOOTHING;
+                panY += dy * PAN_SMOOTHING;
+                zoom += dz * ZOOM_SMOOTHING;
+            }
+        }
+    }
+
+    public void jumpToNode(GuiNode node, int screenWidth, int screenHeight) {
+        targetZoom = 1.0f; // Focus zoom level
+        targetPanX = screenWidth / 2f - (node.x + node.width / 2f) * targetZoom;
+        targetPanY = screenHeight / 2f - (node.y + node.height / 2f) * targetZoom;
+        isAnimatingView = true;
+    }
+
+    public void updateQuickSearchMatches() {
+        quickSearchMatches.clear();
+        if (quickSearchEditBox == null) return;
+        String query = quickSearchEditBox.getValue().toLowerCase();
+        if (query.isEmpty()) {
+            quickSearchSelectedIndex = -1;
+            return;
+        }
+
+        for (GuiNode node : nodes) {
+            if (node.definition.properties().containsKey("is_marker")) {
+                String comment = node.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 
+                                 node.inputValues.get(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT).getAsString() : "";
+                if (comment.toLowerCase().contains(query)) {
+                    quickSearchMatches.add(node);
+                }
+            }
+        }
+        
+        if (!quickSearchMatches.isEmpty()) {
+            quickSearchSelectedIndex = 0;
+        } else {
+            quickSearchSelectedIndex = -1;
+        }
+    }
 
     // Undo/Redo history
     private final java.util.Deque<String> undoStack = new java.util.ArrayDeque<>();

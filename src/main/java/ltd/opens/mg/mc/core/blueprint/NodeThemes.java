@@ -16,6 +16,7 @@ public class NodeThemes {
     public static final int COLOR_NODE_LIST = 0xFF00AAAA;     // 深青 - 列表操作
     public static final int COLOR_NODE_STRING = 0xFFCCAA00;   // 暗金 - 字符串操作
     public static final int COLOR_NODE_CONTROL = 0xFF4444FF;  // 蓝色 - 控制流 (与逻辑一致)
+    public static final int COLOR_NODE_COMMENT = 0xFF448844;  // 灰绿 - 标记/注释
 
     // --- 端口类型颜色 ---
     public static final int COLOR_PORT_EXEC = 0xFFFFFFFF;     // 白色 - 执行流
