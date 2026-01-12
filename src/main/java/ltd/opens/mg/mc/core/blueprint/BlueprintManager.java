@@ -188,6 +188,24 @@ public class BlueprintManager {
         }
     }
 
+    public void duplicateBlueprint(ServerLevel level, String sourceName, String targetName) {
+        if (!isValidFileName(sourceName) || !isValidFileName(targetName)) return;
+        try {
+            if (!sourceName.endsWith(".json")) sourceName += ".json";
+            if (!targetName.endsWith(".json")) targetName += ".json";
+            Path sourceFile = getBlueprintsDir(level).resolve(sourceName);
+            Path targetFile = getBlueprintsDir(level).resolve(targetName);
+            if (Files.exists(sourceFile)) {
+                Files.copy(sourceFile, targetFile);
+                synchronized (allBlueprintsCache) {
+                    lastAllBlueprintsRefresh = 0;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to duplicate blueprint from " + sourceName + " to " + targetName, e);
+        }
+    }
+
     public Collection<JsonObject> getAllBlueprints(ServerLevel level) {
         long now = System.currentTimeMillis();
         synchronized (allBlueprintsCache) {

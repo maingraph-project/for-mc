@@ -70,12 +70,23 @@ public class VersionWarningScreen extends Screen {
                 openAnyway(); // Fallback
             }
         } else if (blueprintName != null) {
-            // For remote blueprints, we can't easily copy without the data.
-            // But we can open it with a flag to save as a new name later, 
-            // or just open it and let the user "Save As" if that exists.
-            // For now, let's just open it anyway or implement remote copy if possible.
-            // Since we don't have remote copy, let's just open it.
-            this.minecraft.setScreen(new BlueprintScreen(this.parent, blueprintName));
+            // Multiplayer: Request server to duplicate the file
+            String baseName = blueprintName.endsWith(".json") ? blueprintName.substring(0, blueprintName.length() - 5) : blueprintName;
+            String newName = baseName + "_v4.json";
+            
+            if (this.minecraft.getConnection() != null) {
+                // We don't have a way to check if file exists on server easily here, 
+                // but the DuplicateBlueprintPayload will just overwrite or fail silently on server for now.
+                // In a real scenario, we might want a response payload.
+                this.minecraft.getConnection().send(new net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket(
+                    new ltd.opens.mg.mc.network.payloads.DuplicateBlueprintPayload(blueprintName, newName)
+                ));
+                
+                // Open the NEW blueprint
+                this.minecraft.setScreen(new BlueprintScreen(this.parent, newName));
+            } else {
+                openAnyway();
+            }
         }
     }
 
@@ -96,7 +107,7 @@ public class VersionWarningScreen extends Screen {
 
         guiGraphics.drawCenteredString(this.font, this.title, centerX, centerY - 50, 0xFFFF5555);
         
-        Component message = Component.translatable("gui.mgmc.version_warning.message", version, 4);
+        Component message = Component.translatable("gui.mgmc.version_warning.message", version, 5);
         int y = centerY - 30;
         for (net.minecraft.util.FormattedCharSequence line : this.font.split(message, 250)) {
             guiGraphics.drawCenteredString(this.font, line, centerX, y, 0xFFAAAAAA);

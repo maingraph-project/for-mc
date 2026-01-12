@@ -148,6 +148,19 @@ public class BlueprintNetworkHandler {
                 }
             });
         }
+
+        public static void handleDuplicate(final DuplicateBlueprintPayload payload, final IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    if (!hasPermission(player)) {
+                        return;
+                    }
+                    var manager = MaingraphforMC.getServerManager();
+                    if (manager == null) return;
+                    manager.duplicateBlueprint((ServerLevel) player.level(), payload.sourceName(), payload.targetName());
+                }
+            });
+        }
     }
 
     public static class Client {
