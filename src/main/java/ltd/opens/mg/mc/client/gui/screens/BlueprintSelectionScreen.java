@@ -270,7 +270,16 @@ public class BlueprintSelectionScreen extends Screen {
             if (baseName.endsWith(".json")) {
                 baseName = baseName.substring(0, baseName.length() - 5);
             }
-            String newName = baseName + "_copy.json";
+            
+            // Generate a random 3-character suffix (alphanumeric)
+            String chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            StringBuilder suffix = new StringBuilder();
+            java.util.Random rnd = new java.util.Random();
+            for (int i = 0; i < 3; i++) {
+                suffix.append(chars.charAt(rnd.nextInt(chars.length())));
+            }
+            
+            String newName = baseName + "_copy_" + suffix.toString() + ".json";
             
             if (Minecraft.getInstance().getConnection() != null) {
                 Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new DuplicateBlueprintPayload(contextMenuEntry.name, newName)));
