@@ -7,15 +7,15 @@ public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     private static final ModConfigSpec.ConfigValue<Integer> MAX_RECURSION_DEPTH_VAL = BUILDER
-            .comment("最大递归执行深度，防止蓝图死循环导致崩溃")
+            .comment("Max recursion depth to prevent server crash from infinite loops")
             .define("max_recursion_depth", 10);
 
     private static final ModConfigSpec.ConfigValue<Integer> MAX_NODE_EXECUTIONS_VAL = BUILDER
-            .comment("单次蓝图运行最大执行节点数，防止超大规模循环导致卡顿")
+            .comment("Max node executions per blueprint run to prevent lag from large loops")
             .define("max_node_executions", 5000);
 
     private static final ModConfigSpec.ConfigValue<Boolean> ALLOW_SERVER_RUN_COMMAND_NODE_VAL = BUILDER
-            .comment("是否允许保存含有 '以服务器身份运行命令' 节点的蓝图。禁用此项可提高安全性。")
+            .comment("Whether to allow saving blueprints containing 'Run Command as Server' nodes. Disabling this improves security.")
             .define("allow_server_run_command_node", true);
 
     static final ModConfigSpec SPEC = BUILDER.build();
