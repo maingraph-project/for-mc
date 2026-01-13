@@ -262,7 +262,7 @@ public class BlueprintSelectionScreen extends Screen {
         renameBox.setVisible(true);
         renameBox.setX((int)menuX);
         renameBox.setY((int)menuY);
-        String fileName = contextMenuEntry.path.getFileName().toString();
+        String fileName = contextMenuEntry.name;
         if (fileName.endsWith(".json")) {
             fileName = fileName.substring(0, fileName.length() - 5);
         }
@@ -428,7 +428,7 @@ public class BlueprintSelectionScreen extends Screen {
                 BlueprintSelectionScreen.this.setFocused(null);
                 if (this.path != null) {
                     int version = BlueprintIO.getFormatVersion(this.path);
-                    if (version < 4) {
+                    if (version < 5) {
                         Minecraft.getInstance().setScreen(new VersionWarningScreen(BlueprintSelectionScreen.this, this.path, version));
                     } else {
                         Minecraft.getInstance().setScreen(new BlueprintScreen(BlueprintSelectionScreen.this, this.path));

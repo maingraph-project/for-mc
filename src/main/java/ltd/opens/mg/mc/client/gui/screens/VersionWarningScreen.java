@@ -54,17 +54,17 @@ public class VersionWarningScreen extends Screen {
             try {
                 String fileName = dataFile.getFileName().toString();
                 String baseName = fileName.endsWith(".json") ? fileName.substring(0, fileName.length() - 5) : fileName;
-                Path newFile = dataFile.getParent().resolve(baseName + "_v4.json");
+                Path newFile = dataFile.getParent().resolve(baseName + "_new.json");
                 
                 // If destination exists, try adding a number
                 int i = 1;
                 while (Files.exists(newFile)) {
-                    newFile = dataFile.getParent().resolve(baseName + "_v4_" + i + ".json");
+                    newFile = dataFile.getParent().resolve(baseName + "_new_" + i + ".json");
                     i++;
                 }
                 
                 Files.copy(dataFile, newFile);
-                this.minecraft.setScreen(new BlueprintScreen(this.parent, newFile));
+                this.minecraft.setScreen(new BlueprintScreen(this.parent, newFile, true));
             } catch (Exception e) {
                 e.printStackTrace();
                 openAnyway(); // Fallback
@@ -72,7 +72,7 @@ public class VersionWarningScreen extends Screen {
         } else if (blueprintName != null) {
             // Multiplayer: Request server to duplicate the file
             String baseName = blueprintName.endsWith(".json") ? blueprintName.substring(0, blueprintName.length() - 5) : blueprintName;
-            String newName = baseName + "_v4.json";
+            String newName = baseName + "_new.json";
             
             if (this.minecraft.getConnection() != null) {
                 // We don't have a way to check if file exists on server easily here, 
@@ -82,8 +82,8 @@ public class VersionWarningScreen extends Screen {
                     new ltd.opens.mg.mc.network.payloads.DuplicateBlueprintPayload(blueprintName, newName)
                 ));
                 
-                // Open the NEW blueprint
-                this.minecraft.setScreen(new BlueprintScreen(this.parent, newName));
+                // Open the NEW blueprint with forceOpen=true to avoid infinite loop
+                this.minecraft.setScreen(new BlueprintScreen(this.parent, newName, true));
             } else {
                 openAnyway();
             }
