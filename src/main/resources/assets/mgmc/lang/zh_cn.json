@@ -14,6 +14,7 @@
    "gui.mgmc.about.link": "官方站点: mc.maingraph.opens.ltd",
   "gui.mgmc.blueprint_selection.refresh": "刷新",
   "gui.mgmc.blueprint_selection.rename": "重命名",
+  "gui.mgmc.blueprint_selection.duplicate": "复制",
   "gui.mgmc.blueprint_selection.no_blueprints": "未找到蓝图。",
   "gui.mgmc.blueprint_selection.delete": "删除",
   "gui.mgmc.blueprint_selection.mapping": "映射",

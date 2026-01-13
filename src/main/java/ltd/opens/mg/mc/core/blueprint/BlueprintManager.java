@@ -130,6 +130,15 @@ public class BlueprintManager {
                 obj.addProperty("_version", newVersion);
                 obj.addProperty("format_version", 5);
                 
+                // Ensure name property exists and matches filename (without extension)
+                if (!obj.has("name")) {
+                    String displayName = name;
+                    if (displayName.endsWith(".json")) {
+                        displayName = displayName.substring(0, displayName.length() - 5);
+                    }
+                    obj.addProperty("name", displayName);
+                }
+                
                 Files.writeString(dataFile, obj.toString());
                 
                 blueprintCache.put(fileName, new CachedBlueprint(obj, System.currentTimeMillis(), newVersion));
@@ -191,16 +200,20 @@ public class BlueprintManager {
     public void duplicateBlueprint(ServerLevel level, String sourceName, String targetName) {
         if (!isValidFileName(sourceName) || !isValidFileName(targetName)) return;
         try {
-            if (!sourceName.endsWith(".json")) sourceName += ".json";
-            if (!targetName.endsWith(".json")) targetName += ".json";
-            Path sourceFile = getBlueprintsDir(level).resolve(sourceName);
-            Path targetFile = getBlueprintsDir(level).resolve(targetName);
-            if (Files.exists(sourceFile)) {
-                Files.copy(sourceFile, targetFile);
-                blueprintCache.remove(targetName);
-                synchronized (allBlueprintsCache) {
-                    lastAllBlueprintsRefresh = 0;
+            JsonObject sourceJson = getBlueprint(level, sourceName);
+            if (sourceJson != null) {
+                // Clone the JSON so we don't modify the source in cache
+                JsonObject newJson = sourceJson.deepCopy();
+                
+                // Ensure the internal "name" property matches the new filename (without .json)
+                String displayName = targetName;
+                if (displayName.endsWith(".json")) {
+                    displayName = displayName.substring(0, displayName.length() - 5);
                 }
+                newJson.addProperty("name", displayName);
+                
+                // Use the existing save logic to handle file writing, versioning, and cache invalidation
+                saveBlueprint(level, targetName, newJson.toString(), -1);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to duplicate blueprint from " + sourceName + " to " + targetName, e);
@@ -208,9 +221,13 @@ public class BlueprintManager {
     }
 
     public Collection<JsonObject> getAllBlueprints(ServerLevel level) {
+        return getAllBlueprints(level, false);
+    }
+
+    public Collection<JsonObject> getAllBlueprints(ServerLevel level, boolean force) {
         long now = System.currentTimeMillis();
         synchronized (allBlueprintsCache) {
-            if (now - lastAllBlueprintsRefresh < CACHE_REFRESH_INTERVAL) {
+            if (!force && now - lastAllBlueprintsRefresh < CACHE_REFRESH_INTERVAL) {
                 return new ArrayList<>(allBlueprintsCache);
             }
         }

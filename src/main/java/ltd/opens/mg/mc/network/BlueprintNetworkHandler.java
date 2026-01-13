@@ -12,15 +12,42 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.stream.Collectors;
 
 public class BlueprintNetworkHandler {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public static class Server {
         private static boolean hasPermission(ServerPlayer player) {
             if (player.level().getServer() == null) return false;
             return player.level().getServer().getProfilePermissions(new NameAndId(player.getUUID(), player.getGameProfile().name())).level().id() >= 2;
+        }
+
+        private static java.util.List<String> getBlueprintNames(ServerLevel level, boolean force) {
+            var manager = MaingraphforMC.getServerManager();
+            if (manager == null) return java.util.Collections.emptyList();
+            
+            var blueprints = manager.getAllBlueprints(level, force);
+            java.util.List<String> names = blueprints.stream()
+                    .map(bp -> {
+                        if (bp.has("name")) return bp.get("name").getAsString();
+                        return "unknown";
+                    })
+                    .collect(Collectors.toList());
+
+            if (names.isEmpty() || names.contains("unknown")) {
+                try (var stream = java.nio.file.Files.list(manager.getBlueprintsDir(level))) {
+                    names = stream.filter(p -> p.toString().endsWith(".json"))
+                            .map(p -> p.getFileName().toString())
+                            .collect(Collectors.toList());
+                } catch (Exception e) {
+                    LOGGER.error("Failed to fallback list blueprints", e);
+                }
+            }
+            return names;
         }
 
         public static void handleRequestList(final RequestBlueprintListPayload payload, final IPayloadContext context) {
@@ -29,23 +56,7 @@ public class BlueprintNetworkHandler {
                     if (!hasPermission(player)) {
                         return;
                     }
-                    var manager = MaingraphforMC.getServerManager();
-                    if (manager == null) return;
-                    var blueprints = manager.getAllBlueprints((ServerLevel) player.level());
-                    java.util.List<String> names = blueprints.stream()
-                            .map(bp -> bp.has("name") ? bp.get("name").getAsString() : "unknown")
-                            .collect(Collectors.toList());
-                    
-                    // Fallback to filenames if name property is missing
-                    if (names.isEmpty() || names.contains("unknown")) {
-                        try (var stream = java.nio.file.Files.list(manager.getBlueprintsDir((ServerLevel) player.level()))) {
-                            names = stream.filter(p -> p.toString().endsWith(".json"))
-                                    .map(p -> p.getFileName().toString())
-                                    .collect(Collectors.toList());
-                        } catch (Exception e) {}
-                    }
-                    
-                    context.reply(new ResponseBlueprintListPayload(names));
+                    context.reply(new ResponseBlueprintListPayload(getBlueprintNames((ServerLevel) player.level(), true)));
                 }
             });
         }
@@ -96,13 +107,8 @@ public class BlueprintNetworkHandler {
                     if (manager == null) return;
                     manager.deleteBlueprint((ServerLevel) player.level(), payload.name());
                     // Refresh list for all clients or just the sender?
-                    // For simplicity, the client can request a refresh or we can broadcast.
-                    // Usually, the client that deleted it will refresh its list.
-                    var blueprints = manager.getAllBlueprints((ServerLevel) player.level());
-                    java.util.List<String> names = blueprints.stream()
-                            .map(bp -> bp.has("name") ? bp.get("name").getAsString() : "unknown")
-                            .collect(Collectors.toList());
-                    context.reply(new ResponseBlueprintListPayload(names));
+                    // For simplicity, the client that deleted it will refresh its list.
+                    context.reply(new ResponseBlueprintListPayload(getBlueprintNames((ServerLevel) player.level(), true)));
                 }
             });
         }
@@ -140,11 +146,7 @@ public class BlueprintNetworkHandler {
                     var manager = MaingraphforMC.getServerManager();
                     if (manager == null) return;
                     manager.renameBlueprint((ServerLevel) player.level(), payload.oldName(), payload.newName());
-                    var blueprints = manager.getAllBlueprints((ServerLevel) player.level());
-                    java.util.List<String> names = blueprints.stream()
-                            .map(bp -> bp.has("name") ? bp.get("name").getAsString() : "unknown")
-                            .collect(Collectors.toList());
-                    context.reply(new ResponseBlueprintListPayload(names));
+                    context.reply(new ResponseBlueprintListPayload(getBlueprintNames((ServerLevel) player.level(), true)));
                 }
             });
         }
@@ -160,11 +162,7 @@ public class BlueprintNetworkHandler {
                     manager.duplicateBlueprint((ServerLevel) player.level(), payload.sourceName(), payload.targetName());
                     
                     // Reply with updated list
-                    var blueprints = manager.getAllBlueprints((ServerLevel) player.level());
-                    java.util.List<String> names = blueprints.stream()
-                            .map(bp -> bp.has("name") ? bp.get("name").getAsString() : "unknown")
-                            .collect(Collectors.toList());
-                    context.reply(new ResponseBlueprintListPayload(names));
+                    context.reply(new ResponseBlueprintListPayload(getBlueprintNames((ServerLevel) player.level(), true)));
                 }
             });
         }

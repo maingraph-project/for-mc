@@ -161,7 +161,7 @@ public class BlueprintSelectionScreen extends Screen {
         int x = (int)menuX;
         int y = (int)menuY;
         int w = 100;
-        int h = 40;
+        int h = 60;
 
         if (x + w > this.width) x -= w;
         if (y + h > this.height) y -= h;
@@ -174,10 +174,15 @@ public class BlueprintSelectionScreen extends Screen {
         if (hoverRename) guiGraphics.fill(x + 1, y + 1, x + w - 1, y + 19, 0xFF404040);
         guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_selection.rename"), x + 10, y + 6, 0xFFFFFFFF);
 
+        // Duplicate Option
+        boolean hoverDuplicate = mouseX >= x && mouseX <= x + w && mouseY >= y + 20 && mouseY <= y + 40;
+        if (hoverDuplicate) guiGraphics.fill(x + 1, y + 21, x + w - 1, y + 39, 0xFF404040);
+        guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_selection.duplicate"), x + 10, y + 26, 0xFFFFFFFF);
+
         // Delete Option
-        boolean hoverDelete = mouseX >= x && mouseX <= x + w && mouseY >= y + 20 && mouseY <= y + 40;
-        if (hoverDelete) guiGraphics.fill(x + 1, y + 21, x + w - 1, y + 39, 0xFF404040);
-        guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_selection.delete"), x + 10, y + 26, 0xFFFF5555);
+        boolean hoverDelete = mouseX >= x && mouseX <= x + w && mouseY >= y + 40 && mouseY <= y + 60;
+        if (hoverDelete) guiGraphics.fill(x + 1, y + 41, x + w - 1, y + 59, 0xFF404040);
+        guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_selection.delete"), x + 10, y + 46, 0xFFFF5555);
     }
 
     @Override
@@ -189,14 +194,19 @@ public class BlueprintSelectionScreen extends Screen {
             int x = (int)menuX;
             int y = (int)menuY;
             int w = 100;
+            int h = 60;
             if (x + w > this.width) x -= w;
-            if (y + 40 > this.height) y -= 40;
+            if (y + h > this.height) y -= h;
 
             if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + 20) {
                 startRename();
                 showMenu = false;
                 return true;
             } else if (mouseX >= x && mouseX <= x + w && mouseY >= y + 20 && mouseY <= y + 40) {
+                duplicateBlueprint();
+                showMenu = false;
+                return true;
+            } else if (mouseX >= x && mouseX <= x + w && mouseY >= y + 40 && mouseY <= y + 60) {
                 deleteBlueprint();
                 showMenu = false;
                 return true;
@@ -250,6 +260,20 @@ public class BlueprintSelectionScreen extends Screen {
         if (contextMenuEntry != null) {
             if (Minecraft.getInstance().getConnection() != null) {
                 Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new DeleteBlueprintPayload(contextMenuEntry.name)));
+            }
+        }
+    }
+
+    private void duplicateBlueprint() {
+        if (contextMenuEntry != null) {
+            String baseName = contextMenuEntry.name;
+            if (baseName.endsWith(".json")) {
+                baseName = baseName.substring(0, baseName.length() - 5);
+            }
+            String newName = baseName + "_copy.json";
+            
+            if (Minecraft.getInstance().getConnection() != null) {
+                Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new DuplicateBlueprintPayload(contextMenuEntry.name, newName)));
             }
         }
     }
