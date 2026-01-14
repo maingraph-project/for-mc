@@ -11,9 +11,6 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import ltd.opens.mg.mc.client.gui.screens.BlueprintSelectionScreen;
 import ltd.opens.mg.mc.client.gui.screens.AboutScreen;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import net.minecraft.client.KeyMapping;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -24,7 +21,6 @@ import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.NeoForge;
-import net.minecraft.world.level.storage.LevelResource;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = MaingraphforMC.MODID, dist = Dist.CLIENT)
@@ -68,27 +64,5 @@ public class MaingraphforMCClient {
 
     private void onClientSetup(FMLClientSetupEvent event) {
         // Client setup logic
-    }
-
-    public static Path getBlueprintsDir() {
-        Minecraft mc = Minecraft.getInstance();
-        Path baseDir;
-        if (mc.getSingleplayerServer() != null) {
-            // Singleplayer: Store in world-specific folder
-            baseDir = mc.getSingleplayerServer().getWorldPath(LevelResource.ROOT).resolve("mgmc_blueprints");
-        } else {
-            // Main menu or fallback: Store in global local folder
-            baseDir = mc.gameDirectory.toPath().resolve("mgmc_blueprints").resolve("local");
-        }
-
-        try {
-            if (!Files.exists(baseDir)) {
-                Files.createDirectories(baseDir);
-            }
-        } catch (IOException e) {
-            MaingraphforMC.LOGGER.error("Failed to create blueprint directory", e);
-        }
-
-        return baseDir;
     }
 }

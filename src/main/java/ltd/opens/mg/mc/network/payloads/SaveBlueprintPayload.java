@@ -13,7 +13,7 @@ public record SaveBlueprintPayload(String name, String data, long expectedVersio
     public static final StreamCodec<FriendlyByteBuf, SaveBlueprintPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8,
             SaveBlueprintPayload::name,
-            ByteBufCodecs.STRING_UTF8,
+            ByteBufCodecs.stringUtf8(1048576),
             SaveBlueprintPayload::data,
             ByteBufCodecs.VAR_LONG,
             SaveBlueprintPayload::expectedVersion,

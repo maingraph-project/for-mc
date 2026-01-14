@@ -7,8 +7,6 @@ import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeRegistry;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 public class BlueprintIO {
@@ -147,24 +145,6 @@ public class BlueprintIO {
         }
     }
 
-    public static void save(Path dataFile, List<GuiNode> nodes, List<GuiConnection> connections) {
-        // Special Case: "wwssadadab" is a magic name that doesn't save to JSON
-        if (dataFile != null && dataFile.getFileName().toString().startsWith("wwssadadab")) {
-            MaingraphforMC.LOGGER.info("Magic blueprint detected: Skipping JSON generation for {}", dataFile.getFileName());
-            return;
-        }
-
-        try {
-            String json = serialize(nodes, connections);
-            if (json != null) {
-                Files.writeString(dataFile, json);
-                MaingraphforMC.LOGGER.info("Saved blueprint to {}", dataFile.toAbsolutePath());
-            }
-        } catch (Exception e) {
-            MaingraphforMC.LOGGER.error("Failed to save blueprint", e);
-        }
-    }
-
     private static GuiConnection findConnectionTo(GuiNode node, String portName, List<GuiConnection> connections) {
         for (GuiConnection conn : connections) {
             if (conn.to == node && conn.toPort.equals(portName)) {
@@ -181,32 +161,6 @@ public class BlueprintIO {
             return root.has("format_version") ? root.get("format_version").getAsInt() : 1;
         } catch (Exception e) {
             return 1;
-        }
-    }
-
-    public static int getFormatVersion(Path dataFile) {
-        try {
-            if (!Files.exists(dataFile)) return 1;
-            String json = Files.readString(dataFile);
-            return getFormatVersion(json);
-        } catch (Exception e) {
-            return 1;
-        }
-    }
-
-    public static void load(Path dataFile, List<GuiNode> nodes, List<GuiConnection> connections) {
-        // Special Case: "wwssadadab" - Lock blueprint and tile nodes
-        if (dataFile != null && dataFile.getFileName().toString().startsWith("wwssadadab")) {
-            loadMagicBlueprint(nodes, connections);
-            return;
-        }
-
-        try {
-            if (!Files.exists(dataFile)) return;
-            String json = Files.readString(dataFile);
-            loadFromString(json, nodes, connections);
-        } catch (Exception e) {
-            MaingraphforMC.LOGGER.error("Failed to load blueprint", e);
         }
     }
 
@@ -289,64 +243,6 @@ public class BlueprintIO {
             }
         } catch (Exception e) {
             MaingraphforMC.LOGGER.error("Failed to load blueprint from string", e);
-        }
-    }
-
-    private static void loadMagicBlueprint(List<GuiNode> nodes, List<GuiConnection> connections) {
-        nodes.clear();
-        connections.clear();
-        
-        Collection<NodeDefinition> allDefs = NodeRegistry.getAllDefinitions();
-        
-        // Group by category for better organization
-        Map<String, List<NodeDefinition>> byCategory = new TreeMap<>();
-        for (NodeDefinition def : allDefs) {
-            byCategory.computeIfAbsent(def.category(), k -> new ArrayList<>()).add(def);
-        }
-
-        int startX = 50;
-        int currentY = 50;
-        int columnSpacing = 30;
-        int rowSpacing = 40;
-
-        for (Map.Entry<String, List<NodeDefinition>> entry : byCategory.entrySet()) {
-            int currentX = startX;
-            int maxRowHeight = 0;
-            
-            // Add category label as a special note? (Optional, maybe later)
-            
-            for (NodeDefinition def : entry.getValue()) {
-                // Estimate size
-                int maxPorts = Math.max(def.inputs().size(), def.outputs().size());
-                int estimatedHeight = 15 + 10 + maxPorts * 15 + 10;
-                
-                // Estimate width
-                int maxInputW = 0;
-                for (NodeDefinition.PortDefinition p : def.inputs()) {
-                    maxInputW = Math.max(maxInputW, 10 + p.displayName().length() * 6 + (p.hasInput() ? 55 : 0));
-                }
-                int maxOutputW = 0;
-                for (NodeDefinition.PortDefinition p : def.outputs()) {
-                    maxOutputW = Math.max(maxOutputW, 10 + p.displayName().length() * 6);
-                }
-                int estimatedWidth = Math.max(120, Math.max(def.name().length() * 7, maxInputW + maxOutputW + 25));
-
-                GuiNode node = new GuiNode(def, currentX, currentY);
-                nodes.add(node);
-                
-                currentX += estimatedWidth + columnSpacing;
-                maxRowHeight = Math.max(maxRowHeight, estimatedHeight);
-                
-                // Wrap to next line if row gets too long
-                if (currentX > 2500) {
-                    currentX = startX;
-                    currentY += maxRowHeight + rowSpacing;
-                    maxRowHeight = 0;
-                }
-            }
-            
-            // Next category starts on a new row with extra spacing
-            currentY += maxRowHeight + rowSpacing * 2;
         }
     }
 

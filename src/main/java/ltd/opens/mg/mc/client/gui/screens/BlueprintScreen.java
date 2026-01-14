@@ -1,6 +1,8 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
+import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.gui.blueprint.*;
+
 import ltd.opens.mg.mc.client.gui.blueprint.handler.*;
 import ltd.opens.mg.mc.client.gui.blueprint.io.*;
 import ltd.opens.mg.mc.client.gui.blueprint.render.*;
@@ -12,45 +14,12 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import ltd.opens.mg.mc.network.payloads.*;
-import java.nio.file.Path;
-
 public class BlueprintScreen extends Screen {
     private final Screen parent;
-    private final Path dataFile;
     private final String blueprintName;
     private final BlueprintState state = new BlueprintState();
     private final BlueprintEventHandler eventHandler;
     private boolean forceOpen = false;
-
-    public BlueprintScreen(Path dataFile) {
-        this(null, dataFile);
-    }
-
-    public BlueprintScreen(Screen parent, Path dataFile) {
-        this(parent, dataFile, false);
-    }
-
-    public BlueprintScreen(Screen parent, Path dataFile, boolean forceOpen) {
-        super(Component.translatable("gui.mgmc.blueprint_editor.title", dataFile.getFileName().toString()));
-        this.parent = parent;
-        this.dataFile = dataFile;
-        this.blueprintName = dataFile.getFileName().toString();
-        this.eventHandler = new BlueprintEventHandler(state);
-        this.forceOpen = forceOpen;
-        
-        // Special Case: "wwssadadab" - Lock blueprint
-        if (blueprintName.startsWith("wwssadadab")) {
-            state.readOnly = true;
-        }
-
-        BlueprintIO.load(this.dataFile, state.nodes, state.connections);
-        
-        if (forceOpen) {
-            state.zoom = 0.5f; // "缩小" effect
-        }
-    }
 
     public BlueprintScreen(String name) {
         this(null, name);
@@ -63,7 +32,6 @@ public class BlueprintScreen extends Screen {
     public BlueprintScreen(Screen parent, String name, boolean forceOpen) {
         super(Component.translatable("gui.mgmc.blueprint_editor.title", name));
         this.parent = parent;
-        this.dataFile = null;
         this.blueprintName = name.endsWith(".json") ? name : name + ".json";
         this.eventHandler = new BlueprintEventHandler(state);
         this.forceOpen = forceOpen;
@@ -76,9 +44,9 @@ public class BlueprintScreen extends Screen {
             state.zoom = 0.5f; // "缩小" effect
         }
 
-        // Request data from server
+        // Request data from server (works for both local and remote servers)
         if (blueprintName != null && !blueprintName.isEmpty()) {
-            if (Minecraft.getInstance().getConnection() != null) Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new RequestBlueprintDataPayload(blueprintName)));
+            NetworkService.getInstance().requestBlueprintData(blueprintName);
         }
     }
 
@@ -239,12 +207,6 @@ public class BlueprintScreen extends Screen {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
-    private boolean isRemoteServer() {
-        return Minecraft.getInstance().getSingleplayerServer() == null && 
-               Minecraft.getInstance().level != null && 
-               Minecraft.getInstance().level.isClientSide();
-    }
-
     @Override
     public void onClose() {
         if (state.isDirty) {
@@ -261,14 +223,7 @@ public class BlueprintScreen extends Screen {
                 (selected) -> {
                     if (selected.equals(Component.translatable("gui.mgmc.blueprint_editor.save_confirm.save").getString())) {
                         String json = BlueprintIO.serialize(state.nodes, state.connections);
-                                               
-                        if (isRemoteServer()) {
-                            if (Minecraft.getInstance().getConnection() != null) {
-                                Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new SaveBlueprintPayload(blueprintName, json, state.version)));
-                            }
-                        } else if (this.dataFile != null) {
-                            BlueprintIO.save(this.dataFile, state.nodes, state.connections);
-                        }
+                        NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
                     }
                     state.isDirty = false;
                     Minecraft.getInstance().setScreen(new BlueprintSelectionScreen());
@@ -352,16 +307,7 @@ public class BlueprintScreen extends Screen {
             if (!state.readOnly && isHovering((int)mouseX, (int)mouseY, rightX, 3, 50, 20)) {
                 String json = BlueprintIO.serialize(state.nodes, state.connections);
                 if (json != null) {
-                    if (isRemoteServer()) {
-                        if (Minecraft.getInstance().getConnection() != null) {
-                            Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new SaveBlueprintPayload(blueprintName, json, state.version)));
-                        }
-                    } else if (this.dataFile != null) {
-                        // 只有在单机环境下且有本地文件路径时，才写本地文件
-                        BlueprintIO.save(this.dataFile, state.nodes, state.connections);
-                        state.isDirty = false;
-                        state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.saved").getString());
-                    }
+                    NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
                 }
                 return true;
             }

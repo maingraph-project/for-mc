@@ -38,6 +38,11 @@ public class MGMCNetwork {
             BlueprintNetworkHandler.Server::handleRename
         );
         registrar.playToServer(
+            DuplicateBlueprintPayload.TYPE,
+            DuplicateBlueprintPayload.STREAM_CODEC,
+            BlueprintNetworkHandler.Server::handleDuplicate
+        );
+        registrar.playToServer(
             RequestMappingsPayload.TYPE,
             RequestMappingsPayload.STREAM_CODEC,
             BlueprintNetworkHandler.Server::handleRequestMappings

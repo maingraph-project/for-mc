@@ -1,21 +1,15 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
-import ltd.opens.mg.mc.MaingraphforMCClient;
-import ltd.opens.mg.mc.network.payloads.RequestBlueprintListPayload;
+import ltd.opens.mg.mc.client.network.NetworkService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.client.input.MouseButtonEvent;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BlueprintSelectionForMappingScreen extends Screen {
     private final BlueprintMappingScreen parent;
@@ -54,23 +48,7 @@ public class BlueprintSelectionForMappingScreen extends Screen {
 
     private void refreshList() {
         this.list.clearEntries();
-        if (isRemoteServer()) {
-            if (Minecraft.getInstance().getConnection() != null) {
-                Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new RequestBlueprintListPayload()));
-            }
-        } else {
-            try {
-                Path dir = MaingraphforMCClient.getBlueprintsDir();
-                if (Files.exists(dir)) {
-                    try (var stream = Files.list(dir)) {
-                        List<Path> files = stream.filter(p -> p.toString().endsWith(".json")).collect(Collectors.toList());
-                        for (Path file : files) {
-                            this.list.add(new BlueprintEntry(file.getFileName().toString()));
-                        }
-                    }
-                }
-            } catch (IOException ignored) {}
-        }
+        NetworkService.getInstance().requestBlueprintList();
     }
 
     public void updateListFromServer(List<String> blueprints) {
@@ -78,10 +56,6 @@ public class BlueprintSelectionForMappingScreen extends Screen {
         for (String name : blueprints) {
             this.list.add(new BlueprintEntry(name));
         }
-    }
-
-    private boolean isRemoteServer() {
-        return Minecraft.getInstance().getSingleplayerServer() == null;
     }
 
     @Override

@@ -54,6 +54,24 @@ public class BlueprintManager {
         return !name.contains("..") && !name.contains("/") && !name.contains("\\") && name.matches("^[a-zA-Z0-9_\\-\\.]+$");
     }
 
+    private boolean containsNodeOfType(JsonObject blueprint, String typeId) {
+        if (!blueprint.has("execution") || !blueprint.get("execution").isJsonArray()) {
+            return false;
+        }
+        com.google.gson.JsonArray executionNodes = blueprint.getAsJsonArray("execution");
+        for (com.google.gson.JsonElement e : executionNodes) {
+            if (!e.isJsonObject()) continue;
+            JsonObject node = e.getAsJsonObject();
+            if (node.has("type")) {
+                String type = node.get("type").getAsString();
+                if (type.equals(typeId) || type.endsWith(":" + typeId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public Path getBlueprintsDir(ServerLevel level) {
         Path dir = level.getServer().getWorldPath(LevelResource.ROOT).resolve("mgmc_blueprints");
         if (!Files.exists(dir)) {
@@ -126,9 +144,26 @@ public class BlueprintManager {
                 }
 
                 JsonObject obj = JsonParser.parseString(data).getAsJsonObject();
+
+                // Security check: run_command_as_server node
+                if (!ltd.opens.mg.mc.Config.isServerRunCommandNodeAllowed()) {
+                    if (containsNodeOfType(obj, "run_command_as_server")) {
+                        return new SaveResult(false, "Security violation: 'Run Command as Server' node is disabled in server configuration.", -1);
+                    }
+                }
+
                 long newVersion = (currentVersion == -1 ? 0 : currentVersion) + 1;
                 obj.addProperty("_version", newVersion);
                 obj.addProperty("format_version", 5);
+                
+                // Ensure name property exists and matches filename (without extension)
+                if (!obj.has("name")) {
+                    String displayName = name;
+                    if (displayName.endsWith(".json")) {
+                        displayName = displayName.substring(0, displayName.length() - 5);
+                    }
+                    obj.addProperty("name", displayName);
+                }
                 
                 Files.writeString(dataFile, obj.toString());
                 
@@ -188,10 +223,37 @@ public class BlueprintManager {
         }
     }
 
+    public void duplicateBlueprint(ServerLevel level, String sourceName, String targetName) {
+        if (!isValidFileName(sourceName) || !isValidFileName(targetName)) return;
+        try {
+            JsonObject sourceJson = getBlueprint(level, sourceName);
+            if (sourceJson != null) {
+                // Clone the JSON so we don't modify the source in cache
+                JsonObject newJson = sourceJson.deepCopy();
+                
+                // Ensure the internal "name" property matches the new filename (without .json)
+                String displayName = targetName;
+                if (displayName.endsWith(".json")) {
+                    displayName = displayName.substring(0, displayName.length() - 5);
+                }
+                newJson.addProperty("name", displayName);
+                
+                // Use the existing save logic to handle file writing, versioning, and cache invalidation
+                saveBlueprint(level, targetName, newJson.toString(), -1);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to duplicate blueprint from " + sourceName + " to " + targetName, e);
+        }
+    }
+
     public Collection<JsonObject> getAllBlueprints(ServerLevel level) {
+        return getAllBlueprints(level, false);
+    }
+
+    public Collection<JsonObject> getAllBlueprints(ServerLevel level, boolean force) {
         long now = System.currentTimeMillis();
         synchronized (allBlueprintsCache) {
-            if (now - lastAllBlueprintsRefresh < CACHE_REFRESH_INTERVAL) {
+            if (!force && now - lastAllBlueprintsRefresh < CACHE_REFRESH_INTERVAL) {
                 return new ArrayList<>(allBlueprintsCache);
             }
         }

@@ -1,9 +1,9 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
+import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.utils.IdMetadataHelper;
+
 import ltd.opens.mg.mc.core.blueprint.routing.BlueprintRouter;
-import ltd.opens.mg.mc.network.payloads.RequestMappingsPayload;
-import ltd.opens.mg.mc.network.payloads.SaveMappingsPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -11,8 +11,6 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,8 +43,8 @@ public class BlueprintMappingScreen extends Screen {
     @Override
     protected void init() {
         // 只有在没有数据时才请求，避免覆盖本地未保存的修改
-        if (this.workingMappings.isEmpty() && Minecraft.getInstance().getConnection() != null) {
-            Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new RequestMappingsPayload()));
+        if (this.workingMappings.isEmpty()) {
+            NetworkService.getInstance().requestMappings();
         }
 
         int sidePanelWidth = this.width / 3;
@@ -90,9 +88,7 @@ public class BlueprintMappingScreen extends Screen {
         // 保存和返回按钮 (最底部)
         int footerY = this.height - 30;
         this.addRenderableWidget(Button.builder(Component.translatable("gui.mgmc.mapping.save"), b -> {
-            if (Minecraft.getInstance().getConnection() != null) {
-                Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new SaveMappingsPayload(new HashMap<>(workingMappings))));
-            }
+            NetworkService.getInstance().saveMappings(workingMappings);
             this.onClose();
         }).bounds(this.width - 110, footerY, 100, 20).build());
 

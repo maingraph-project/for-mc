@@ -13,7 +13,7 @@ public record ResponseBlueprintDataPayload(String name, String data, long versio
     public static final StreamCodec<FriendlyByteBuf, ResponseBlueprintDataPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8,
             ResponseBlueprintDataPayload::name,
-            ByteBufCodecs.STRING_UTF8,
+            ByteBufCodecs.stringUtf8(1048576),
             ResponseBlueprintDataPayload::data,
             ByteBufCodecs.VAR_LONG,
             ResponseBlueprintDataPayload::version,

@@ -120,7 +120,7 @@ public class EventDispatcher {
             
             // 执行蓝图
             for (JsonObject blueprint : blueprints) {
-                MaingraphforMC.LOGGER.info("MGMC: Executing blueprint for node {} (IDs: {})", def.id(), ids);
+                MaingraphforMC.LOGGER.debug("MGMC: Executing blueprint for node {} (IDs: {})", def.id(), ids);
                 BlueprintEngine.execute(serverLevel, blueprint, def.id(), contextBuilder);
             }
         }
