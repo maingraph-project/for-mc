@@ -71,23 +71,23 @@ public class ControlFlowNodes {
                 @Override
                 public void execute(JsonObject node, NodeContext ctx) {
                     if (NodePorts.BREAK.equals(ctx.lastTriggeredPin)) {
-                        ctx.breakRequested = true;
+                        ctx.breakRequested.set(true);
                         return;
                     }
                     int start = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.START, ctx));
                     int end = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.END, ctx));
-                    boolean previousBreakRequested = ctx.breakRequested;
-                    ctx.breakRequested = false;
+                    boolean previousBreakRequested = ctx.breakRequested.get();
+                    ctx.breakRequested.set(false);
                     String nodeId = node.get("id").getAsString();
                     for (int i = start; i <= end; i++) {
                         ctx.setRuntimeData(nodeId, "index", i);
                         NodeLogicRegistry.triggerExec(node, NodePorts.LOOP_BODY, ctx);
-                        if (ctx.breakRequested) {
-                            ctx.breakRequested = false;
+                        if (ctx.breakRequested.get()) {
+                            ctx.breakRequested.set(false);
                             break;
                         }
                     }
-                    ctx.breakRequested = previousBreakRequested;
+                    ctx.breakRequested.set(previousBreakRequested);
                     NodeLogicRegistry.triggerExec(node, NodePorts.COMPLETED, ctx);
                 }
 
@@ -140,7 +140,7 @@ public class ControlFlowNodes {
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .output(NodePorts.BREAK, "node.mgmc.break_loop.port.break", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
-                ctx.breakRequested = true;
+                ctx.breakRequested.set(true);
             });
     }
 }

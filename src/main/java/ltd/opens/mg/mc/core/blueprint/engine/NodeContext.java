@@ -6,6 +6,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NodeContext {
     public final Level level;
@@ -27,11 +30,11 @@ public class NodeContext {
     public final Map<String, JsonObject> nodesMap;
     public final int formatVersion;
     public final Map<String, Object> properties;
-    public final Map<String, Object> variables = new HashMap<>();
-    public final Map<String, Map<String, Object>> runtimeData = new HashMap<>();
-    public boolean breakRequested = false;
-    public int nodeExecCount = 0;
-    public String lastTriggeredPin;
+    public final Map<String, Object> variables = new ConcurrentHashMap<>();
+    public final Map<String, Map<String, Object>> runtimeData = new ConcurrentHashMap<>();
+    public final AtomicBoolean breakRequested = new AtomicBoolean(false);
+    public final AtomicInteger nodeExecCount = new AtomicInteger(0);
+    public volatile String lastTriggeredPin;
     
     public Object getRuntimeData(String nodeId, String key, Object defaultValue) {
         Map<String, Object> nodeData = runtimeData.get(nodeId);
@@ -40,7 +43,7 @@ public class NodeContext {
     }
 
     public void setRuntimeData(String nodeId, String key, Object value) {
-        runtimeData.computeIfAbsent(nodeId, k -> new HashMap<>()).put(key, value);
+        runtimeData.computeIfAbsent(nodeId, k -> new ConcurrentHashMap<>()).put(key, value);
     }
 
     public NodeContext(Level level, String eventName, String[] args, String triggerUuid, String triggerName, Entity triggerEntity,
