@@ -16,6 +16,10 @@ import net.minecraft.world.level.storage.LevelResource;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import ltd.opens.mg.mc.MaingraphforMC;
+import ltd.opens.mg.mc.core.blueprint.BlueprintManager;
+import ltd.opens.mg.mc.core.blueprint.engine.BlueprintEngine;
+
 /**
  * 中央调度路由中心
  * 负责维护 Minecraft ID (ResourceLocation) 与蓝图文件路径之间的映射关系
@@ -148,6 +152,15 @@ public class BlueprintRouter {
         });
         routingTable.set(newTable);
         save(level);
+
+        // 核心修复：当路由映射更新时，必须清理服务端缓存
+        BlueprintManager manager = MaingraphforMC.getServerManager();
+        if (manager != null) {
+            manager.clearCaches();
+            LOGGER.info("MGMC: Cleared BlueprintManager caches due to mapping update.");
+        }
+        BlueprintEngine.clearCaches();
+        LOGGER.info("MGMC: Cleared BlueprintEngine caches due to mapping update.");
     }
 
     /**
