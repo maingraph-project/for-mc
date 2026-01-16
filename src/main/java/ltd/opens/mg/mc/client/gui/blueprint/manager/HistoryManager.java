@@ -15,18 +15,14 @@ public class HistoryManager {
     private final Deque<String> redoStack = new ArrayDeque<>();
     private static final int MAX_HISTORY = 50;
     
-    private final List<GuiNode> nodes;
-    private final List<GuiConnection> connections;
     private final BlueprintState state;
 
     public HistoryManager(BlueprintState state) {
         this.state = state;
-        this.nodes = state.nodes;
-        this.connections = state.connections;
     }
 
     public void pushHistory() {
-        String currentState = BlueprintIO.serialize(nodes, connections);
+        String currentState = BlueprintIO.serialize(state.nodes, state.connections);
         pushHistory(currentState);
     }
 
@@ -45,7 +41,7 @@ public class HistoryManager {
     public void undo() {
         if (undoStack.isEmpty()) return;
         
-        String currentState = BlueprintIO.serialize(nodes, connections);
+        String currentState = BlueprintIO.serialize(state.nodes, state.connections);
         
         // Skip identical states at the top of the stack
         while (!undoStack.isEmpty() && undoStack.peek().equals(currentState)) {
@@ -66,7 +62,7 @@ public class HistoryManager {
     public void redo() {
         if (redoStack.isEmpty()) return;
         
-        String currentState = BlueprintIO.serialize(nodes, connections);
+        String currentState = BlueprintIO.serialize(state.nodes, state.connections);
         
         // Skip identical states at the top of the stack
         while (!redoStack.isEmpty() && redoStack.peek().equals(currentState)) {
@@ -86,7 +82,7 @@ public class HistoryManager {
 
     private void applyState(String json) {
         state.selectedNodes.clear();
-        BlueprintIO.loadFromString(json, nodes, connections, true);
+        BlueprintIO.loadFromString(json, state.nodes, state.connections, true);
         state.markDirty();
     }
 }

@@ -9,10 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BlueprintState {
-    public final HistoryManager historyManager = new HistoryManager(this);
-    public final LayoutManager layoutManager = new LayoutManager(this);
-    public final ViewManager viewManager = new ViewManager(this);
-
     public float panX = 0;
     public float panY = 0;
     public float zoom = 1.0f;
@@ -20,6 +16,10 @@ public class BlueprintState {
 
     public final List<GuiNode> nodes = new ArrayList<>();
     public final List<GuiConnection> connections = new ArrayList<>();
+
+    public final HistoryManager historyManager = new HistoryManager(this);
+    public final LayoutManager layoutManager = new LayoutManager(this);
+    public final ViewManager viewManager = new ViewManager(this);
     
     // Selection state
     public final List<GuiNode> selectedNodes = new ArrayList<>();
