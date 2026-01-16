@@ -7,6 +7,7 @@ import ltd.opens.mg.mc.client.gui.components.GuiNode;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
@@ -82,7 +83,36 @@ public class HistoryManager {
 
     private void applyState(String json) {
         state.selectedNodes.clear();
+        state.draggingNode = null;
+        state.connectionStartNode = null;
+        state.contextMenuNode = null;
+        state.focusedNode = null;
+        state.editingMarkerNode = null;
+        state.highlightedNode = null;
+        
+        state.isBoxSelecting = false;
+        state.isPanning = false;
+        state.showNodeMenu = false;
+        state.showNodeContextMenu = false;
+        state.showQuickSearch = false;
+
+        List<String> historyIds = new ArrayList<>();
+        for (GuiNode node : state.searchHistory) {
+            historyIds.add(node.id);
+        }
+        
         BlueprintIO.loadFromString(json, state.nodes, state.connections, true);
+
+        state.searchHistory.clear();
+        for (String id : historyIds) {
+            for (GuiNode node : state.nodes) {
+                if (node.id.equals(id)) {
+                    state.searchHistory.add(node);
+                    break;
+                }
+            }
+        }
+        
         state.markDirty();
     }
 }
