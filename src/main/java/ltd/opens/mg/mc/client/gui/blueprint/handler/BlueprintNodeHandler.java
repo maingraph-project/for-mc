@@ -30,11 +30,14 @@ public class BlueprintNodeHandler {
         boolean isShiftDown = event.hasShiftDown();
         boolean isCtrlDown = event.hasControlDown();
 
-        // Check for remove port click
-        for (GuiNode node : state.nodes) {
+        // Single reverse loop for all node interactions to respect Z-order
+        for (int i = state.nodes.size() - 1; i >= 0; i--) {
+            GuiNode node = state.nodes.get(i);
+
+            // 1. Check for remove port click
             String portId = node.getRemovePortAt(worldMouseX, worldMouseY, font);
             if (portId != null) {
-                // Determine if it's an input or output port
+                state.pushHistory();
                 boolean isInput = node.getPortByName(portId, true) != null;
                 if (isInput) {
                     node.inputs.removeIf(p -> p.id.equals(portId));
@@ -46,185 +49,74 @@ public class BlueprintNodeHandler {
                 state.markDirty();
                 return true;
             }
-        }
 
-        // Check for input box click check first
-        for (GuiNode node : state.nodes) {
-            if (node.definition.properties().containsKey("is_marker")) continue; // Skip port checks for markers
-            for (int i = 0; i < node.inputs.size(); i++) {
-                GuiNode.NodePort port = node.inputs.get(i);
-                float[] pos = node.getPortPosition(i, true);
-                
-                if (port.hasInput) {
-                    float inputX = pos[0] + 8 + font.width(Component.translatable(port.displayName)) + 2;
-                    float inputY = pos[1] - 4;
-                    float inputWidth = 50;
-                    float inputHeight = 10;
-                    if (worldMouseX >= inputX && worldMouseX <= inputX + inputWidth && worldMouseY >= inputY && worldMouseY <= inputY + inputHeight) {
-                        // Only allow editing if not connected
-                        boolean isConnected = false;
-                        for (GuiConnection conn : state.connections) {
-                            if (conn.to == node && conn.toPort.equals(port.id)) {
-                                isConnected = true;
-                                break;
+            // 2. Check for input box click (skip for markers)
+            if (!node.definition.properties().containsKey("is_marker")) {
+                for (int j = 0; j < node.inputs.size(); j++) {
+                    GuiNode.NodePort port = node.inputs.get(j);
+                    float[] pos = node.getPortPosition(j, true);
+                    
+                    if (port.hasInput) {
+                        float inputX = pos[0] + 8 + font.width(Component.translatable(port.displayName)) + 2;
+                        float inputY = pos[1] - 4;
+                        float inputWidth = 50;
+                        float inputHeight = 10;
+                        if (worldMouseX >= inputX && worldMouseX <= inputX + inputWidth && worldMouseY >= inputY && worldMouseY <= inputY + inputHeight) {
+                            // Only allow editing if not connected
+                            boolean isConnected = false;
+                            for (GuiConnection conn : state.connections) {
+                                if (conn.to == node && conn.toPort.equals(port.id)) {
+                                    isConnected = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (!isConnected) {
-                            if (port.type == NodeDefinition.PortType.BOOLEAN) {
-                                JsonElement val = node.inputValues.get(port.id);
-                                boolean current = val != null ? val.getAsBoolean() : (port.defaultValue instanceof Boolean ? (Boolean) port.defaultValue : false);
-                                boolean nextVal = !current;
-                                node.inputValues.addProperty(port.id, nextVal);
-                                state.markDirty();
-                            } else if (port.options != null && port.options.length > 0) {
-                                // Open selection modal instead of cycling
-                                JsonElement val = node.inputValues.get(port.id);
-                                String current = val != null ? val.getAsString() : (port.defaultValue != null ? port.defaultValue.toString() : port.options[0]);
-                                
-                                final GuiNode targetNode = node;
-                                final String targetPort = port.id;
-                                
-                                Minecraft.getInstance().setScreen(new InputModalScreen(
-                                    screen, 
-                                    Component.translatable("gui.mgmc.blueprint_editor.modal.select_type").getString(), 
-                                    current, 
-                                    false, 
-                                    port.options,
-                                    InputModalScreen.Mode.SELECTION,
-                                    (selected) -> {
-                                        JsonElement oldVal = targetNode.inputValues.get(targetPort);
-                                        String oldStr = oldVal != null ? oldVal.getAsString() : "";
-                                        
-                                        if (!selected.equals(oldStr)) {
-                                            state.pushHistory();
-                                            targetNode.inputValues.addProperty(targetPort, selected);
-                                            state.markDirty();
-                                            // Update output port type based on selection
-                                            NodeDefinition.PortType newType = NodeDefinition.PortType.valueOf(selected.toUpperCase());
-                                            targetNode.getPortByName("output", false).type = newType;
-                                            
-                                            // Disconnect all output connections since the type changed
-                                            state.connections.removeIf(conn -> conn.from == targetNode && conn.fromPort.equals("output"));
-                                        }
-                                    }
-                                ));
-                            } else {
-                                JsonElement val = node.inputValues.get(port.id);
-                                String initialText = val != null ? val.getAsString() : (port.defaultValue != null ? port.defaultValue.toString() : "");
-                                boolean isNumeric = (port.type == NodeDefinition.PortType.FLOAT);
-                                
-                                final GuiNode targetNode = node;
-                                final String targetPort = port.id;
-                                
-                                Minecraft.getInstance().setScreen(new InputModalScreen(
-                                    screen, 
-                                    Component.translatable("gui.mgmc.blueprint_editor.modal.enter_value", Component.translatable(port.displayName)).getString(), 
-                                    initialText, 
-                                    isNumeric,
-                                    (newText) -> {
-                                        state.pushHistory();
-                                        targetNode.inputValues.addProperty(targetPort, newText);
-                                        state.markDirty();
-                                    }
-                                ));
+                            if (!isConnected) {
+                                handleInputBoxClick(node, port, screen);
+                                return true;
                             }
-                            return true;
                         }
                     }
                 }
             }
-        }
 
-        // Check for node header click
-        for (int i = state.nodes.size() - 1; i >= 0; i--) {
-            GuiNode node = state.nodes.get(i);
+            // 3. Check for add button click
             if (node.isMouseOverAddButton(worldMouseX, worldMouseY)) {
-                String action = (String) node.definition.properties().get("ui_button_action");
-                if ("add_output_modal".equals(action)) {
-                    // Add new branch/output via modal
-                    Minecraft.getInstance().setScreen(new InputModalScreen(
-                        screen,
-                        Component.translatable("gui.mgmc.modal.enter_value", Component.translatable(node.title)).getString(),
-                        "",
-                        false,
-                        (newText) -> {
-                             if (newText != null && !newText.isEmpty()) {
-                                 if (node.getPortByName(newText, false) == null) {
-                                     state.pushHistory();
-                                     node.addOutput(newText, newText, NodeDefinition.PortType.EXEC, 0xFFFFFFFF);
-                                     state.markDirty();
-                                 }
-                             }
-                         }
-                    ));
-                } else if ("add_input_indexed".equals(action)) {
-                    // Add new indexed input (like string_combine)
-                    int maxIndex = -1;
-                    for (GuiNode.NodePort port : node.inputs) {
-                        if (port.id.startsWith("input_")) {
-                            try {
-                                int idx = Integer.parseInt(port.id.substring(6));
-                                if (idx > maxIndex) maxIndex = idx;
-                            } catch (NumberFormatException ignored) {}
-                        }
-                    }
-                    int nextIndex = maxIndex + 1;
-                    String portId = "input_" + nextIndex;
-                    String displayName = "input " + nextIndex;
-                    state.pushHistory();
-                    node.addInput(portId, displayName, NodeDefinition.PortType.STRING, 0xFFBBBBBB, true, "", null);
-                    state.markDirty();
-                }
+                handleAddButtonClick(node, screen);
                 return true;
             }
-            if (node.isMouseOverHeader(worldMouseX, worldMouseY) || (node.definition.properties().containsKey("is_marker") && worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height)) {
-                if (isDouble && node.definition.properties().containsKey("is_marker")) {
-                    // Double click marker to edit
-                    state.editingMarkerNode = node;
-                    if (state.markerEditBox == null) {
-                        state.markerEditBox = new EditBox(font, 0, 0, 200, 20, Component.empty());
-                        state.markerEditBox.setBordered(false);
-                        state.markerEditBox.setMaxLength(500);
-                        state.markerEditBox.setTextColor(0xFFFFFFFF);
-                    }
-                    String current = node.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 
-                                     node.inputValues.get(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT).getAsString() : "";
-                    state.markerEditBox.setValue(current);
-                    state.markerEditBox.setFocused(true);
-                    state.markerEditBox.setCursorPosition(current.length());
+
+            // 4. Check for node header/body click (drag/select)
+            boolean isMarker = node.definition.properties().containsKey("is_marker");
+            boolean overHeader = node.isMouseOverHeader(worldMouseX, worldMouseY);
+            boolean overNode = worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height;
+
+            if (overHeader || (isMarker && overNode)) {
+                if (isDouble && isMarker) {
+                    handleMarkerEdit(node, font);
                     return true;
                 }
 
-                if (isShiftDown || isCtrlDown) {
-                    if (node.isSelected) {
-                        node.isSelected = false;
-                        state.selectedNodes.remove(node);
-                    } else {
-                        node.isSelected = true;
-                        state.selectedNodes.add(node);
-                    }
-                } else {
-                    if (!node.isSelected) {
-                        // Clear previous selection if not clicking a selected node
-                        for (GuiNode n : state.selectedNodes) n.isSelected = false;
-                        state.selectedNodes.clear();
-                        node.isSelected = true;
-                        state.selectedNodes.add(node);
-                    }
-                }
-
+                handleNodeSelection(node, isShiftDown, isCtrlDown);
+                
                 state.draggingNode = node;
-                state.isAnimatingView = false; // Stop animation if user starts dragging a node
+                state.isAnimatingView = false;
                 state.dragOffsetX = (float) (worldMouseX - node.x);
                 state.dragOffsetY = (float) (worldMouseY - node.y);
                 state.startMouseX = node.x;
                 state.startMouseY = node.y;
+                
+                // Move to top
                 state.nodes.remove(i);
                 state.nodes.add(node);
 
-                // Capture state AFTER z-index change to avoid redundant history on simple clicks
                 state.historyPendingState = BlueprintIO.serialize(state.nodes, state.connections);
+                state.markDirty();
+                return true;
+            }
 
+            // 5. Block clicks if over the node body even if no specific element was hit
+            if (overNode) {
+                handleNodeSelection(node, isShiftDown, isCtrlDown);
                 state.markDirty();
                 return true;
             }
@@ -244,6 +136,125 @@ public class BlueprintNodeHandler {
         state.boxSelectEndY = state.boxSelectStartY;
 
         return false;
+    }
+
+    private void handleInputBoxClick(GuiNode node, GuiNode.NodePort port, BlueprintScreen screen) {
+        if (port.type == NodeDefinition.PortType.BOOLEAN) {
+            JsonElement val = node.inputValues.get(port.id);
+            boolean current = val != null ? val.getAsBoolean() : (port.defaultValue instanceof Boolean ? (Boolean) port.defaultValue : false);
+            node.inputValues.addProperty(port.id, !current);
+            state.markDirty();
+        } else if (port.options != null && port.options.length > 0) {
+            JsonElement val = node.inputValues.get(port.id);
+            String current = val != null ? val.getAsString() : (port.defaultValue != null ? port.defaultValue.toString() : port.options[0]);
+            
+            Minecraft.getInstance().setScreen(new InputModalScreen(
+                screen, 
+                Component.translatable("gui.mgmc.blueprint_editor.modal.select_type").getString(), 
+                current, 
+                false, 
+                port.options,
+                InputModalScreen.Mode.SELECTION,
+                (selected) -> {
+                    JsonElement oldVal = node.inputValues.get(port.id);
+                    String oldStr = oldVal != null ? oldVal.getAsString() : "";
+                    
+                    if (!selected.equals(oldStr)) {
+                        state.pushHistory();
+                        node.inputValues.addProperty(port.id, selected);
+                        state.markDirty();
+                        NodeDefinition.PortType newType = NodeDefinition.PortType.valueOf(selected.toUpperCase());
+                        node.getPortByName("output", false).type = newType;
+                        state.connections.removeIf(conn -> conn.from == node && conn.fromPort.equals("output"));
+                    }
+                }
+            ));
+        } else {
+            JsonElement val = node.inputValues.get(port.id);
+            String initialText = val != null ? val.getAsString() : (port.defaultValue != null ? port.defaultValue.toString() : "");
+            boolean isNumeric = (port.type == NodeDefinition.PortType.FLOAT);
+            
+            Minecraft.getInstance().setScreen(new InputModalScreen(
+                screen, 
+                Component.translatable("gui.mgmc.blueprint_editor.modal.enter_value", Component.translatable(port.displayName)).getString(), 
+                initialText, 
+                isNumeric,
+                (newText) -> {
+                    state.pushHistory();
+                    node.inputValues.addProperty(port.id, newText);
+                    state.markDirty();
+                }
+            ));
+        }
+    }
+
+    private void handleAddButtonClick(GuiNode node, BlueprintScreen screen) {
+        String action = (String) node.definition.properties().get("ui_button_action");
+        if ("add_output_modal".equals(action)) {
+            Minecraft.getInstance().setScreen(new InputModalScreen(
+                screen,
+                Component.translatable("gui.mgmc.modal.enter_value", Component.translatable(node.title)).getString(),
+                "",
+                false,
+                (newText) -> {
+                     if (newText != null && !newText.isEmpty()) {
+                         if (node.getPortByName(newText, false) == null) {
+                             state.pushHistory();
+                             node.addOutput(newText, newText, NodeDefinition.PortType.EXEC, 0xFFFFFFFF);
+                             state.markDirty();
+                         }
+                     }
+                 }
+            ));
+        } else if ("add_input_indexed".equals(action)) {
+            int maxIndex = -1;
+            for (GuiNode.NodePort port : node.inputs) {
+                if (port.id.startsWith("input_")) {
+                    try {
+                        int idx = Integer.parseInt(port.id.substring(6));
+                        if (idx > maxIndex) maxIndex = idx;
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            int nextIndex = maxIndex + 1;
+            state.pushHistory();
+            node.addInput("input_" + nextIndex, "input " + nextIndex, NodeDefinition.PortType.STRING, 0xFFBBBBBB, true, "", null);
+            state.markDirty();
+        }
+    }
+
+    private void handleMarkerEdit(GuiNode node, Font font) {
+        state.editingMarkerNode = node;
+        if (state.markerEditBox == null) {
+            state.markerEditBox = new EditBox(font, 0, 0, 200, 20, Component.empty());
+            state.markerEditBox.setBordered(false);
+            state.markerEditBox.setMaxLength(500);
+            state.markerEditBox.setTextColor(0xFFFFFFFF);
+        }
+        String current = node.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 
+                         node.inputValues.get(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT).getAsString() : "";
+        state.markerEditBox.setValue(current);
+        state.markerEditBox.setFocused(true);
+        state.markerEditBox.setCursorPosition(current.length());
+    }
+
+    private void handleNodeSelection(GuiNode node, boolean isShiftDown, boolean isCtrlDown) {
+        if (isShiftDown || isCtrlDown) {
+            if (node.isSelected) {
+                node.isSelected = false;
+                state.selectedNodes.remove(node);
+            } else {
+                node.isSelected = true;
+                state.selectedNodes.add(node);
+            }
+        } else {
+            if (!node.isSelected) {
+                for (GuiNode n : state.selectedNodes) n.isSelected = false;
+                state.selectedNodes.clear();
+                node.isSelected = true;
+                state.selectedNodes.add(node);
+            }
+        }
     }
 
     public boolean mouseReleased(MouseButtonEvent event) {

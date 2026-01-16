@@ -14,28 +14,35 @@ public class BlueprintConnectionHandler {
     }
 
     public boolean mouseClicked(double worldMouseX, double worldMouseY) {
-        for (GuiNode node : state.nodes) {
+        for (int i = state.nodes.size() - 1; i >= 0; i--) {
+            GuiNode node = state.nodes.get(i);
             // Check inputs
-            for (int i = 0; i < node.inputs.size(); i++) {
-                float[] pos = node.getPortPosition(i, true);
+            for (int j = 0; j < node.inputs.size(); j++) {
+                float[] pos = node.getPortPosition(j, true);
                 if (Math.abs(worldMouseX - pos[0]) < 5 && Math.abs(worldMouseY - pos[1]) < 5) {
                     state.connectionStartNode = node;
-                    state.connectionStartPort = node.inputs.get(i).id;
+                    state.connectionStartPort = node.inputs.get(j).id;
                     state.isConnectionFromInput = true;
-                    state.isAnimatingView = false; // Stop animation if user starts drawing connection
+                    state.isAnimatingView = false;
                     return true;
                 }
             }
             // Check outputs
-            for (int i = 0; i < node.outputs.size(); i++) {
-                float[] pos = node.getPortPosition(i, false);
+            for (int j = 0; j < node.outputs.size(); j++) {
+                float[] pos = node.getPortPosition(j, false);
                 if (Math.abs(worldMouseX - pos[0]) < 5 && Math.abs(worldMouseY - pos[1]) < 5) {
                     state.connectionStartNode = node;
-                    state.connectionStartPort = node.outputs.get(i).id;
+                    state.connectionStartPort = node.outputs.get(j).id;
                     state.isConnectionFromInput = false;
-                    state.isAnimatingView = false; // Stop animation if user starts drawing connection
+                    state.isAnimatingView = false;
                     return true;
                 }
+            }
+            
+            // If the mouse is anywhere over this node, stop checking ports for nodes underneath
+            if (worldMouseX >= node.x && worldMouseX <= node.x + node.width &&
+                worldMouseY >= node.y && worldMouseY <= node.y + node.height) {
+                return false; // Let BlueprintNodeHandler handle the node click
             }
         }
         return false;
