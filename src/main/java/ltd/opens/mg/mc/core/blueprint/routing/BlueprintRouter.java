@@ -107,21 +107,23 @@ public class BlueprintRouter {
      * 添加映射（注意：此方法目前仅由客户端通过网络请求触发，由 handleSaveMappings 统一处理保存）
      */
     public void addMapping(String id, String blueprintPath) {
-        routingTable.get().computeIfAbsent(id, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
-                    .add(blueprintPath);
+        routingTable.get().compute(id, (k, blueprints) -> {
+            if (blueprints == null) {
+                blueprints = Collections.newSetFromMap(new ConcurrentHashMap<>());
+            }
+            blueprints.add(blueprintPath);
+            return blueprints;
+        });
     }
 
     /**
      * 移除映射
      */
     public void removeMapping(String id, String blueprintPath) {
-        Set<String> blueprints = routingTable.get().get(id);
-        if (blueprints != null) {
+        routingTable.get().computeIfPresent(id, (k, blueprints) -> {
             blueprints.remove(blueprintPath);
-            if (blueprints.isEmpty()) {
-                routingTable.get().remove(id);
-            }
-        }
+            return blueprints.isEmpty() ? null : blueprints;
+        });
     }
 
     /**
@@ -144,13 +146,7 @@ public class BlueprintRouter {
      * 批量更新路由表并保存
      */
     public void updateAllMappings(ServerLevel level, Map<String, Set<String>> newMappings) {
-        Map<String, Set<String>> newTable = new ConcurrentHashMap<>();
-        newMappings.forEach((k, v) -> {
-            Set<String> set = Collections.newSetFromMap(new ConcurrentHashMap<>());
-            set.addAll(v);
-            newTable.put(k, set);
-        });
-        routingTable.set(newTable);
+        routingTable.set(toConcurrentTable(newMappings));
         save(level);
 
         // 核心修复：当路由映射更新时，必须清理服务端缓存
@@ -167,12 +163,16 @@ public class BlueprintRouter {
      * 客户端专用的内存更新（不保存文件）
      */
     public void clientUpdateMappings(Map<String, Set<String>> newMappings) {
+        routingTable.set(toConcurrentTable(newMappings));
+    }
+
+    private Map<String, Set<String>> toConcurrentTable(Map<String, Set<String>> source) {
         Map<String, Set<String>> newTable = new ConcurrentHashMap<>();
-        newMappings.forEach((k, v) -> {
+        source.forEach((k, v) -> {
             Set<String> set = Collections.newSetFromMap(new ConcurrentHashMap<>());
             set.addAll(v);
             newTable.put(k, set);
         });
-        routingTable.set(newTable);
+        return newTable;
     }
 }
