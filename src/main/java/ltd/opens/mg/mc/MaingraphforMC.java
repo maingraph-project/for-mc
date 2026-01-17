@@ -19,6 +19,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
@@ -150,16 +151,42 @@ public class MaingraphforMC {
             )
             .then(Commands.literal("list")
                 .executes(context -> {
-                    if (serverManager != null) {
-                        ServerLevel level = context.getSource().getLevel();
-                        java.util.Collection<JsonObject> blueprints = serverManager.getAllBlueprints(level);
-                        if (blueprints.isEmpty()) {
+                    BlueprintManager manager = getServerManager();
+                    if (manager != null) {
+                        java.util.List<String> names = manager.getRouter().getRoutingTable().values().stream()
+                            .flatMap(java.util.Set::stream)
+                            .distinct()
+                            .sorted()
+                            .toList();
+                        
+                        if (names.isEmpty()) {
                             context.getSource().sendSuccess(() -> Component.translatable("command.mgmc.list.empty"), false);
                         } else {
-                            context.getSource().sendSuccess(() -> Component.translatable("command.mgmc.list.header", blueprints.size()), false);
-                            for (JsonObject bp : blueprints) {
-                                String name = bp.has("name") ? bp.get("name").getAsString() : "unnamed";
+                            context.getSource().sendSuccess(() -> Component.translatable("command.mgmc.list.header", names.size()), false);
+                            for (String name : names) {
                                 context.getSource().sendSuccess(() -> Component.translatable("command.mgmc.list.item", name), false);
+                            }
+                        }
+                    }
+                    return 1;
+                })
+            )
+            .then(Commands.literal("log")
+                .executes(context -> {
+                    BlueprintManager manager = getServerManager();
+                    if (manager != null) {
+                        var logs = manager.getLogs();
+                        if (logs.isEmpty()) {
+                            context.getSource().sendSuccess(() -> Component.literal("§7[MGMC] No logs available."), false);
+                        } else {
+                            context.getSource().sendSuccess(() -> Component.literal("§6--- MGMC Runtime Logs (Last " + logs.size() + ") ---"), false);
+                            for (var log : logs) {
+                                String color = log.level().equals("ERROR") ? "§c" : "§f";
+                                String time = new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(log.timestamp()));
+                                context.getSource().sendSuccess(() -> Component.literal(
+                                    String.format("§8[%s] %s[%s] §7(%s) §f%s", 
+                                        time, color, log.level(), log.blueprintName(), log.message())
+                                ), false);
                             }
                         }
                     }

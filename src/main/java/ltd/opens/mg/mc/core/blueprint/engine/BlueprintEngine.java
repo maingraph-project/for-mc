@@ -42,7 +42,8 @@ public class BlueprintEngine {
                                 String triggerUuid, String triggerName, double tx, double ty, double tz, double speed,
                                 String triggerBlockId, String triggerItemId, double triggerValue, String triggerExtraUuid) {
         NodeContext.Builder builder = new NodeContext.Builder(level)
-            .eventName(name)
+            .blueprintName(name)
+            .eventName(eventType)
             .args(args)
             .triggerUuid(triggerUuid)
             .triggerName(triggerName)
@@ -116,7 +117,13 @@ public class BlueprintEngine {
             });
 
             int formatVersion = root.has("format_version") ? root.get("format_version").getAsInt() : 1;
-            NodeContext ctx = contextBuilder.nodesMap(nodesMap).formatVersion(formatVersion).build();
+            String blueprintName = root.has("name") ? root.get("name").getAsString() : "unknown";
+            
+            NodeContext ctx = contextBuilder
+                .blueprintName(blueprintName)
+                .nodesMap(nodesMap)
+                .formatVersion(formatVersion)
+                .build();
 
             // 3. 根据事件类型快速检索
             String pureEvent = eventType.contains(":") ? eventType.substring(eventType.indexOf(":") + 1) : eventType;

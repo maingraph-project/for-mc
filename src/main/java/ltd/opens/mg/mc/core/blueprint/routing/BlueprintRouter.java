@@ -73,6 +73,10 @@ public class BlueprintRouter {
     /**
      * 保存路由表到指定世界的路由表文件
      */
+    public Map<String, Set<String>> getRoutingTable() {
+        return routingTable.get();
+    }
+
     public synchronized void save(ServerLevel level) {
         Path filePath = getMappingsPath(level);
         try {

@@ -89,6 +89,7 @@
   "node.mgmc.on_mgrun.name": "On MGRUN",
   "node.mgmc.on_player_move.name": "On Player Move",
   "node.mgmc.print_chat.name": "Print to Chat",
+  "node.mgmc.print_log.name": "Print to Console",
   "node.mgmc.run_command_as_player.name": "Run Command as Player",
   "node.mgmc.run_command_as_server.name": "Run Command as Server",
   "node.mgmc.play_effect.name": "Play Effect",

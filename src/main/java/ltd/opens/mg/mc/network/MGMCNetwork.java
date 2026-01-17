@@ -79,5 +79,10 @@ public class MGMCNetwork {
             ResponseMappingsPayload.STREAM_CODEC,
             BlueprintNetworkHandler.Client::handleResponseMappings
         );
+        registrar.playToClient(
+            RuntimeErrorReportPayload.TYPE,
+            RuntimeErrorReportPayload.STREAM_CODEC,
+            BlueprintNetworkHandler.Client::handleRuntimeError
+        );
     }
 }

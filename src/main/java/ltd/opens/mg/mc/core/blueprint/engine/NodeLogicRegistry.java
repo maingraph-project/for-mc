@@ -72,7 +72,12 @@ public class NodeLogicRegistry {
 
         NodeHandler handler = get(type);
         if (handler != null) {
-            return handler.getValue(node, pinId, ctx);
+            try {
+                return handler.getValue(node, pinId, ctx);
+            } catch (Exception e) {
+                reportError(ctx, node, e.getMessage());
+                return null;
+            }
         }
         return null;
     }
@@ -82,6 +87,7 @@ public class NodeLogicRegistry {
         
         // 增加执行计数并检查上限，防止死循环或大规模循环导致卡服
         if (ctx.nodeExecCount.incrementAndGet() > ltd.opens.mg.mc.Config.getMaxNodeExecutions()) {
+            reportError(ctx, node, "Execution limit exceeded (" + ltd.opens.mg.mc.Config.getMaxNodeExecutions() + ")");
             return;
         }
 
@@ -99,10 +105,33 @@ public class NodeLogicRegistry {
                     NodeHandler handler = get(type);
                     if (handler != null) {
                         ctx.lastTriggeredPin = target.has("socket") ? target.get("socket").getAsString() : "exec";
-                        handler.execute(targetNode, ctx);
+                        try {
+                            handler.execute(targetNode, ctx);
+                        } catch (Exception e) {
+                            reportError(ctx, targetNode, e.getMessage());
+                        }
                     }
                 }
             }
+        }
+    }
+
+    private static void reportError(NodeContext ctx, JsonObject node, String message) {
+        String nodeId = node.has("id") ? node.get("id").getAsString() : "unknown";
+        String blueprintName = ctx.currentBlueprintName;
+        
+        ltd.opens.mg.mc.MaingraphforMC.LOGGER.error("MGMC Runtime Error in [{}]: Node [{}]: {}", blueprintName, nodeId, message);
+        
+        // Add to server manager logs
+        var manager = ltd.opens.mg.mc.MaingraphforMC.getServerManager();
+        if (manager != null) {
+            manager.addLog(blueprintName, nodeId, "ERROR", message);
+        }
+
+        // Send to client if possible
+        if (ctx.triggerEntity instanceof net.minecraft.server.level.ServerPlayer player) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c[MGMC Error] §f" + blueprintName + " (Node: " + nodeId + "): " + message));
+            player.connection.send(new ltd.opens.mg.mc.network.payloads.RuntimeErrorReportPayload(blueprintName, nodeId, message));
         }
     }
 

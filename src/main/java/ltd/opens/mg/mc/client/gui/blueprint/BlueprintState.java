@@ -79,6 +79,22 @@ public class BlueprintState {
     public boolean isEnterDown = false;
     public boolean isMouseDown = false;
 
+    public void showNotification(String message) {
+        this.notificationMessage = message;
+        this.notificationTimer = 100; // 5 seconds
+    }
+
+    public void highlightNode(String nodeId) {
+        for (GuiNode node : nodes) {
+            if (node.id.equals(nodeId)) {
+                this.highlightedNode = node;
+                this.highlightTimer = 100; // 5 seconds
+                this.viewManager.centerOnNode(node);
+                break;
+            }
+        }
+    }
+
     public void addToHistory(GuiNode node) {
         searchHistory.remove(node);
         searchHistory.add(0, node);
@@ -98,7 +114,8 @@ public class BlueprintState {
     public void tick(int screenWidth, int screenHeight) {
         cursorTick++;
         if (highlightTimer > 0) highlightTimer--;
-        
+        viewManager.tick();
+
         // Confirm progress logic (Long press Enter or Mouse for history)
         if (showQuickSearch && quickSearchEditBox != null && quickSearchEditBox.getValue().isEmpty()) {
             if ((isEnterDown || isMouseDown) && quickSearchSelectedIndex >= 0 && quickSearchSelectedIndex < searchHistory.size()) {
@@ -117,8 +134,6 @@ public class BlueprintState {
         } else {
             searchConfirmProgress = 0f;
         }
-
-        viewManager.tick();
     }
 
     public void jumpToNode(GuiNode node, int screenWidth, int screenHeight) {
@@ -167,11 +182,6 @@ public class BlueprintState {
 
     public void autoLayout() {
         layoutManager.autoLayout();
-    }
-
-    public void showNotification(String message) {
-        this.notificationMessage = message;
-        this.notificationTimer = 60;
     }
 
     public void markDirty() {

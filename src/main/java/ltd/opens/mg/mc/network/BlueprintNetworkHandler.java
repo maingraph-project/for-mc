@@ -238,5 +238,14 @@ public class BlueprintNetworkHandler {
                 }
             });
         }
+
+        public static void handleRuntimeError(RuntimeErrorReportPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+                if (mc.screen instanceof ltd.opens.mg.mc.client.gui.screens.BlueprintScreen blueprintScreen) {
+                    blueprintScreen.onRuntimeError(payload.blueprintName(), payload.nodeId(), payload.message());
+                }
+            });
+        }
     }
 }

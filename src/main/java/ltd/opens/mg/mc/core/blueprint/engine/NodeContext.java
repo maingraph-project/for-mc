@@ -35,6 +35,7 @@ public class NodeContext {
     public final AtomicBoolean breakRequested = new AtomicBoolean(false);
     public final AtomicInteger nodeExecCount = new AtomicInteger(0);
     public volatile String lastTriggeredPin;
+    public volatile String currentBlueprintName = "";
     
     public Object getRuntimeData(String nodeId, String key, Object defaultValue) {
         Map<String, Object> nodeData = runtimeData.get(nodeId);
@@ -97,10 +98,16 @@ public class NodeContext {
         private Entity triggerExtraEntity;
         private Map<String, JsonObject> nodesMap = new HashMap<>();
         private int formatVersion = 1;
-        private final Map<String, Object> properties = new HashMap<>();
+        private String blueprintName = "";
+        private Map<String, Object> properties = new HashMap<>();
 
         public Builder(Level level) {
             this.level = level;
+        }
+
+        public Builder blueprintName(String name) {
+            this.blueprintName = name;
+            return this;
         }
 
         public Builder eventName(String eventName) { this.eventName = eventName; return this; }
@@ -126,10 +133,12 @@ public class NodeContext {
         }
 
         public NodeContext build() {
-            return new NodeContext(level, eventName, args, triggerUuid, triggerName, triggerEntity,
-                    triggerX, triggerY, triggerZ, triggerSpeed,
-                    triggerBlockId, triggerItemId, triggerValue, triggerExtraUuid, triggerExtraEntity,
-                    nodesMap, formatVersion, properties);
+            NodeContext ctx = new NodeContext(level, eventName, args, triggerUuid, triggerName, triggerEntity, 
+                                 triggerX, triggerY, triggerZ, triggerSpeed, 
+                                 triggerBlockId, triggerItemId, triggerValue, triggerExtraUuid, triggerExtraEntity, 
+                                 nodesMap, formatVersion, properties);
+            ctx.currentBlueprintName = blueprintName;
+            return ctx;
         }
     }
 }

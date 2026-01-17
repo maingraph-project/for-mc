@@ -32,9 +32,24 @@ public class BlueprintManager {
     private static final long CACHE_REFRESH_INTERVAL = 1000; // 1 second
 
     private final BlueprintRouter router;
+    private final List<LogEntry> logCache = Collections.synchronizedList(new LinkedList<>());
+    private static final int MAX_LOG_SIZE = 100;
+
+    public static record LogEntry(String blueprintName, String nodeId, String level, String message, long timestamp) {}
 
     public BlueprintManager() {
         this.router = new BlueprintRouter();
+    }
+
+    public void addLog(String blueprintName, String nodeId, String level, String message) {
+        logCache.add(0, new LogEntry(blueprintName, nodeId, level, message, System.currentTimeMillis()));
+        while (logCache.size() > MAX_LOG_SIZE) {
+            logCache.remove(logCache.size() - 1);
+        }
+    }
+
+    public List<LogEntry> getLogs() {
+        return new ArrayList<>(logCache);
     }
 
     public BlueprintRouter getRouter() {

@@ -46,6 +46,16 @@ public class ViewManager {
         state.addToHistory(node);
     }
 
+    public void centerOnNode(GuiNode node) {
+        // Use a heuristic for center if screen size is unknown, or just set target pan
+        // Since we don't have screen size here, we'll just set it to be somewhat centered
+        // The jumpToNode usually handles this better when called from UI.
+        targetZoom = 1.0f;
+        targetPanX = -node.x; 
+        targetPanY = -node.y;
+        state.isAnimatingView = true;
+    }
+
     public void resetView() {
         state.panX = 0;
         state.panY = 0;

@@ -90,6 +90,7 @@
   "node.mgmc.on_mgrun.name": "当运行 /mgrun 命令时",
   "node.mgmc.on_player_move.name": "当玩家移动",
   "node.mgmc.print_chat.name": "打印到聊天栏",
+  "node.mgmc.print_log.name": "打印到控制台",
   "node.mgmc.run_command_as_player.name": "以玩家身份 运行命令",
   "node.mgmc.run_command_as_server.name": "以服务器身份 运行命令",
   "node.mgmc.play_effect.name": "播放粒子效果",

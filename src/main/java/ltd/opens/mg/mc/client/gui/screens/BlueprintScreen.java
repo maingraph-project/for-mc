@@ -73,6 +73,13 @@ public class BlueprintScreen extends Screen {
         }
     }
 
+    public void onRuntimeError(String blueprintName, String nodeId, String message) {
+        if (this.blueprintName.equals(blueprintName) || this.blueprintName.equals(blueprintName + ".json")) {
+            state.highlightNode(nodeId);
+            state.showNotification("§cRuntime Error: §f" + message);
+        }
+    }
+
     @Override
     protected void init() {
         if (this.minecraft.player != null && !this.minecraft.player.isCreative()) {

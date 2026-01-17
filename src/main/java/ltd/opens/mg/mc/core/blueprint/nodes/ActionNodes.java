@@ -6,6 +6,7 @@ import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
+import ltd.opens.mg.mc.MaingraphforMC;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,6 +54,33 @@ public class ActionNodes {
                         ctx.level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(message), false);
                     }
                 }
+                NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+            });
+
+        // print_log (控制台输出)
+        NodeHelper.setup("print_log", "node.mgmc.print_log.name")
+            .category("node_category.mgmc.action.world")
+            .color(NodeThemes.COLOR_NODE_ACTION)
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.MESSAGE, "node.mgmc.port.message", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
+            .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .registerExec((node, ctx) -> {
+                String message = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MESSAGE, ctx));
+                String logMsg = String.format("[MGMC Log] [%s] %s", ctx.currentBlueprintName, message);
+                
+                // 1. 输出到系统控制台 (最直接的反馈)
+                System.out.println(logMsg);
+                
+                // 2. 使用 SLF4J 记录 (用于文件日志)
+                MaingraphforMC.LOGGER.info(logMsg);
+                
+                // 3. 记录到 /mgmc log 缓存
+                var manager = MaingraphforMC.getServerManager();
+                if (manager != null) {
+                    String nodeId = node.has("id") ? node.get("id").getAsString() : "unknown";
+                    manager.addLog(ctx.currentBlueprintName, nodeId, "INFO", message);
+                }
+                
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
             });
 
