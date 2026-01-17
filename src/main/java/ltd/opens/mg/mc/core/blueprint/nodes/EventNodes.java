@@ -16,14 +16,31 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 
-import java.util.Arrays;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 事件类节点注册
  * 包含节点定义及其对应的数据提取逻辑
  */
 public class EventNodes {
+
+    private static final Map<UUID, XYZ> lastPlayerPositions = new ConcurrentHashMap<>();
+    private static final Map<PlayerTickEvent.Post, XYZ> eventOldPosCache = Collections.synchronizedMap(new WeakHashMap<>());
+
+    private static XYZ getOldPos(PlayerTickEvent.Post event) {
+        Player player = event.getEntity();
+        return eventOldPosCache.computeIfAbsent(event, e -> {
+            XYZ old = lastPlayerPositions.get(player.getUUID());
+            if (old == null) {
+                old = new XYZ(player.getX(), player.getY(), player.getZ());
+            }
+            lastPlayerPositions.put(player.getUUID(), new XYZ(player.getX(), player.getY(), player.getZ()));
+            return old;
+        });
+    }
 
     @SubscribeEvent
     public static void onRegister(RegisterMGMCNodesEvent event) {
@@ -343,9 +360,10 @@ public class EventNodes {
             .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
             .registerEvent(PlayerTickEvent.Post.class, (e, b) -> {
                 Player player = e.getEntity();
-                double dx = player.getX() - player.xo;
-                double dy = player.getY() - player.yo;
-                double dz = player.getZ() - player.zo;
+                XYZ oldPos = getOldPos(e);
+                double dx = player.getX() - oldPos.x();
+                double dy = player.getY() - oldPos.y();
+                double dz = player.getZ() - oldPos.z();
                 double distanceSq = dx * dx + dy * dy + dz * dz;
 
                 if (distanceSq > 1E-6) {
@@ -357,9 +375,10 @@ public class EventNodes {
                 }
             }, e -> {
                 Player player = e.getEntity();
-                double dx = player.getX() - player.xo;
-                double dy = player.getY() - player.yo;
-                double dz = player.getZ() - player.zo;
+                XYZ oldPos = getOldPos(e);
+                double dx = player.getX() - oldPos.x();
+                double dy = player.getY() - oldPos.y();
+                double dz = player.getZ() - oldPos.z();
                 return (dx * dx + dy * dy + dz * dz > 1E-6) ? BlueprintRouter.PLAYERS_ID : null;
             },
             (node, portId, ctx) -> switch (portId) {
@@ -376,6 +395,7 @@ public class EventNodes {
             .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
             .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerEvent(PlayerEvent.PlayerLoggedOutEvent.class, (e, b) -> {
+                lastPlayerPositions.remove(e.getEntity().getUUID());
                 b.triggerUuid(e.getEntity().getUUID().toString())
                  .triggerName(e.getEntity().getName().getString())
                  .triggerEntity(e.getEntity());
