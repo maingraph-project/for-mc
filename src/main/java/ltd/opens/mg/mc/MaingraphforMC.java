@@ -88,9 +88,17 @@ public class MaingraphforMC {
         return clientRouter;
     }
 
+    private boolean hasPermission(CommandSourceStack s) {
+        if (s.getServer() != null && s.getEntity() instanceof ServerPlayer player) {
+            return s.getServer().getProfilePermissions(new net.minecraft.server.players.NameAndId(player.getUUID(), player.getGameProfile().name())).level().id() >= 2;
+        }
+        return true;
+    }
+
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("mgmc")
+            .requires(this::hasPermission)
             .then(Commands.literal("workbench")
                 .executes(context -> {
                     if (context.getSource().getPlayer() != null) {
@@ -172,12 +180,6 @@ public class MaingraphforMC {
                 })
             )
             .then(Commands.literal("log")
-                .requires(s -> {
-                    if (s.getServer() != null && s.getEntity() instanceof ServerPlayer player) {
-                        return s.getServer().getProfilePermissions(new net.minecraft.server.players.NameAndId(player.getUUID(), player.getGameProfile().name())).level().id() >= 2;
-                    }
-                    return true;
-                })
                 .executes(context -> {
                     BlueprintManager manager = getServerManager();
                     if (manager != null) {
