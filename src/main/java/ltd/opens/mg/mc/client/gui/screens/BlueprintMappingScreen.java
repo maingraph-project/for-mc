@@ -28,8 +28,6 @@ public class BlueprintMappingScreen extends Screen {
 
     // 右键菜单状态
     private final GuiContextMenu contextMenu = new GuiContextMenu();
-    private String contextMenuId = null;
-    private String contextMenuBlueprint = null;
 
     public BlueprintMappingScreen(Screen parent) {
         super(Component.translatable("gui.mgmc.mapping.title"));
