@@ -3,6 +3,7 @@ package ltd.opens.mg.mc.client.gui.blueprint;
 import ltd.opens.mg.mc.client.gui.blueprint.manager.*;
 import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
 import ltd.opens.mg.mc.client.gui.components.*;
+import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import ltd.opens.mg.mc.client.gui.blueprint.manager.MarkerSearchManager;
 import net.minecraft.client.gui.components.EditBox;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class BlueprintState {
     
     public boolean showNodeMenu = false;
     public double menuX, menuY;
-    public boolean showNodeContextMenu = false;
+    public final GuiContextMenu contextMenu = new GuiContextMenu();
     public GuiNode contextMenuNode = null;
     public BlueprintMenu menu = new BlueprintMenu();
     

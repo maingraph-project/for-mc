@@ -1,6 +1,7 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
 import ltd.opens.mg.mc.client.network.NetworkService;
+import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -11,6 +12,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BlueprintSelectionScreen extends Screen {
@@ -20,9 +22,8 @@ public class BlueprintSelectionScreen extends Screen {
     private Button createButton;
     
     // Context Menu State
+    private final GuiContextMenu contextMenu = new GuiContextMenu();
     private BlueprintEntry contextMenuEntry;
-    private double menuX, menuY;
-    private boolean showMenu = false;
     private EditBox renameBox;
     private boolean isRenaming = false;
 
@@ -138,45 +139,11 @@ public class BlueprintSelectionScreen extends Screen {
         // Draw title
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
         
-        // Draw list area background if it's not being drawn by the list
-        // This helps to see the bounds
-        // guiGraphics.fill(0, 40, this.width, this.height - 60, 0x44000000);
-        
         if (this.list != null && this.list.children().isEmpty()) {
             guiGraphics.drawCenteredString(this.font, Component.translatable("gui.mgmc.blueprint_selection.no_blueprints"), this.width / 2, this.height / 2 - 10, 0xAAAAAA);
         }
 
-        if (showMenu) {
-            renderContextMenu(guiGraphics, mouseX, mouseY);
-        }
-    }
-
-    private void renderContextMenu(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        int x = (int)menuX;
-        int y = (int)menuY;
-        int w = 100;
-        int h = 60;
-
-        if (x + w > this.width) x -= w;
-        if (y + h > this.height) y -= h;
-
-        guiGraphics.fill(x, y, x + w, y + h, 0xFF202020);
-        guiGraphics.renderOutline(x, y, w, h, 0xFFFFFFFF);
-
-        // Rename Option
-        boolean hoverRename = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + 20;
-        if (hoverRename) guiGraphics.fill(x + 1, y + 1, x + w - 1, y + 19, 0xFF404040);
-        guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_selection.rename"), x + 10, y + 6, 0xFFFFFFFF);
-
-        // Duplicate Option
-        boolean hoverDuplicate = mouseX >= x && mouseX <= x + w && mouseY >= y + 20 && mouseY <= y + 40;
-        if (hoverDuplicate) guiGraphics.fill(x + 1, y + 21, x + w - 1, y + 39, 0xFF404040);
-        guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_selection.duplicate"), x + 10, y + 26, 0xFFFFFFFF);
-
-        // Delete Option
-        boolean hoverDelete = mouseX >= x && mouseX <= x + w && mouseY >= y + 40 && mouseY <= y + 60;
-        if (hoverDelete) guiGraphics.fill(x + 1, y + 41, x + w - 1, y + 59, 0xFF404040);
-        guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_selection.delete"), x + 10, y + 46, 0xFFFF5555);
+        contextMenu.render(guiGraphics, font, mouseX, mouseY, this.width, this.height);
     }
 
     @Override
@@ -184,28 +151,8 @@ public class BlueprintSelectionScreen extends Screen {
         double mouseX = event.x();
         double mouseY = event.y();
 
-        if (showMenu) {
-            int x = (int)menuX;
-            int y = (int)menuY;
-            int w = 100;
-            int h = 60;
-            if (x + w > this.width) x -= w;
-            if (y + h > this.height) y -= h;
-
-            if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + 20) {
-                startRename();
-                showMenu = false;
-                return true;
-            } else if (mouseX >= x && mouseX <= x + w && mouseY >= y + 20 && mouseY <= y + 40) {
-                duplicateBlueprint();
-                showMenu = false;
-                return true;
-            } else if (mouseX >= x && mouseX <= x + w && mouseY >= y + 40 && mouseY <= y + 60) {
-                deleteBlueprint();
-                showMenu = false;
-                return true;
-            }
-            showMenu = false;
+        if (contextMenu.mouseClicked(mouseX, mouseY, event.buttonInfo().button())) {
+            return true;
         }
 
         if (isRenaming) {
@@ -220,10 +167,12 @@ public class BlueprintSelectionScreen extends Screen {
     }
 
     private void startRename() {
+        if (contextMenuEntry == null) return;
         isRenaming = true;
         renameBox.setVisible(true);
-        renameBox.setX((int)menuX);
-        renameBox.setY((int)menuY);
+        // We don't have menuX/menuY anymore, we can use the list entry position or just center it
+        renameBox.setX(this.width / 2 - 50);
+        renameBox.setY(this.height / 2 - 10);
         String fileName = contextMenuEntry.name;
         if (fileName.endsWith(".json")) {
             fileName = fileName.substring(0, fileName.length() - 5);
@@ -367,9 +316,11 @@ public class BlueprintSelectionScreen extends Screen {
             
             if (event.buttonInfo().button() == 1) { // Right click
                 contextMenuEntry = this;
-                menuX = event.x();
-                menuY = event.y();
-                showMenu = true;
+                List<GuiContextMenu.MenuItem> items = new ArrayList<>();
+                items.add(new GuiContextMenu.MenuItem(Component.translatable("gui.mgmc.blueprint_selection.rename"), BlueprintSelectionScreen.this::startRename));
+                items.add(new GuiContextMenu.MenuItem(Component.translatable("gui.mgmc.blueprint_selection.duplicate"), BlueprintSelectionScreen.this::duplicateBlueprint));
+                items.add(new GuiContextMenu.MenuItem(Component.translatable("gui.mgmc.blueprint_selection.delete"), BlueprintSelectionScreen.this::deleteBlueprint, 0xFFFF5555));
+                contextMenu.show(event.x(), event.y(), items);
                 return true;
             }
             

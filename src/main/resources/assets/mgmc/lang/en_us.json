@@ -35,6 +35,7 @@
   "gui.mgmc.mapping.cancel": "Cancel",
   "gui.mgmc.mapping.delete_id": "Delete ID",
   "gui.mgmc.mapping.remove_mapping": "Remove Binding",
+  "gui.mgmc.mapping.delete_mapping": "Delete Mapping",
   "gui.mgmc.mapping.built_in_no_delete": "Built-in ID cannot be deleted",
   "gui.mgmc.blueprint_editor.title": "Blueprint Editor - %s",
   "gui.mgmc.blueprint_editor.back": "Back",

@@ -1,5 +1,6 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
+import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.utils.IdMetadataHelper;
 
@@ -14,6 +15,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,8 +27,7 @@ public class BlueprintMappingScreen extends Screen {
     private String selectedId = null;
 
     // 右键菜单状态
-    private boolean showMenu = false;
-    private double menuX, menuY;
+    private final GuiContextMenu contextMenu = new GuiContextMenu();
     private String contextMenuId = null;
     private String contextMenuBlueprint = null;
 
@@ -171,73 +172,13 @@ public class BlueprintMappingScreen extends Screen {
         guiGraphics.drawString(this.font, Component.translatable("gui.mgmc.mapping.ids"), 10, 30, 0xAAAAAA);
         guiGraphics.drawString(this.font, Component.translatable("gui.mgmc.mapping.blueprints"), this.width / 3 + 20, 30, 0xAAAAAA);
 
-        // 渲染右键菜单
-        if (showMenu) {
-            renderContextMenu(guiGraphics, mouseX, mouseY);
-        }
-    }
-
-    private void renderContextMenu(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        int x = (int)menuX;
-        int y = (int)menuY;
-        int w = 120; // 稍微加宽一点
-        int h = 20;
-
-        if (x + w > this.width) x -= w;
-        if (y + h > this.height) y -= h;
-
-        guiGraphics.fill(x, y, x + w, y + h, 0xFF202020);
-        guiGraphics.renderOutline(x, y, w, h, 0xFFFFFFFF);
-
-        // 删除/移除 选项
-        boolean isBuiltIn = contextMenuId != null && (contextMenuId.equals(BlueprintRouter.GLOBAL_ID) || contextMenuId.equals(BlueprintRouter.PLAYERS_ID));
-        boolean hover = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
-        
-        if (hover && !isBuiltIn) {
-            guiGraphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, 0xFF404040);
-        }
-        
-        String label = contextMenuId != null ? "gui.mgmc.mapping.delete_id" : "gui.mgmc.mapping.remove_mapping";
-        int textColor = isBuiltIn ? 0x888888 : 0xFFFF5555;
-        guiGraphics.drawString(font, Component.translatable(label), x + 10, y + 6, textColor, false);
-        
-        if (isBuiltIn && hover) {
-            Component text = Component.translatable("gui.mgmc.mapping.built_in_no_delete");
-            int textWidth = font.width(text);
-            guiGraphics.fill(mouseX + 10, mouseY - 15, mouseX + 10 + textWidth + 10, mouseY + 5, 0xAA000000);
-            guiGraphics.renderOutline(mouseX + 10, mouseY - 15, textWidth + 10, 20, 0xFFFFFFFF);
-            guiGraphics.drawString(font, text, mouseX + 15, mouseY - 10, 0xFFFFFFFF);
-        }
+        contextMenu.render(guiGraphics, font, mouseX, mouseY, this.width, this.height);
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean isDouble) {
-        if (showMenu) {
-            int x = (int)menuX;
-            int y = (int)menuY;
-            int w = 120;
-            if (x + w > this.width) x -= w;
-            if (y + 20 > this.height) y -= 20;
-
-            if (event.x() >= x && event.x() <= x + w && event.y() >= y && event.y() <= y + 20) {
-                if (contextMenuId != null) {
-                    // 删除 ID (不允许删除内置 ID)
-                    if (!contextMenuId.equals(BlueprintRouter.GLOBAL_ID) && !contextMenuId.equals(BlueprintRouter.PLAYERS_ID)) {
-                        workingMappings.remove(contextMenuId);
-                        if (contextMenuId.equals(selectedId)) {
-                            selectedId = BlueprintRouter.GLOBAL_ID;
-                        }
-                        refreshIdList();
-                    }
-                } else if (contextMenuBlueprint != null && selectedId != null) {
-                    // 移除蓝图绑定
-                    workingMappings.get(selectedId).remove(contextMenuBlueprint);
-                    selectId(selectedId);
-                }
-                showMenu = false;
-                return true;
-            }
-            showMenu = false;
+        if (contextMenu.mouseClicked(event.x(), event.y(), event.buttonInfo().button())) {
+            return true;
         }
         return super.mouseClicked(event, isDouble);
     }
@@ -307,11 +248,23 @@ public class BlueprintMappingScreen extends Screen {
         public boolean mouseClicked(MouseButtonEvent event, boolean isDouble) {
             selectId(id);
             if (event.buttonInfo().button() == 1) { // 右键
-                contextMenuId = id;
-                contextMenuBlueprint = null;
-                menuX = event.x();
-                menuY = event.y();
-                showMenu = true;
+                boolean isBuiltIn = id.equals(BlueprintRouter.GLOBAL_ID) || id.equals(BlueprintRouter.PLAYERS_ID);
+                List<GuiContextMenu.MenuItem> items = new ArrayList<>();
+                items.add(new GuiContextMenu.MenuItem(
+                    Component.translatable("gui.mgmc.mapping.delete_id"),
+                    () -> {
+                        if (!isBuiltIn) {
+                            workingMappings.remove(id);
+                            if (id.equals(selectedId)) {
+                                selectedId = BlueprintRouter.GLOBAL_ID;
+                            }
+                            refreshIdList();
+                        }
+                    },
+                    isBuiltIn ? 0x888888 : 0xFFFF5555
+                ));
+                contextMenu.setWidth(120);
+                contextMenu.show(event.x(), event.y(), items);
                 return true;
             }
             return true;
@@ -386,11 +339,19 @@ public class BlueprintMappingScreen extends Screen {
             double mouseY = event.y();
 
             if (event.buttonInfo().button() == 1) { // 右键
-                contextMenuId = null;
-                contextMenuBlueprint = blueprintPath;
-                menuX = mouseX;
-                menuY = mouseY;
-                showMenu = true;
+                List<GuiContextMenu.MenuItem> items = new ArrayList<>();
+                items.add(new GuiContextMenu.MenuItem(
+                    Component.translatable("gui.mgmc.mapping.delete_mapping"),
+                    () -> {
+                        if (selectedId != null && workingMappings.containsKey(selectedId)) {
+                            workingMappings.get(selectedId).remove(blueprintPath);
+                            selectId(selectedId);
+                        }
+                    },
+                    0xFFFF5555
+                ));
+                contextMenu.setWidth(120);
+                contextMenu.show(mouseX, mouseY, items);
                 return true;
             }
 

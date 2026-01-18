@@ -181,9 +181,7 @@ public class BlueprintScreen extends Screen {
             state.menu.renderNodeMenu(guiGraphics, font, mouseX, mouseY, state.menuX, state.menuY, this.width, this.height);
         }
         
-        if (state.showNodeContextMenu) {
-            state.menu.renderNodeContextMenu(guiGraphics, font, mouseX, mouseY, state.menuX, state.menuY);
-        }
+        state.contextMenu.render(guiGraphics, font, mouseX, mouseY, this.width, this.height);
 
         // --- Notification Popup ---
         if (state.notificationMessage != null && state.notificationTimer > 0) {

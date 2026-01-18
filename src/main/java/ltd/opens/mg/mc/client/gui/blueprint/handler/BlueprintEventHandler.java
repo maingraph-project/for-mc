@@ -244,7 +244,7 @@ public class BlueprintEventHandler {
                 state.quickSearchEditBox.setFocused(true);
                 state.updateQuickSearchMatches();
                 state.showNodeMenu = false;
-                state.showNodeContextMenu = false;
+                state.contextMenu.hide();
             }
             return true;
         }

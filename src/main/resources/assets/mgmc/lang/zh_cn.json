@@ -35,6 +35,7 @@
   "gui.mgmc.mapping.cancel": "取消",
   "gui.mgmc.mapping.delete_id": "删除 ID",
   "gui.mgmc.mapping.remove_mapping": "移除绑定",
+  "gui.mgmc.mapping.delete_mapping": "删除映射",
   "gui.mgmc.mapping.built_in_no_delete": "内置 ID 不允许删除",
   "gui.mgmc.blueprint_editor.title": "蓝图编辑器 - %s",
   "gui.mgmc.blueprint_editor.back": "返回",

@@ -7,30 +7,6 @@ import net.minecraft.network.chat.Component;
 
 public class BlueprintMenuRenderer {
 
-    public static void renderNodeContextMenu(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, double menuX, double menuY) {
-        int x = (int) menuX;
-        int y = (int) menuY;
-        int width = 120;
-        int height = 46;
-
-        // Shadow/Glow
-        guiGraphics.fill(x + 2, y + 2, x + width + 2, y + height + 2, 0x44000000);
-        // Background
-        guiGraphics.fill(x, y, x + width, y + height, 0xF01E1E1E);
-        // Border
-        guiGraphics.renderOutline(x, y, width, height, 0xFF444444);
-
-        // Delete Node
-        boolean hoverDelete = mouseX >= x && mouseX <= x + width && mouseY >= y + 3 && mouseY <= y + 23;
-        if (hoverDelete) guiGraphics.fill(x + 1, y + 3, x + width - 1, y + 23, 0x44FFFFFF);
-        guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_editor.context_menu.delete"), x + 8, y + 8, 0xFFFFFFFF, false);
-
-        // Break Links
-        boolean hoverBreak = mouseX >= x && mouseX <= x + width && mouseY >= y + 23 && mouseY <= y + 43;
-        if (hoverBreak) guiGraphics.fill(x + 1, y + 23, x + width - 1, y + 43, 0x44FFFFFF);
-        guiGraphics.drawString(font, Component.translatable("gui.mgmc.blueprint_editor.context_menu.break_links"), x + 8, y + 28, 0xFFFFFFFF, false);
-    }
-
     public static void renderScrollbar(GuiGraphics guiGraphics, int x, int y, int width, int height, double scroll, int totalHeight) {
         if (totalHeight <= height) return;
         guiGraphics.fill(x, y, x + width, y + height, 0x22FFFFFF);

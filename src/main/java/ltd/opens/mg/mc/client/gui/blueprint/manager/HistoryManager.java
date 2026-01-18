@@ -92,7 +92,7 @@ public class HistoryManager {
         state.isBoxSelecting = false;
         state.isPanning = false;
         state.showNodeMenu = false;
-        state.showNodeContextMenu = false;
+        state.contextMenu.hide();
         state.showQuickSearch = false;
 
         List<String> historyIds = new ArrayList<>();

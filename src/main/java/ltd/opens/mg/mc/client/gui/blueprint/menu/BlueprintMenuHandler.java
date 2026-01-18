@@ -4,10 +4,15 @@ import ltd.opens.mg.mc.client.utils.BlueprintMathHelper;
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 
 import ltd.opens.mg.mc.client.gui.components.*;
+import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
+import net.minecraft.network.chat.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BlueprintMenuHandler {
     private final BlueprintState state;
@@ -20,37 +25,11 @@ public class BlueprintMenuHandler {
         double mouseX = event.x();
         double mouseY = event.y();
 
-        if (state.showNodeContextMenu) {
-            BlueprintMenu.ContextMenuResult result = state.menu.onClickContextMenu(event, state.menuX, state.menuY);
-            if (result == BlueprintMenu.ContextMenuResult.DELETE) {
-                if (state.contextMenuNode != null) {
-                    state.pushHistory();
-                    if (state.focusedNode == state.contextMenuNode) {
-                        state.focusedNode = null;
-                        state.focusedPort = null;
-                    }
-                    final GuiNode finalNode = state.contextMenuNode;
-                    state.nodes.remove(state.contextMenuNode);
-                    state.connections.removeIf(c -> c.from == finalNode || c.to == finalNode);
-                    state.markDirty();
-                }
-                state.showNodeContextMenu = false;
-                state.contextMenuNode = null;
-                return true;
-            } else if (result == BlueprintMenu.ContextMenuResult.BREAK_LINKS) {
-                if (state.contextMenuNode != null) {
-                    state.pushHistory();
-                    final GuiNode finalNode = state.contextMenuNode;
-                    state.connections.removeIf(c -> c.from == finalNode || c.to == finalNode);
-                    state.markDirty();
-                }
-                state.showNodeContextMenu = false;
-                state.contextMenuNode = null;
+        if (state.contextMenu.isVisible()) {
+            if (state.contextMenu.mouseClicked(event.x(), event.y(), event.buttonInfo().button())) {
                 return true;
             }
-            
-            state.showNodeContextMenu = false;
-            state.contextMenuNode = null;
+            state.contextMenu.hide();
             return true;
         }
 
@@ -120,10 +99,36 @@ public class BlueprintMenuHandler {
             for (int i = state.nodes.size() - 1; i >= 0; i--) {
                 GuiNode node = state.nodes.get(i);
                 if (worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height) {
-                    state.showNodeContextMenu = true;
                     state.contextMenuNode = node;
-                    state.menuX = mouseX;
-                    state.menuY = mouseY;
+                    List<GuiContextMenu.MenuItem> items = new ArrayList<>();
+                    items.add(new GuiContextMenu.MenuItem(
+                        Component.translatable("gui.mgmc.blueprint_editor.context_menu.delete"),
+                        () -> {
+                            if (state.contextMenuNode != null) {
+                                state.pushHistory();
+                                if (state.focusedNode == state.contextMenuNode) {
+                                    state.focusedNode = null;
+                                    state.focusedPort = null;
+                                }
+                                final GuiNode finalNode = state.contextMenuNode;
+                                state.nodes.remove(state.contextMenuNode);
+                                state.connections.removeIf(c -> c.from == finalNode || c.to == finalNode);
+                                state.markDirty();
+                            }
+                        }
+                    ));
+                    items.add(new GuiContextMenu.MenuItem(
+                        Component.translatable("gui.mgmc.blueprint_editor.context_menu.break_links"),
+                        () -> {
+                            if (state.contextMenuNode != null) {
+                                state.pushHistory();
+                                final GuiNode finalNode = state.contextMenuNode;
+                                state.connections.removeIf(c -> c.from == finalNode || c.to == finalNode);
+                                state.markDirty();
+                            }
+                        }
+                    ));
+                    state.contextMenu.show(mouseX, mouseY, items);
                     return true;
                 }
             }
