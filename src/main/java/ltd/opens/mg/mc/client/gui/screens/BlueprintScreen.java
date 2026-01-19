@@ -222,6 +222,21 @@ public class BlueprintScreen extends Screen {
                 InputModalScreen.Mode.SELECTION,
                 (selected) -> {
                     if (selected.equals(Component.translatable("gui.mgmc.blueprint_editor.save_confirm.save").getString())) {
+                        // Check for unknown nodes
+                        boolean hasUnknown = false;
+                        for (GuiNode node : state.nodes) {
+                            if (node.definition.properties().containsKey("is_unknown")) {
+                                hasUnknown = true;
+                                break;
+                            }
+                        }
+                        
+                        if (hasUnknown) {
+                            state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.save_error.unknown_nodes").getString());
+                            // Keep the screen open if they tried to save with unknown nodes
+                            return;
+                        }
+
                         String json = BlueprintIO.serialize(state.nodes, state.connections);
                         NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
                     }
@@ -305,6 +320,20 @@ public class BlueprintScreen extends Screen {
             // Save
             rightX -= 55;
             if (!state.readOnly && isHovering((int)mouseX, (int)mouseY, rightX, 3, 50, 20)) {
+                // Check for unknown nodes
+                boolean hasUnknown = false;
+                for (GuiNode node : state.nodes) {
+                    if (node.definition.properties().containsKey("is_unknown")) {
+                        hasUnknown = true;
+                        break;
+                    }
+                }
+                
+                if (hasUnknown) {
+                    state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.save_error.unknown_nodes").getString());
+                    return true;
+                }
+
                 String json = BlueprintIO.serialize(state.nodes, state.connections);
                 if (json != null) {
                     NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);

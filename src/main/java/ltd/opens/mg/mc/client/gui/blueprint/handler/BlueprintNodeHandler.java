@@ -190,6 +190,30 @@ public class BlueprintNodeHandler {
 
     private void handleAddButtonClick(GuiNode node, BlueprintScreen screen) {
         String action = (String) node.definition.properties().get("ui_button_action");
+        if ("view_unknown_info".equals(action)) {
+            String originalData = (String) node.definition.properties().get("original_data");
+            if (originalData != null) {
+                Minecraft.getInstance().setScreen(new InputModalScreen(
+                    screen,
+                    Component.translatable("gui.mgmc.node.unknown.info_title").getString(),
+                    originalData,
+                    false,
+                    new String[]{
+                        Component.translatable("gui.mgmc.modal.confirm").getString(),
+                        Component.translatable("gui.mgmc.blueprint_editor.context_menu.copy").getString()
+                    },
+                    InputModalScreen.Mode.SELECTION,
+                    (selected) -> {
+                        if (selected.equals(Component.translatable("gui.mgmc.blueprint_editor.context_menu.copy").getString())) {
+                            Minecraft.getInstance().keyboardHandler.setClipboard(originalData);
+                            state.showNotification(Component.translatable("gui.mgmc.node.unknown.copy_success").getString());
+                        }
+                        Minecraft.getInstance().setScreen(screen);
+                    }
+                ));
+            }
+            return;
+        }
         if ("add_output_modal".equals(action)) {
             Minecraft.getInstance().setScreen(new InputModalScreen(
                 screen,
