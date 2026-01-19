@@ -2,6 +2,7 @@ package ltd.opens.mg.mc.client.gui.blueprint.render;
 
 
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
+import ltd.opens.mg.mc.client.gui.blueprint.Viewport;
 import ltd.opens.mg.mc.client.gui.components.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -9,7 +10,10 @@ import java.util.List;
 
 public class BlueprintRenderer {
 
-    public static void drawGrid(GuiGraphics guiGraphics, int width, int height, float panX, float panY, float zoom) {
+    public static void drawGrid(GuiGraphics guiGraphics, int width, int height, Viewport viewport) {
+        float panX = viewport.panX;
+        float panY = viewport.panY;
+        float zoom = viewport.zoom;
         // Fill background first
         guiGraphics.fill(0, 0, width, height, 0xFF121212);
 
@@ -48,16 +52,16 @@ public class BlueprintRenderer {
         }
     }
 
-    public static void drawConnections(GuiGraphics guiGraphics, List<GuiConnection> connections, int screenWidth, int screenHeight, float panX, float panY, float zoom) {
+    public static void drawConnections(GuiGraphics guiGraphics, List<GuiConnection> connections, int screenWidth, int screenHeight, Viewport viewport) {
         for (GuiConnection conn : connections) {
             float[] outPos = conn.from.getPortPositionByName(conn.fromPort, false);
             float[] inPos = conn.to.getPortPositionByName(conn.toPort, true);
             
             // Screen-space coordinates
-            float sX1 = outPos[0] * zoom + panX;
-            float sY1 = outPos[1] * zoom + panY;
-            float sX2 = inPos[0] * zoom + panX;
-            float sY2 = inPos[1] * zoom + panY;
+            float sX1 = viewport.toScreenX(outPos[0]);
+            float sY1 = viewport.toScreenY(outPos[1]);
+            float sX2 = viewport.toScreenX(inPos[0]);
+            float sY2 = viewport.toScreenY(inPos[1]);
 
             // Simple culling for connections
             if ((sX1 < 0 && sX2 < 0) || (sX1 > screenWidth && sX2 > screenWidth) ||
@@ -65,7 +69,7 @@ public class BlueprintRenderer {
                 continue;
             }
 
-            drawBezier(guiGraphics, outPos[0], outPos[1], inPos[0], inPos[1], 0xAAFFFFFF, zoom); // Slightly transparent for better look
+            drawBezier(guiGraphics, outPos[0], outPos[1], inPos[0], inPos[1], 0xAAFFFFFF, viewport.zoom); 
         }
     }
 
@@ -153,6 +157,7 @@ public class BlueprintRenderer {
     public static void drawMinimap(GuiGraphics guiGraphics, BlueprintState state, int screenWidth, int screenHeight) {
         if (!state.showMinimap || state.nodes.isEmpty()) return;
 
+        Viewport viewport = state.viewport;
         // Minimap settings
         int minimapWidth = 120;
         int minimapHeight = 80;
@@ -202,10 +207,10 @@ public class BlueprintRenderer {
         }
 
         // Draw current view area
-        float viewX = (-state.panX / state.zoom);
-        float viewY = (-state.panY / state.zoom);
-        float viewW = (screenWidth / state.zoom);
-        float viewH = (screenHeight / state.zoom);
+        float viewX = viewport.toWorldX(0);
+        float viewY = viewport.toWorldY(0);
+        float viewW = viewport.getWorldWidth(screenWidth);
+        float viewH = viewport.getWorldHeight(screenHeight);
 
         int vx = (int) (viewX * scale + offsetX);
         int vy = (int) (viewY * scale + offsetY);
@@ -228,22 +233,19 @@ public class BlueprintRenderer {
         if (state.editingMarkerNode == null || state.markerEditBox == null) return;
 
         GuiNode node = state.editingMarkerNode;
+        Viewport viewport = state.viewport;
         // Project node to screen space
-        int sx = (int) (node.x * state.zoom + state.panX);
-        int sy = (int) (node.y * state.zoom + state.panY);
-        int sw = (int) (node.width * state.zoom);
+        int sx = (int) viewport.toScreenX(node.x);
+        int sy = (int) viewport.toScreenY(node.y);
+        int sw = (int) (node.width * viewport.zoom);
 
         // Header height in screen space
-        int headerH = (int) (node.headerHeight * state.zoom);
+        int headerH = (int) (node.headerHeight * viewport.zoom);
 
         // Position EditBox in the content area of the node
-        state.markerEditBox.setX(sx + (int)(10 * state.zoom));
-        state.markerEditBox.setY(sy + headerH + (int)(10 * state.zoom));
-        state.markerEditBox.setWidth(sw - (int)(20 * state.zoom));
-        // EditBox height is fixed for single line, but we might want it to look okay
-        // Minecraft's EditBox doesn't natively support multiline well, but for input it's fine.
-        // If we want multiline editing, we might need a custom component, 
-        // but let's stick with EditBox for now as it's better than a modal.
+        state.markerEditBox.setX(sx + (int)(10 * viewport.zoom));
+        state.markerEditBox.setY(sy + headerH + (int)(10 * viewport.zoom));
+        state.markerEditBox.setWidth(sw - (int)(20 * viewport.zoom));
         
         state.markerEditBox.render(guiGraphics, 0, 0, 0);
     }

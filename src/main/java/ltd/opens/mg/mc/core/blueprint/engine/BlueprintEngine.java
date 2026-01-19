@@ -117,10 +117,8 @@ public class BlueprintEngine {
             });
 
             int formatVersion = root.has("format_version") ? root.get("format_version").getAsInt() : 1;
-            String blueprintName = root.has("name") ? root.get("name").getAsString() : "unknown";
             
             NodeContext ctx = contextBuilder
-                .blueprintName(blueprintName)
                 .nodesMap(nodesMap)
                 .formatVersion(formatVersion)
                 .build();

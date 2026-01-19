@@ -75,8 +75,8 @@ public class BlueprintEventHandler {
         if (state.editingMarkerNode != null) {
             if (state.markerEditBox != null) {
                 // If clicked outside the node, finish editing
-                double worldMouseX = (mouseX - state.panX) / state.zoom;
-                double worldMouseY = (mouseY - state.panY) / state.zoom;
+                double worldMouseX = state.viewport.toWorldX(mouseX);
+                double worldMouseY = state.viewport.toWorldY(mouseY);
                 GuiNode node = state.editingMarkerNode;
                 if (!(worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height)) {
                     finishMarkerEditing();
@@ -109,8 +109,8 @@ public class BlueprintEventHandler {
         if (viewHandler.mouseClicked(mouseX, mouseY, button)) return true;
 
         // World coordinates for other interactions
-        double worldMouseX = (mouseX - state.panX) / state.zoom;
-        double worldMouseY = (mouseY - state.panY) / state.zoom;
+        double worldMouseX = state.viewport.toWorldX(mouseX);
+        double worldMouseY = state.viewport.toWorldY(mouseY);
 
         if (button == 0) { // Left click
             state.focusedNode = null;
@@ -146,8 +146,8 @@ public class BlueprintEventHandler {
         if (menuHandler.mouseReleased(mouseX, mouseY, button, screen.width, screen.height)) return true;
 
         // World coordinates for other interactions
-        double worldMouseX = (mouseX - state.panX) / state.zoom;
-        double worldMouseY = (mouseY - state.panY) / state.zoom;
+        double worldMouseX = state.viewport.toWorldX(mouseX);
+        double worldMouseY = state.viewport.toWorldY(mouseY);
 
         // 2. Connection interactions (link creation)
         if (connectionHandler.mouseReleased(worldMouseX, worldMouseY)) return true;
@@ -168,8 +168,8 @@ public class BlueprintEventHandler {
         if (state.readOnly) return false;
 
         // World coordinates for other interactions
-        double worldMouseX = (mouseX - state.panX) / state.zoom;
-        double worldMouseY = (mouseY - state.panY) / state.zoom;
+        double worldMouseX = state.viewport.toWorldX(mouseX);
+        double worldMouseY = state.viewport.toWorldY(mouseY);
 
         // 2. Node interactions (node drag)
         if (nodeHandler.mouseDragged(worldMouseX, worldMouseY, mouseX, mouseY)) return true;
@@ -244,7 +244,7 @@ public class BlueprintEventHandler {
                 state.quickSearchEditBox.setFocused(true);
                 state.updateQuickSearchMatches();
                 state.showNodeMenu = false;
-                state.showNodeContextMenu = false;
+                state.contextMenu.hide();
             }
             return true;
         }

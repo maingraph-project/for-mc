@@ -164,6 +164,14 @@ public class BlueprintIO {
         }
     }
 
+    private static NodeDefinition.PortType safeParsePortType(String type) {
+        try {
+            return NodeDefinition.PortType.valueOf(type);
+        } catch (Exception e) {
+            return NodeDefinition.PortType.STRING;
+        }
+    }
+
     public static void loadFromString(String json, List<GuiNode> nodes, List<GuiConnection> connections) {
         loadFromString(json, nodes, connections, true);
     }
@@ -187,6 +195,32 @@ public class BlueprintIO {
                     JsonObject obj = e.getAsJsonObject();
                     String nodeTypeId = obj.has("defId") ? obj.get("defId").getAsString() : obj.get("type").getAsString();
                     NodeDefinition def = NodeRegistry.get(nodeTypeId);
+                    if (def == null) {
+                        // Create a virtual definition for unknown node
+                        NodeDefinition.Builder builder = new NodeDefinition.Builder(nodeTypeId, "gui.mgmc.node.unknown")
+                            .category("Unknown")
+                            .color(0xFF880000)
+                            .addProperty("is_unknown", true)
+                            .addProperty("original_data", obj.toString())
+                            .addProperty("ui_button_label", "gui.mgmc.node.unknown.view_info")
+                            .addProperty("ui_button_action", "view_unknown_info");
+                        
+                        // Add all ports from the JSON to the virtual definition so connections work
+                        if (obj.has("dynamicOutputs")) {
+                            for (JsonElement p : obj.getAsJsonArray("dynamicOutputs")) {
+                                JsonObject pObj = p.getAsJsonObject();
+                                builder.addOutput(pObj.get("id").getAsString(), pObj.get("name").getAsString(), safeParsePortType(pObj.get("type").getAsString()), 0xFFFFFFFF);
+                            }
+                        }
+                        if (obj.has("dynamicInputs")) {
+                            for (JsonElement p : obj.getAsJsonArray("dynamicInputs")) {
+                                JsonObject pObj = p.getAsJsonObject();
+                                builder.addInput(pObj.get("id").getAsString(), pObj.get("name").getAsString(), safeParsePortType(pObj.get("type").getAsString()), 0xFFFFFFFF);
+                            }
+                        }
+                        def = builder.build();
+                    }
+
                     if (def != null) {
                         GuiNode node = new GuiNode(def, obj.get("x").getAsFloat(), obj.get("y").getAsFloat());
                         node.id = obj.get("id").getAsString();
@@ -196,7 +230,7 @@ public class BlueprintIO {
                         if (obj.has("dynamicOutputs")) {
                             for (JsonElement p : obj.getAsJsonArray("dynamicOutputs")) {
                                 JsonObject pObj = p.getAsJsonObject();
-                                NodeDefinition.PortType portType = NodeDefinition.PortType.valueOf(pObj.get("type").getAsString());
+                                NodeDefinition.PortType portType = safeParsePortType(pObj.get("type").getAsString());
                                 node.addOutput(
                                     pObj.get("id").getAsString(),
                                     pObj.get("name").getAsString(),
@@ -208,7 +242,7 @@ public class BlueprintIO {
                         if (obj.has("dynamicInputs")) {
                             for (JsonElement p : obj.getAsJsonArray("dynamicInputs")) {
                                 JsonObject pObj = p.getAsJsonObject();
-                                NodeDefinition.PortType portType = NodeDefinition.PortType.valueOf(pObj.get("type").getAsString());
+                                NodeDefinition.PortType portType = safeParsePortType(pObj.get("type").getAsString());
                                 node.addInput(
                                     pObj.get("id").getAsString(),
                                     pObj.get("name").getAsString(),

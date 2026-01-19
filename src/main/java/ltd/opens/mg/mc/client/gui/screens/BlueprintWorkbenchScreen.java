@@ -175,7 +175,11 @@ public class BlueprintWorkbenchScreen extends AbstractContainerScreen<BlueprintW
 
     private class BlueprintEntry extends ObjectSelectionList.Entry<BlueprintEntry> {
         final String path;
-        public BlueprintEntry(String path) { this.path = path; }
+        final String displayName;
+        public BlueprintEntry(String path) { 
+            this.path = path;
+            this.displayName = path.endsWith(".json") ? path.substring(0, path.length() - 5) : path;
+        }
 
         @Override
         public void renderContent(GuiGraphics guiGraphics, int index, int top, boolean isHovered, float partialTick) {
@@ -187,16 +191,12 @@ public class BlueprintWorkbenchScreen extends AbstractContainerScreen<BlueprintW
 
             if (this == allBlueprintsList.getSelected()) {
                 guiGraphics.fill(x, y, x + width, y + height, 0xFFFFFFFF); // 选中白色背景
-                String name = path;
-                if (name.endsWith(".json")) name = name.substring(0, name.length() - 5);
-                guiGraphics.drawString(minecraft.font, name, x + 4, y + 5, 0xFF404040, false); // 选中时深色文字
+                guiGraphics.drawString(minecraft.font, displayName, x + 4, y + 5, 0xFF404040, false); // 选中时深色文字
             } else {
                 if (isHovered) {
                     guiGraphics.fill(x, y, x + width, y + height, 0x44FFFFFF); // 悬停半透明
                 }
-                String name = path;
-                if (name.endsWith(".json")) name = name.substring(0, name.length() - 5);
-                guiGraphics.drawString(minecraft.font, name, x + 4, y + 5, 0xFFFFFFFF, false); // 普通白色文字
+                guiGraphics.drawString(minecraft.font, displayName, x + 4, y + 5, 0xFFFFFFFF, false); // 普通白色文字
             }
         }
 
@@ -207,7 +207,7 @@ public class BlueprintWorkbenchScreen extends AbstractContainerScreen<BlueprintW
         }
 
         @Override
-        public Component getNarration() { return Component.literal(path); }
+        public Component getNarration() { return Component.literal(displayName); }
     }
 
     private class BoundBlueprintList extends ObjectSelectionList<BoundEntry> {

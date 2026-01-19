@@ -3,15 +3,17 @@ package ltd.opens.mg.mc.client.gui.blueprint;
 import ltd.opens.mg.mc.client.gui.blueprint.manager.*;
 import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
 import ltd.opens.mg.mc.client.gui.components.*;
+import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import ltd.opens.mg.mc.client.gui.blueprint.manager.MarkerSearchManager;
 import net.minecraft.client.gui.components.EditBox;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BlueprintState {
-    public float panX = 0;
-    public float panY = 0;
-    public float zoom = 1.0f;
+    public final Viewport viewport = new Viewport();
+    
+    // UI State
+    public GuiNode focusedNode;
     public boolean isAnimatingView = false;
 
     public final List<GuiNode> nodes = new ArrayList<>();
@@ -44,11 +46,10 @@ public class BlueprintState {
     
     public boolean showNodeMenu = false;
     public double menuX, menuY;
-    public boolean showNodeContextMenu = false;
+    public final GuiContextMenu contextMenu = new GuiContextMenu();
     public GuiNode contextMenuNode = null;
-    public final BlueprintMenu menu = new BlueprintMenu();
-
-    public GuiNode focusedNode = null;
+    public BlueprintMenu menu = new BlueprintMenu();
+    
     public String focusedPort = null;
     public int cursorTick = 0;
     public boolean isDirty = false;
@@ -81,7 +82,7 @@ public class BlueprintState {
 
     public void showNotification(String message) {
         this.notificationMessage = message;
-        this.notificationTimer = 100; // 5 seconds
+        this.notificationTimer = 60; // 3 seconds (at 20 ticks per second)
     }
 
     public void highlightNode(String nodeId) {
@@ -103,17 +104,10 @@ public class BlueprintState {
         }
     }
 
-    // View state delegates
-    public float getTargetPanX() { return viewManager.targetPanX; }
-    public float getTargetPanY() { return viewManager.targetPanY; }
-    public float getTargetZoom() { return viewManager.targetZoom; }
-    public void setTargetPanX(float v) { viewManager.targetPanX = v; }
-    public void setTargetPanY(float v) { viewManager.targetPanY = v; }
-    public void setTargetZoom(float v) { viewManager.targetZoom = v; }
-
     public void tick(int screenWidth, int screenHeight) {
         cursorTick++;
         if (highlightTimer > 0) highlightTimer--;
+        if (notificationTimer > 0) notificationTimer--;
         viewManager.tick();
 
         // Confirm progress logic (Long press Enter or Mouse for history)
@@ -189,8 +183,6 @@ public class BlueprintState {
     }
 
     public void resetView() {
-        panX = 0;
-        panY = 0;
-        zoom = 1.0f;
+        viewManager.resetView();
     }
 }

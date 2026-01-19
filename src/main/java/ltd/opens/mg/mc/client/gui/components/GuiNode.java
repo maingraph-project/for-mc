@@ -1,6 +1,7 @@
 package ltd.opens.mg.mc.client.gui.components;
 
 import com.google.gson.JsonObject;
+import ltd.opens.mg.mc.client.gui.blueprint.Viewport;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.client.gui.GuiGraphics;
 
@@ -75,11 +76,11 @@ public class GuiNode {
         GuiNodePortManager.updateConnectedState(this, connections);
     }
 
-    public void render(GuiGraphics guiGraphics, net.minecraft.client.gui.Font font, int mouseX, int mouseY, float panX, float panY, float zoom, List<GuiConnection> connections, GuiNode focusedNode, String focusedPort, boolean isEditing, int highlightTimer) {
+    public void render(GuiGraphics guiGraphics, net.minecraft.client.gui.Font font, int mouseX, int mouseY, Viewport viewport, List<GuiConnection> connections, GuiNode focusedNode, String focusedPort, boolean isEditing, int highlightTimer) {
         if (sizeDirty) {
             GuiNodeHelper.updateSize(this, font);
         }
-        GuiNodeRenderer.render(this, guiGraphics, font, mouseX, mouseY, panX, panY, zoom, connections, focusedNode, focusedPort, isEditing, highlightTimer);
+        GuiNodeRenderer.render(this, guiGraphics, font, mouseX, mouseY, viewport, connections, focusedNode, focusedPort, isEditing, highlightTimer);
     }
 
     public boolean isDynamicPort(NodePort port) {

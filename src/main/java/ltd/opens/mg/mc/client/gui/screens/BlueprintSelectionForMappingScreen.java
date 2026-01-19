@@ -78,7 +78,11 @@ public class BlueprintSelectionForMappingScreen extends Screen {
 
     class BlueprintEntry extends ObjectSelectionList.Entry<BlueprintEntry> {
         final String name;
-        public BlueprintEntry(String name) { this.name = name; }
+        final String displayName;
+        public BlueprintEntry(String name) { 
+            this.name = name; 
+            this.displayName = name.endsWith(".json") ? name.substring(0, name.length() - 5) : name;
+        }
         
         @Override
         public void renderContent(GuiGraphics guiGraphics, int index, int top, boolean isHovered, float partialTick) {
@@ -100,7 +104,7 @@ public class BlueprintSelectionForMappingScreen extends Screen {
             }
 
             int color = isSelected ? 0xFFFFCC00 : (isHovered ? 0xFFFFFFFF : 0xFFAAAAAA);
-            guiGraphics.drawString(font, name, left + 5, y + (height - 8) / 2, color);
+            guiGraphics.drawString(font, displayName, left + 5, y + (height - 8) / 2, color);
         }
         
         @Override
@@ -110,6 +114,6 @@ public class BlueprintSelectionForMappingScreen extends Screen {
         }
         
         @Override
-        public Component getNarration() { return Component.literal(name); }
+        public Component getNarration() { return Component.literal(displayName); }
     }
 }

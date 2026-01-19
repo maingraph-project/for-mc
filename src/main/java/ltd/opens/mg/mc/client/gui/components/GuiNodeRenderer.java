@@ -1,5 +1,6 @@
 package ltd.opens.mg.mc.client.gui.components;
-
+ 
+import ltd.opens.mg.mc.client.gui.blueprint.Viewport;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import net.minecraft.client.gui.Font;
@@ -12,7 +13,8 @@ import java.util.List;
 
 public class GuiNodeRenderer {
 
-    public static void render(GuiNode node, GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, float panX, float panY, float zoom, List<GuiConnection> connections, GuiNode focusedNode, String focusedPort, boolean isEditing, int highlightTimer) {
+    public static void render(GuiNode node, GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, Viewport viewport, List<GuiConnection> connections, GuiNode focusedNode, String focusedPort, boolean isEditing, int highlightTimer) {
+        float zoom = viewport.zoom;
         // LOD 3: Minimal rendering for very far zoom
         if (zoom < 0.15f) {
             guiGraphics.fill((int) node.x, (int) node.y, (int) (node.x + node.width), (int) (node.y + node.height), node.color);
@@ -32,8 +34,8 @@ public class GuiNodeRenderer {
         guiGraphics.fill((int) node.x, (int) node.y, (int) (node.x + node.width), (int) (node.y + node.height), 0xEE1A1A1A);
         
         // Border
-        double worldMouseX = (mouseX - panX) / zoom;
-        double worldMouseY = (mouseY - panY) / zoom;
+        double worldMouseX = viewport.toWorldX(mouseX);
+        double worldMouseY = viewport.toWorldY(mouseY);
         boolean isHovered = worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height;
         
         // Simplified border: only draw if hovered or at reasonable zoom

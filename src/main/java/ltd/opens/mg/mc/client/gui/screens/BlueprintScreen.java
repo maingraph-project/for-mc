@@ -30,7 +30,7 @@ public class BlueprintScreen extends Screen {
     }
 
     public BlueprintScreen(Screen parent, String name, boolean forceOpen) {
-        super(Component.translatable("gui.mgmc.blueprint_editor.title", name));
+        super(Component.translatable("gui.mgmc.blueprint_editor.title", name.endsWith(".json") ? name.substring(0, name.length() - 5) : name));
         this.parent = parent;
         this.blueprintName = name.endsWith(".json") ? name : name + ".json";
         this.eventHandler = new BlueprintEventHandler(state);
@@ -41,7 +41,7 @@ public class BlueprintScreen extends Screen {
         }
 
         if (forceOpen) {
-            state.zoom = 0.5f; // "缩小" effect
+            state.viewport.zoom = 0.5f; // "缩小" effect
         }
 
         // Request data from server (works for both local and remote servers)
@@ -103,32 +103,27 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        BlueprintRenderer.drawGrid(guiGraphics, this.width, this.height, state.panX, state.panY, state.zoom);
+        BlueprintRenderer.drawGrid(guiGraphics, this.width, this.height, state.viewport);
 
         guiGraphics.pose().pushMatrix();
-        guiGraphics.pose().translate(state.panX, state.panY);
-        guiGraphics.pose().scale(state.zoom, state.zoom);
+        guiGraphics.pose().translate(state.viewport.panX, state.viewport.panY);
+        guiGraphics.pose().scale(state.viewport.zoom, state.viewport.zoom);
 
-        BlueprintRenderer.drawConnections(guiGraphics, state.connections, this.width, this.height, state.panX, state.panY, state.zoom);
+        BlueprintRenderer.drawConnections(guiGraphics, state.connections, this.width, this.height, state.viewport);
 
         for (GuiNode node : state.nodes) {
-            float sX = node.x * state.zoom + state.panX;
-            float sY = node.y * state.zoom + state.panY;
-            float sW = node.width * state.zoom;
-            float sH = node.height * state.zoom;
-            
-            if (sX + sW < 0 || sX > this.width || sY + sH < 0 || sY > this.height) {
+            if (!state.viewport.isVisible(node.x, node.y, node.width, node.height, this.width, this.height)) {
                 continue;
             }
             
             node.updateConnectedState(state.connections);
             int hTimer = (state.highlightedNode == node) ? state.highlightTimer : 0;
-            node.render(guiGraphics, this.font, mouseX, mouseY, state.panX, state.panY, state.zoom, state.connections, state.focusedNode, state.focusedPort, state.editingMarkerNode == node, hTimer);
+            node.render(guiGraphics, this.font, mouseX, mouseY, state.viewport, state.connections, state.focusedNode, state.focusedPort, state.editingMarkerNode == node, hTimer);
         }
 
         if (state.connectionStartNode != null) {
             float[] startPos = state.connectionStartNode.getPortPositionByName(state.connectionStartPort, state.isConnectionFromInput);
-            BlueprintRenderer.drawBezier(guiGraphics, startPos[0], startPos[1], (float) ((mouseX - state.panX) / state.zoom), (float) ((mouseY - state.panY) / state.zoom), 0x88FFFFFF, state.zoom);
+            BlueprintRenderer.drawBezier(guiGraphics, startPos[0], startPos[1], state.viewport.toWorldX(mouseX), state.viewport.toWorldY(mouseY), 0x88FFFFFF, state.viewport.zoom);
         }
 
         guiGraphics.pose().popMatrix();
@@ -186,9 +181,7 @@ public class BlueprintScreen extends Screen {
             state.menu.renderNodeMenu(guiGraphics, font, mouseX, mouseY, state.menuX, state.menuY, this.width, this.height);
         }
         
-        if (state.showNodeContextMenu) {
-            state.menu.renderNodeContextMenu(guiGraphics, font, mouseX, mouseY, state.menuX, state.menuY);
-        }
+        state.contextMenu.render(guiGraphics, font, mouseX, mouseY, this.width, this.height);
 
         // --- Notification Popup ---
         if (state.notificationMessage != null && state.notificationTimer > 0) {
@@ -198,7 +191,12 @@ public class BlueprintScreen extends Screen {
             int popupX = (this.width - popupW) / 2;
             int popupY = 40; // Just below top bar
             
-            float alpha = Math.min(1.0f, state.notificationTimer / 10.0f);
+            float alpha = 1.0f;
+            if (state.notificationTimer < 5) {
+                alpha = state.notificationTimer / 5.0f; // Fade out in 0.25s
+            }
+            alpha = Math.max(0.0f, Math.min(1.0f, alpha));
+            
             int alphaInt = (int)(alpha * 255);
             int bgColor = (alphaInt << 24) | 0x222222;
             int textColor = (alphaInt << 24) | 0xFFFFFF;
@@ -207,8 +205,10 @@ public class BlueprintScreen extends Screen {
             guiGraphics.fill(popupX, popupY, popupX + popupW, popupY + popupH, bgColor);
             guiGraphics.renderOutline(popupX, popupY, popupW, popupH, borderColor);
             guiGraphics.drawString(font, state.notificationMessage, popupX + 10, popupY + (popupH - 9) / 2, textColor, false);
-            
-            state.notificationTimer--;
+
+            // Draw close "X" indicator
+            int closeColor = (alphaInt << 24) | 0x888888;
+            guiGraphics.drawString(font, "×", popupX + popupW - 12, popupY + (popupH - 9) / 2, closeColor, false);
         }
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -229,6 +229,21 @@ public class BlueprintScreen extends Screen {
                 InputModalScreen.Mode.SELECTION,
                 (selected) -> {
                     if (selected.equals(Component.translatable("gui.mgmc.blueprint_editor.save_confirm.save").getString())) {
+                        // Check for unknown nodes
+                        boolean hasUnknown = false;
+                        for (GuiNode node : state.nodes) {
+                            if (node.definition.properties().containsKey("is_unknown")) {
+                                hasUnknown = true;
+                                break;
+                            }
+                        }
+                        
+                        if (hasUnknown) {
+                            state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.save_error.unknown_nodes").getString());
+                            // Keep the screen open if they tried to save with unknown nodes
+                            return;
+                        }
+
                         String json = BlueprintIO.serialize(state.nodes, state.connections);
                         NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
                     }
@@ -285,6 +300,18 @@ public class BlueprintScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent event, boolean isDouble) {
         double mouseX = event.x();
         double mouseY = event.y();
+
+        // Handle Notification Close
+        if (state.notificationMessage != null && state.notificationTimer > 0) {
+            int msgW = font.width(state.notificationMessage);
+            int popupW = msgW + 20;
+            int popupX = (this.width - popupW) / 2;
+            int popupY = 40;
+            if (isHovering((int)mouseX, (int)mouseY, popupX, popupY, popupW, 20)) {
+                state.notificationTimer = 0;
+                return true;
+            }
+        }
         
         // Handle Top Bar Buttons
         if (mouseY < 26) {
@@ -312,6 +339,20 @@ public class BlueprintScreen extends Screen {
             // Save
             rightX -= 55;
             if (!state.readOnly && isHovering((int)mouseX, (int)mouseY, rightX, 3, 50, 20)) {
+                // Check for unknown nodes
+                boolean hasUnknown = false;
+                for (GuiNode node : state.nodes) {
+                    if (node.definition.properties().containsKey("is_unknown")) {
+                        hasUnknown = true;
+                        break;
+                    }
+                }
+                
+                if (hasUnknown) {
+                    state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.save_error.unknown_nodes").getString());
+                    return true;
+                }
+
                 String json = BlueprintIO.serialize(state.nodes, state.connections);
                 if (json != null) {
                     NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);

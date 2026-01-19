@@ -106,10 +106,6 @@ public class BlueprintMenu {
         return null;
     }
 
-    public void renderNodeContextMenu(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, double menuX, double menuY) {
-        BlueprintMenuRenderer.renderNodeContextMenu(guiGraphics, font, mouseX, mouseY, menuX, menuY);
-    }
-
     public void renderNodeMenu(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, double menuX, double menuY, int screenWidth, int screenHeight) {
         init(font);
         int x = (int) menuX;
@@ -375,12 +371,6 @@ public class BlueprintMenu {
 
     public boolean isClickInsideNodeMenu(double mouseX, double mouseY, double menuX, double menuY, int screenWidth, int screenHeight) {
         return BlueprintMenuInputHandler.handleIsClickInsideNodeMenu(this, mouseX, mouseY, menuX, menuY, screenWidth, screenHeight);
-    }
-
-    public enum ContextMenuResult { DELETE, BREAK_LINKS, NONE }
-
-    public ContextMenuResult onClickContextMenu(MouseButtonEvent event, double menuX, double menuY) {
-        return BlueprintMenuInputHandler.handleOnClickContextMenu(event, menuX, menuY);
     }
 }
 

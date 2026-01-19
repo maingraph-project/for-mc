@@ -11,6 +11,8 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 import ltd.opens.mg.mc.core.blueprint.BlueprintManager;
+import ltd.opens.mg.mc.core.blueprint.EntityVariableManager;
+import ltd.opens.mg.mc.core.blueprint.GlobalVariableManager;
 import ltd.opens.mg.mc.core.blueprint.routing.BlueprintRouter;
 import ltd.opens.mg.mc.core.blueprint.engine.BlueprintEngine;
 import net.minecraft.commands.Commands;
@@ -32,6 +34,8 @@ public class MaingraphforMC {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     private static BlueprintManager serverManager;
+    private static GlobalVariableManager globalVariableManager;
+    private static EntityVariableManager entityVariableManager;
     private static BlueprintRouter clientRouter;
     private final IEventBus modEventBus;
 
@@ -65,7 +69,14 @@ public class MaingraphforMC {
     public void onServerStarting(ServerStartingEvent event) {
         serverManager = new BlueprintManager();
         serverManager.getRouter().load(event.getServer().overworld());
-        LOGGER.info("MGMC: Blueprint manager initialized and routing table loaded for world.");
+        
+        globalVariableManager = new GlobalVariableManager();
+        globalVariableManager.load(event.getServer().overworld());
+        
+        entityVariableManager = new EntityVariableManager();
+        entityVariableManager.load(event.getServer().overworld());
+        
+        LOGGER.info("MGMC: Blueprint manager, global and entity variables initialized for world.");
     }
 
     @SubscribeEvent
@@ -73,15 +84,33 @@ public class MaingraphforMC {
         if (serverManager != null) {
             serverManager.clearCaches();
         }
+        if (globalVariableManager != null) {
+            globalVariableManager.save();
+            globalVariableManager.clear();
+        }
+        if (entityVariableManager != null) {
+            entityVariableManager.save();
+            entityVariableManager.clear();
+        }
         ltd.opens.mg.mc.core.blueprint.engine.BlueprintEngine.clearCaches();
         ltd.opens.mg.mc.core.blueprint.EventDispatcher.clear();
         
         serverManager = null;
+        globalVariableManager = null;
+        entityVariableManager = null;
         LOGGER.info("MGMC: Blueprint manager and global caches cleared.");
     }
 
     public static BlueprintManager getServerManager() {
         return serverManager;
+    }
+
+    public static GlobalVariableManager getGlobalVariableManager() {
+        return globalVariableManager;
+    }
+
+    public static EntityVariableManager getEntityVariableManager() {
+        return entityVariableManager;
     }
 
     public static BlueprintRouter getClientRouter() {

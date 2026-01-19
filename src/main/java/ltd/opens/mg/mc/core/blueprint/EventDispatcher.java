@@ -44,8 +44,6 @@ public class EventDispatcher {
     }
 
     public static void clear() {
-        EVENT_NODES.clear();
-        REGISTERED_CLASSES.clear();
         CONCRETE_CACHE.clear();
     }
 

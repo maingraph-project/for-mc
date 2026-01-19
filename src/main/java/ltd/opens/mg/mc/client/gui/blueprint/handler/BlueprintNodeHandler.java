@@ -130,8 +130,8 @@ public class BlueprintNodeHandler {
         
         // Start box selection
         state.isBoxSelecting = true;
-        state.boxSelectStartX = worldMouseX * state.zoom + state.panX;
-        state.boxSelectStartY = worldMouseY * state.zoom + state.panY;
+        state.boxSelectStartX = event.x();
+        state.boxSelectStartY = event.y();
         state.boxSelectEndX = state.boxSelectStartX;
         state.boxSelectEndY = state.boxSelectStartY;
 
@@ -190,6 +190,30 @@ public class BlueprintNodeHandler {
 
     private void handleAddButtonClick(GuiNode node, BlueprintScreen screen) {
         String action = (String) node.definition.properties().get("ui_button_action");
+        if ("view_unknown_info".equals(action)) {
+            String originalData = (String) node.definition.properties().get("original_data");
+            if (originalData != null) {
+                Minecraft.getInstance().setScreen(new InputModalScreen(
+                    screen,
+                    Component.translatable("gui.mgmc.node.unknown.info_title").getString(),
+                    originalData,
+                    false,
+                    new String[]{
+                        Component.translatable("gui.mgmc.modal.confirm").getString(),
+                        Component.translatable("gui.mgmc.blueprint_editor.context_menu.copy").getString()
+                    },
+                    InputModalScreen.Mode.SELECTION,
+                    (selected) -> {
+                        if (selected.equals(Component.translatable("gui.mgmc.blueprint_editor.context_menu.copy").getString())) {
+                            Minecraft.getInstance().keyboardHandler.setClipboard(originalData);
+                            state.showNotification(Component.translatable("gui.mgmc.node.unknown.copy_success").getString());
+                        }
+                        Minecraft.getInstance().setScreen(screen);
+                    }
+                ));
+            }
+            return;
+        }
         if ("add_output_modal".equals(action)) {
             Minecraft.getInstance().setScreen(new InputModalScreen(
                 screen,
@@ -261,10 +285,10 @@ public class BlueprintNodeHandler {
         if (state.isBoxSelecting) {
             state.isBoxSelecting = false;
             
-            double worldX1 = (state.boxSelectStartX - state.panX) / state.zoom;
-            double worldY1 = (state.boxSelectStartY - state.panY) / state.zoom;
-            double worldX2 = (state.boxSelectEndX - state.panX) / state.zoom;
-            double worldY2 = (state.boxSelectEndY - state.panY) / state.zoom;
+            double worldX1 = state.viewport.toWorldX(state.boxSelectStartX);
+            double worldY1 = state.viewport.toWorldY(state.boxSelectStartY);
+            double worldX2 = state.viewport.toWorldX(state.boxSelectEndX);
+            double worldY2 = state.viewport.toWorldY(state.boxSelectEndY);
             
             double minX = Math.min(worldX1, worldX2);
             double minY = Math.min(worldY1, worldY2);
@@ -365,6 +389,7 @@ public class BlueprintNodeHandler {
 
         if (isCtrlDown && keyCode == GLFW.GLFW_KEY_V) {
             if (BlueprintState.clipboardJson != null && !BlueprintState.clipboardJson.isEmpty()) {
+
                 state.pushHistory();
                 List<GuiNode> pastedNodes = new ArrayList<>();
                 List<GuiConnection> pastedConnections = new ArrayList<>();
@@ -415,8 +440,8 @@ public class BlueprintNodeHandler {
             double mouseX = Minecraft.getInstance().mouseHandler.xpos() * (double)Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double)Minecraft.getInstance().getWindow().getWidth();
             double mouseY = Minecraft.getInstance().mouseHandler.ypos() * (double)Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double)Minecraft.getInstance().getWindow().getHeight();
             
-            double worldMouseX = (mouseX - state.panX) / state.zoom;
-            double worldMouseY = (mouseY - state.panY) / state.zoom;
+            double worldMouseX = state.viewport.toWorldX(mouseX);
+            double worldMouseY = state.viewport.toWorldY(mouseY);
             
             GuiNode hoveredToRemove = null;
             for (int i = state.nodes.size() - 1; i >= 0; i--) {

@@ -26,7 +26,7 @@ public class AboutScreen extends Screen {
 
         // Website Button
         this.addRenderableWidget(Button.builder(Component.translatable("gui.mgmc.about.website"), b -> {
-            String url = "https://mc.maingraph.opens.ltd";
+            String url = "https://mc.maingraph.nb6.ltd";
             Minecraft.getInstance().setScreen(new ConfirmLinkScreen(confirmed -> {
                 if (confirmed) {
                     try {

@@ -19,19 +19,17 @@ public class ViewManager {
 
     public void tick() {
         if (state.isAnimatingView) {
-            float dx = targetPanX - state.panX;
-            float dy = targetPanY - state.panY;
-            float dz = targetZoom - state.zoom;
+            float dx = targetPanX - state.viewport.panX;
+            float dy = targetPanY - state.viewport.panY;
+            float dz = targetZoom - state.viewport.zoom;
             
             if (Math.abs(dx) < 0.1f && Math.abs(dy) < 0.1f && Math.abs(dz) < 0.005f) {
-                state.panX = targetPanX;
-                state.panY = targetPanY;
-                state.zoom = targetZoom;
+                state.viewport.set(targetPanX, targetPanY, targetZoom);
                 state.isAnimatingView = false;
             } else {
-                state.panX += dx * PAN_SMOOTHING;
-                state.panY += dy * PAN_SMOOTHING;
-                state.zoom += dz * ZOOM_SMOOTHING;
+                state.viewport.panX += dx * PAN_SMOOTHING;
+                state.viewport.panY += dy * PAN_SMOOTHING;
+                state.viewport.zoom += dz * ZOOM_SMOOTHING;
             }
         }
     }
@@ -47,9 +45,6 @@ public class ViewManager {
     }
 
     public void centerOnNode(GuiNode node) {
-        // Use a heuristic for center if screen size is unknown, or just set target pan
-        // Since we don't have screen size here, we'll just set it to be somewhat centered
-        // The jumpToNode usually handles this better when called from UI.
         targetZoom = 1.0f;
         targetPanX = -node.x; 
         targetPanY = -node.y;
@@ -57,9 +52,7 @@ public class ViewManager {
     }
 
     public void resetView() {
-        state.panX = 0;
-        state.panY = 0;
-        state.zoom = 1.0f;
+        state.viewport.set(0, 0, 1.0f);
         state.isAnimatingView = false;
     }
 }

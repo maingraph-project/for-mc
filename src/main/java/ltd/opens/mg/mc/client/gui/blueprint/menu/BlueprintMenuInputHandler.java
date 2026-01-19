@@ -191,21 +191,6 @@ public class BlueprintMenuInputHandler {
         }
         return false;
     }
-
-    public static BlueprintMenu.ContextMenuResult handleOnClickContextMenu(MouseButtonEvent event, double menuX, double menuY) {
-        double mouseX = event.x();
-        double mouseY = event.y();
-        int x = (int) menuX;
-        int y = (int) menuY;
-        int width = 120;
-        int itemHeight = 20;
-
-        if (mouseX >= x && mouseX <= x + width) {
-            if (mouseY >= y && mouseY <= y + itemHeight) return BlueprintMenu.ContextMenuResult.DELETE;
-            if (mouseY >= y + itemHeight && mouseY <= y + itemHeight * 2) return BlueprintMenu.ContextMenuResult.BREAK_LINKS;
-        }
-        return BlueprintMenu.ContextMenuResult.NONE;
-    }
 }
 
 
