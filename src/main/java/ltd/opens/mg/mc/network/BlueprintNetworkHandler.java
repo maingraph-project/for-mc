@@ -98,22 +98,6 @@ public class BlueprintNetworkHandler {
             }
         }
 
-        public static void handleDelete(final DeleteBlueprintPayload payload, final IPayloadContext context) {
-            context.enqueueWork(() -> {
-                if (context.player() instanceof ServerPlayer player) {
-                    if (!hasPermission(player)) {
-                        return;
-                    }
-                    var manager = MaingraphforMC.getServerManager();
-                    if (manager == null) return;
-                    manager.deleteBlueprint((ServerLevel) player.level(), payload.name());
-                    // Refresh list for all clients or just the sender?
-                    // For simplicity, the client that deleted it will refresh its list.
-                    context.reply(new ResponseBlueprintListPayload(getBlueprintNames((ServerLevel) player.level(), true)));
-                }
-            });
-        }
-
         public static void handleRequestMappings(final RequestMappingsPayload payload, final IPayloadContext context) {
             context.enqueueWork(() -> {
                 if (context.player() instanceof ServerPlayer player) {
@@ -161,36 +145,6 @@ public class BlueprintNetworkHandler {
                     }
                     
                     menu.slotsChanged(null); // 通知槽位刷新
-                }
-            });
-        }
-
-        public static void handleRename(final RenameBlueprintPayload payload, final IPayloadContext context) {
-            context.enqueueWork(() -> {
-                if (context.player() instanceof ServerPlayer player) {
-                    if (!hasPermission(player)) {
-                        return;
-                    }
-                    var manager = MaingraphforMC.getServerManager();
-                    if (manager == null) return;
-                    manager.renameBlueprint((ServerLevel) player.level(), payload.oldName(), payload.newName());
-                    context.reply(new ResponseBlueprintListPayload(getBlueprintNames((ServerLevel) player.level(), true)));
-                }
-            });
-        }
-
-        public static void handleDuplicate(final DuplicateBlueprintPayload payload, final IPayloadContext context) {
-            context.enqueueWork(() -> {
-                if (context.player() instanceof ServerPlayer player) {
-                    if (!hasPermission(player)) {
-                        return;
-                    }
-                    var manager = MaingraphforMC.getServerManager();
-                    if (manager == null) return;
-                    manager.duplicateBlueprint((ServerLevel) player.level(), payload.sourceName(), payload.targetName());
-                    
-                    // Reply with updated list
-                    context.reply(new ResponseBlueprintListPayload(getBlueprintNames((ServerLevel) player.level(), true)));
                 }
             });
         }
