@@ -93,7 +93,15 @@ public class BlueprintScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        state.tick(this.width, this.height);
+        
+        // Update mouse state for long press
+        double mX = this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getWidth();
+        double mY = this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getHeight();
+        
+        // Use both internal state and raw mouse state for robustness
+        boolean isDown = state.isMouseDown || this.minecraft.mouseHandler.isLeftPressed();
+        
+        state.tick(this.width, this.height, (int)mX, (int)mY, isDown);
         state.menu.tick();
     }
 
@@ -147,22 +155,22 @@ public class BlueprintScreen extends Screen {
         
         // Custom Buttons Rendering
         // Back Button
-        renderCustomButton(guiGraphics, mouseX, mouseY, 5, 3, 40, 20, "gui.mgmc.blueprint_editor.back");
+        renderCustomButton(guiGraphics, mouseX, mouseY, 5, 3, 40, 20, "gui.mgmc.blueprint_editor.back", null);
         
         // Right side buttons
         int rightX = this.width - 5;
         // Reset View
         rightX -= 70;
-        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 70, 20, "gui.mgmc.blueprint_editor.reset_view");
+        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 70, 20, "gui.mgmc.blueprint_editor.reset_view", "reset_view");
         
         // Arrange
         rightX -= 45;
-        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 40, 20, "gui.mgmc.blueprint_editor.auto_layout");
+        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 40, 20, "gui.mgmc.blueprint_editor.auto_layout", "auto_layout");
         
         // Save
         rightX -= 55;
         if (!state.readOnly) {
-            renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 50, 20, "gui.mgmc.blueprint_editor.save");
+            renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 50, 20, "gui.mgmc.blueprint_editor.save", null);
         }
 
         // --- Bottom UI ---
@@ -256,7 +264,7 @@ public class BlueprintScreen extends Screen {
         }
     }
 
-    private void renderCustomButton(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int w, int h, String langKey) {
+    private void renderCustomButton(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int w, int h, String langKey, String buttonId) {
         boolean hovered = isHovering(mouseX, mouseY, x, y, w, h);
         int bgColor = hovered ? 0xFF3D3D3D : 0x00000000; // Transparent background when not hovered
         if (bgColor != 0) {
@@ -264,14 +272,29 @@ public class BlueprintScreen extends Screen {
             guiGraphics.renderOutline(x, y, w, h, 0xFF555555);
         }
         
+        // Progress bar for long press
+        if (buttonId != null && buttonId.equals(state.buttonLongPressTarget) && state.buttonLongPressProgress > 0) {
+            int progressW = (int) (w * state.buttonLongPressProgress);
+            guiGraphics.fill(x, y + h - 2, x + progressW, y + h, 0xFF55FF55);
+        }
+
         Component text = Component.translatable(langKey);
         int textW = font.width(text);
         guiGraphics.drawString(font, text, x + (w - textW) / 2, y + (h - 9) / 2, hovered ? 0xFFFFFFFF : 0xFFBBBBBB, false);
 
-        if (hovered && Minecraft.getInstance().mouseHandler.isLeftPressed()) {
-            // This is still inside render, which is called every frame.
-            // We should use a flag to prevent multiple sends or move this to mouseClicked.
+        // Update long press state
+        if (buttonId != null && buttonId.equals(state.buttonLongPressTarget)) {
+            if (!hovered) {
+                state.buttonLongPressTarget = null;
+            }
         }
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        state.buttonLongPressTarget = null;
+        state.isMouseDown = false;
+        return eventHandler.mouseReleased(event, this) || super.mouseReleased(event);
     }
 
 
@@ -325,14 +348,22 @@ public class BlueprintScreen extends Screen {
             // Reset View
             rightX -= 70;
             if (isHovering((int)mouseX, (int)mouseY, rightX, 3, 70, 20)) {
-                state.resetView();
+                if (event.buttonInfo().button() == 0) {
+                    state.buttonLongPressTarget = "reset_view";
+                    state.buttonLongPressProgress = 0f;
+                    state.isMouseDown = true;
+                }
                 return true;
             }
 
             // Auto Layout
             rightX -= 45;
             if (isHovering((int)mouseX, (int)mouseY, rightX, 3, 40, 20)) {
-                state.autoLayout();
+                if (event.buttonInfo().button() == 0) {
+                    state.buttonLongPressTarget = "auto_layout";
+                    state.buttonLongPressProgress = 0f;
+                    state.isMouseDown = true;
+                }
                 return true;
             }
             
@@ -364,11 +395,6 @@ public class BlueprintScreen extends Screen {
         }
 
         return eventHandler.mouseClicked(event, isDouble, font, this) || super.mouseClicked(event, isDouble);
-    }
-
-    @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        return eventHandler.mouseReleased(event, this) || super.mouseReleased(event);
     }
 
     @Override

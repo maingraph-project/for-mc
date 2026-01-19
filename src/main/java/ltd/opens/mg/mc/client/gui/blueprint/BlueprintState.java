@@ -76,6 +76,8 @@ public class BlueprintState {
     // Quick Search & History
     public List<GuiNode> searchHistory = new ArrayList<>();
     public float searchConfirmProgress = 0f;
+    public float buttonLongPressProgress = 0f;
+    public String buttonLongPressTarget = null;
     public int lastHistorySelectedIndex = -1;
     public boolean isEnterDown = false;
     public boolean isMouseDown = false;
@@ -104,7 +106,7 @@ public class BlueprintState {
         }
     }
 
-    public void tick(int screenWidth, int screenHeight) {
+    public void tick(int screenWidth, int screenHeight, int mouseX, int mouseY, boolean isMouseDown) {
         cursorTick++;
         if (highlightTimer > 0) highlightTimer--;
         if (notificationTimer > 0) notificationTimer--;
@@ -117,7 +119,7 @@ public class BlueprintState {
                 if (searchConfirmProgress >= 1.0f) {
                     searchConfirmProgress = 0f;
                     isEnterDown = false;
-                    isMouseDown = false;
+                    this.isMouseDown = false;
                     jumpToNode(searchHistory.get(quickSearchSelectedIndex), screenWidth, screenHeight);
                     showQuickSearch = false;
                 }
@@ -127,6 +129,27 @@ public class BlueprintState {
             }
         } else {
             searchConfirmProgress = 0f;
+        }
+
+        // Button long press logic
+        if (buttonLongPressTarget != null) {
+            if (isMouseDown) {
+                buttonLongPressProgress += 0.05f; // 20 ticks = 1s
+                if (buttonLongPressProgress >= 1.0f) {
+                    if ("reset_view".equals(buttonLongPressTarget)) {
+                        resetView();
+                    } else if ("auto_layout".equals(buttonLongPressTarget)) {
+                        autoLayout();
+                    }
+                    buttonLongPressProgress = 0f;
+                    buttonLongPressTarget = null;
+                }
+            } else {
+                buttonLongPressProgress = 0f;
+                buttonLongPressTarget = null;
+            }
+        } else {
+            buttonLongPressProgress = 0f;
         }
     }
 
