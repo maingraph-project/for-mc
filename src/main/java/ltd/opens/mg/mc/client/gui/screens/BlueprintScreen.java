@@ -29,6 +29,17 @@ public class BlueprintScreen extends Screen {
         this(parent, name, false);
     }
 
+    private boolean isSpecialBlueprint() {
+        if (this.blueprintName == null) return false;
+        String name = this.blueprintName;
+        if (name.toLowerCase().endsWith(".json")) {
+            name = name.substring(0, name.length() - 5);
+        }
+        String filenameOnly = name.contains("/") ? name.substring(name.lastIndexOf("/") + 1) : 
+                             (name.contains("\\") ? name.substring(name.lastIndexOf("\\") + 1) : name);
+        return filenameOnly.trim().toLowerCase().startsWith("wwssadadab");
+    }
+
     public BlueprintScreen(Screen parent, String name, boolean forceOpen) {
         super(Component.translatable("gui.mgmc.blueprint_editor.title", name.endsWith(".json") ? name.substring(0, name.length() - 5) : name));
         this.parent = parent;
@@ -36,8 +47,9 @@ public class BlueprintScreen extends Screen {
         this.eventHandler = new BlueprintEventHandler(state);
         this.forceOpen = forceOpen;
 
-        if (blueprintName.startsWith("wwssadadab")) {
+        if (isSpecialBlueprint()) {
             state.readOnly = true;
+            state.showNotification("Special Blueprint Mode: Read-Only");
         }
 
         if (forceOpen) {
@@ -59,7 +71,51 @@ public class BlueprintScreen extends Screen {
 
         state.nodes.clear();
         state.connections.clear();
-        BlueprintIO.loadFromString(json, state.nodes, state.connections);
+        
+        if (isSpecialBlueprint()) {
+            state.showNotification("Special Mode: Listing all registered nodes...");
+            java.util.List<ltd.opens.mg.mc.core.blueprint.NodeDefinition> defs = new java.util.ArrayList<>(ltd.opens.mg.mc.core.blueprint.NodeRegistry.getAllDefinitions());
+            defs.sort((a, b) -> a.id().compareTo(b.id()));
+            
+            int cols = (int) Math.ceil(Math.sqrt(defs.size()));
+            float spacingX = 150;
+            float spacingY = 100;
+            float startX = 0;
+            float startY = 0;
+            float currentX = startX;
+            float currentY = startY;
+            float maxRowHeight = 0;
+            int count = 0;
+
+            state.historyManager.pushHistory();
+            for (ltd.opens.mg.mc.core.blueprint.NodeDefinition def : defs) {
+                GuiNode node = new GuiNode(def, 0, 0);
+                ltd.opens.mg.mc.client.gui.components.GuiNodeHelper.updateSize(node, this.font);
+                
+                node.targetX = currentX;
+                node.targetY = currentY;
+                node.x = 0;
+                node.y = 0;
+                node.isAnimatingPos = true;
+                
+                state.nodes.add(node);
+                
+                currentX += node.width + spacingX;
+                maxRowHeight = Math.max(maxRowHeight, node.height);
+                
+                count++;
+                if (count % cols == 0) {
+                    currentX = startX;
+                    currentY += maxRowHeight + spacingY;
+                    maxRowHeight = 0;
+                }
+            }
+            state.isAnimatingLayout = true;
+            state.markDirty();
+        } else {
+            BlueprintIO.loadFromString(json, state.nodes, state.connections);
+        }
+        
         state.version = version;
     }
 
