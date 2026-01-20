@@ -252,7 +252,7 @@ public class BlueprintNodeHandler {
         if (state.markerEditBox == null) {
             state.markerEditBox = new EditBox(font, 0, 0, 200, 20, Component.empty());
             state.markerEditBox.setBordered(false);
-            state.markerEditBox.setMaxLength(500);
+            state.markerEditBox.setMaxLength(32767);
             state.markerEditBox.setTextColor(0xFFFFFFFF);
         }
         String current = node.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 

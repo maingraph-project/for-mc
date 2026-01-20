@@ -47,6 +47,7 @@ public class BlueprintSelectionScreen extends Screen {
         int createY = 35;
 
         this.newBlueprintName = new EditBox(this.font, createX, createY, createWidth, createHeight, Component.translatable("gui.mgmc.blueprint_selection.new_name_label"));
+        this.newBlueprintName.setMaxLength(128);
         this.newBlueprintName.setHint(Component.translatable("gui.mgmc.blueprint_selection.new_name_hint"));
         this.addRenderableWidget(this.newBlueprintName);
 

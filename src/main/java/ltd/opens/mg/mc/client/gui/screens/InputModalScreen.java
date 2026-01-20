@@ -50,6 +50,7 @@ public class InputModalScreen extends Screen {
         if (mode == Mode.INPUT) {
             // Text Input Mode
             this.editBox = new EditBox(this.font, startX + 10, startY + 30, width - 20, 20, Component.translatable("gui.mgmc.modal.input_label"));
+            this.editBox.setMaxLength(32767);
             this.editBox.setValue(initialValue);
             if (isNumeric) {
                 this.editBox.setFilter(s -> s.isEmpty() || s.matches("^-?\\d*\\.?\\d*$"));
