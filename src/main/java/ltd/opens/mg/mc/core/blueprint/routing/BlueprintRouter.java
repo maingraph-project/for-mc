@@ -107,13 +107,52 @@ public class BlueprintRouter {
         Path filePath = getMappingsPath(level);
         try {
             Files.createDirectories(filePath.getParent());
+            
+            // 准备全局映射以便在保存存档时做差集
+            Map<String, Set<String>> globalMappings = new HashMap<>();
+            if (level != null) {
+                Path globalPath = getMappingsPath(null);
+                if (Files.exists(globalPath)) {
+                    try (FileReader reader = new FileReader(globalPath.toFile())) {
+                        JsonObject json = GSON.fromJson(reader, JsonObject.class);
+                        if (json != null) {
+                            for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+                                if (!entry.getValue().isJsonArray()) continue;
+                                Set<String> blueprints = new HashSet<>();
+                                entry.getValue().getAsJsonArray().forEach(e -> blueprints.add(e.getAsString()));
+                                globalMappings.put(entry.getKey(), blueprints);
+                            }
+                        }
+                    } catch (IOException e) {
+                        LOGGER.error("MGMC: Failed to load global mappings for subtraction", e);
+                    }
+                }
+            }
+
             try (FileWriter writer = new FileWriter(filePath.toFile())) {
                 JsonObject json = new JsonObject();
                 Map<String, Set<String>> currentTable = routingTable.get();
                 for (Map.Entry<String, Set<String>> entry : currentTable.entrySet()) {
-                    JsonArray array = new JsonArray();
-                    entry.getValue().forEach(array::add);
-                    json.add(entry.getKey(), array);
+                    String id = entry.getKey();
+                    Set<String> blueprints = entry.getValue();
+                    
+                    if (level != null) {
+                        // 如果是保存到存档，排除掉全局已有的映射，实现“增量保存”
+                        Set<String> globalBps = globalMappings.getOrDefault(id, Collections.emptySet());
+                        Set<String> localOnlyBps = new HashSet<>(blueprints);
+                        localOnlyBps.removeAll(globalBps);
+                        
+                        if (!localOnlyBps.isEmpty()) {
+                            JsonArray array = new JsonArray();
+                            localOnlyBps.stream().sorted().forEach(array::add);
+                            json.add(id, array);
+                        }
+                    } else {
+                        // 如果是保存到全局，直接全部保存
+                        JsonArray array = new JsonArray();
+                        blueprints.stream().sorted().forEach(array::add);
+                        json.add(id, array);
+                    }
                 }
                 GSON.toJson(json, writer);
             }
