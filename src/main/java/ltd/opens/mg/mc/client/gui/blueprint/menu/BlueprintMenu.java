@@ -48,6 +48,7 @@ public class BlueprintMenu {
     public void setSearchQuery(String searchQuery) { 
         if (searchEditBox != null) {
             searchEditBox.setValue(searchQuery);
+            updateSearch();
         }
     }
     
@@ -70,7 +71,10 @@ public class BlueprintMenu {
      public int getLastMenuHeight() { return lastMenuHeight; }
      public String getHoveredCategory() { return hoveredCategory; }
     public String getCurrentPath() { return currentPath; }
-    public void setCurrentPath(String currentPath) { this.currentPath = currentPath; }
+    public void setCurrentPath(String currentPath) { 
+        this.currentPath = currentPath; 
+        updateSearch();
+    }
     public NodeDefinition.PortType getFilterType() { return filterType; }
     public boolean isLookingForInput() { return lookingForInput; }
 
@@ -102,6 +106,7 @@ public class BlueprintMenu {
         currentPath = BlueprintCategoryManager.ROOT_PATH;
         filterType = null;
         lookingForInput = false;
+        updateSearch();
     }
 
     public void updateSearch() {
