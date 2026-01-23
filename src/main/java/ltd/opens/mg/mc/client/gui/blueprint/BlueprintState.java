@@ -228,7 +228,7 @@ public class BlueprintState {
         
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
-            mc.player.displayClientMessage(Component.literal("§a[MGMC] §7正在尝试打开: §n" + url), false);
+            mc.player.displayClientMessage(Component.literal("§a[MGMC] §7 Try open URL: §n" + url), false);
         }
 
         // 先尝试最直接的方式

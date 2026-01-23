@@ -154,40 +154,30 @@ public class BlueprintRenderer {
         guiGraphics.renderOutline(minX, minY, maxX - minX, maxY - minY, 0xFF4488FF);
     }
 
-    public static void drawWPressProgressBar(GuiGraphics guiGraphics, BlueprintState state, int screenWidth, int screenHeight, net.minecraft.client.gui.Font font) {
-        if (state.wPressProgress <= 0) return;
+    public static void drawNodeWProgressBar(GuiGraphics guiGraphics, GuiNode node, float progress) {
+        if (progress <= 0) return;
 
-        int barWidth = 160;
-        int barHeight = 3;
-        int x = (screenWidth - barWidth) / 2;
-        int y = screenHeight - 50;
+        // 进度条位置在节点正上方
+        float barWidth = node.width * 0.8f;
+        float barHeight = 2.0f;
+        float x = node.x + (node.width - barWidth) / 2f;
+        float y = node.y - 6.0f;
 
-        // 绘制半透明圆角背景背景 (模拟)
-        guiGraphics.fill(x - 10, y - 18, x + barWidth + 10, y + barHeight + 8, 0x88000000);
+        // 背景
+        guiGraphics.fill((int)x, (int)y, (int)(x + barWidth), (int)(y + barHeight), 0xAA000000);
         
-        // 绘制文字，带一点点发光效果 (通过叠加两次绘制)
-        String label = Component.translatable("gui.mgmc.blueprint.opening_webpage").getString();
-        guiGraphics.drawCenteredString(font, label, screenWidth / 2 + 1, y - 13 + 1, 0x44000000); // 阴影
-        guiGraphics.drawCenteredString(font, label, screenWidth / 2, y - 13, 0xFFFFFFFF);
-
-        // 绘制进度条背景
-        guiGraphics.fill(x, y, x + barWidth, y + barHeight, 0xFF222222);
-        
-        // 绘制进度
-        int progressWidth = (int) (barWidth * state.wPressProgress);
-        
-        // 进度条主体颜色 (青色到蓝色的渐变感)
+        // 进度主体
         int color = 0xFF55FFFF;
-        if (state.wPressProgress > 0.9f) {
-            // 即将完成时变为亮白色闪烁感
-            color = 0xFFFFFFFF;
+        if (progress > 0.9f) {
+            color = 0xFFFFFFFF; // 临近完成闪白
         }
         
-        guiGraphics.fill(x, y, x + progressWidth, y + barHeight, color);
+        float currentWidth = barWidth * progress;
+        guiGraphics.fill((int)x, (int)y, (int)(x + currentWidth), (int)(y + barHeight), color);
         
-        // 在进度条末端加一个小光点
-        if (progressWidth > 0) {
-            guiGraphics.fill(x + progressWidth - 1, y - 1, x + progressWidth + 1, y + barHeight + 1, 0xFFFFFFFF);
+        // 末端光点
+        if (currentWidth > 0) {
+            guiGraphics.fill((int)(x + currentWidth - 0.5f), (int)(y - 0.5f), (int)(x + currentWidth + 0.5f), (int)(y + barHeight + 0.5f), 0xFFFFFFFF);
         }
     }
 
