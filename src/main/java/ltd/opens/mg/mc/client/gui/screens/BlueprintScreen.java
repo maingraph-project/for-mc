@@ -199,6 +199,11 @@ public class BlueprintScreen extends Screen {
             node.updateConnectedState(state.connections);
             int hTimer = (state.highlightedNode == node) ? state.highlightTimer : 0;
             node.render(guiGraphics, this.font, mouseX, mouseY, state.viewport, state.connections, state.focusedNode, state.focusedPort, state.editingMarkerNode == node, hTimer);
+
+            // 如果该节点是当前 W 长按的目标节点，渲染进度条
+            if (state.wPressProgress > 0 && state.selectedNodes.size() == 1 && state.selectedNodes.contains(node)) {
+                BlueprintRenderer.drawNodeWProgressBar(guiGraphics, node, state.wPressProgress);
+            }
         }
 
         if (state.connectionStartNode != null) {

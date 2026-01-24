@@ -225,16 +225,16 @@ public class BlueprintSearchManager {
                 String regex = term.replace(".", "\\.").replace("?", ".").replace("*", ".*");
                 try {
                     java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex, java.util.regex.Pattern.CASE_INSENSITIVE);
-                    if (pattern.matcher(locName).matches() || pattern.matcher(rawName).matches()) {
+                    if ((locName != null && pattern.matcher(locName).matches()) || (rawName != null && pattern.matcher(rawName).matches())) {
                         totalScore += 15;
                         termMatched = true;
-                    } else if (pattern.matcher(locName).find() || pattern.matcher(rawName).find()) {
+                    } else if ((locName != null && pattern.matcher(locName).find()) || (rawName != null && pattern.matcher(rawName).find())) {
                         totalScore += 10;
                         termMatched = true;
-                    } else if (pattern.matcher(locCat).find() || pattern.matcher(rawCat).find()) {
+                    } else if ((locCat != null && pattern.matcher(locCat).find()) || (rawCat != null && pattern.matcher(rawCat).find())) {
                         totalScore += 5;
                         termMatched = true;
-                    } else if (pattern.matcher(locPath).find() || pattern.matcher(rawPath).find()) {
+                    } else if ((locPath != null && pattern.matcher(locPath).find()) || (rawPath != null && pattern.matcher(rawPath).find())) {
                         totalScore += 8;
                         termMatched = true;
                     }
@@ -242,15 +242,15 @@ public class BlueprintSearchManager {
                 }
             } else {
                 // Normal matching
-                if (matches(locName, term) || rawName.contains(term)) {
+                if ((locName != null && matches(locName, term)) || (rawName != null && rawName.contains(term))) {
                     totalScore += 10;
                     termMatched = true;
                 }
-                if (matches(locCat, term) || rawCat.contains(term)) {
+                if ((locCat != null && matches(locCat, term)) || (rawCat != null && rawCat.contains(term))) {
                     totalScore += 5;
                     termMatched = true;
                 }
-                if (matches(locPath, term) || rawPath.contains(term)) {
+                if ((locPath != null && matches(locPath, term)) || (rawPath != null && rawPath.contains(term))) {
                     totalScore += 8;
                     termMatched = true;
                 }
@@ -261,14 +261,14 @@ public class BlueprintSearchManager {
 
         // Bonus for full query matches (non-wildcard)
         if (!fullQuery.contains("*") && !fullQuery.contains("?")) {
-            if (locName.equals(fullQuery) || rawName.equals(fullQuery)) totalScore += 100;
-            else if (locName.startsWith(fullQuery) || rawName.startsWith(fullQuery)) totalScore += 50;
+            if ((locName != null && locName.equals(fullQuery)) || (rawName != null && rawName.equals(fullQuery))) totalScore += 100;
+            else if ((locName != null && locName.startsWith(fullQuery)) || (rawName != null && rawName.startsWith(fullQuery))) totalScore += 50;
 
-            if (locCat.equals(fullQuery) || rawCat.equals(fullQuery)) totalScore += 40;
-            else if (locCat.startsWith(fullQuery) || rawCat.startsWith(fullQuery)) totalScore += 20;
+            if ((locCat != null && locCat.equals(fullQuery)) || (rawCat != null && rawCat.equals(fullQuery))) totalScore += 40;
+            else if ((locCat != null && locCat.startsWith(fullQuery)) || (rawCat != null && rawCat.startsWith(fullQuery))) totalScore += 20;
 
-            if (locPath.equals(fullQuery) || rawPath.equals(fullQuery)) totalScore += 60;
-            else if (locPath.startsWith(fullQuery) || rawPath.startsWith(fullQuery)) totalScore += 30;
+            if ((locPath != null && locPath.equals(fullQuery)) || (rawPath != null && rawPath.equals(fullQuery))) totalScore += 60;
+            else if ((locPath != null && locPath.startsWith(fullQuery)) || (rawPath != null && rawPath.startsWith(fullQuery))) totalScore += 30;
         }
 
         if (isFolder) totalScore -= 2;

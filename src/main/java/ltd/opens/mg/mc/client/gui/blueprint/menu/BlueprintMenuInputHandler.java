@@ -129,7 +129,6 @@ public class BlueprintMenuInputHandler {
                         if (lastDot != -1) menu.setCurrentPath(menu.getCurrentPath().substring(0, lastDot));
                         else menu.setCurrentPath(BlueprintCategoryManager.ROOT_PATH);
                         menu.setScrollAmount(0);
-                        menu.updateSearch(); // Need to update search after changing path
                         return null;
                     }
                 }
@@ -141,7 +140,6 @@ public class BlueprintMenuInputHandler {
                     if (mouseX >= x && mouseX <= x + width && mouseY >= itemY && mouseY <= itemY + 18) {
                         menu.setCurrentPath(subPath);
                         menu.setScrollAmount(0);
-                        menu.updateSearch(); // Need to update search after changing path
                         return null;
                     }
                 }

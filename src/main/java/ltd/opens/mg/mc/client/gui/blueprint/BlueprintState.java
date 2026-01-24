@@ -6,7 +6,12 @@ import ltd.opens.mg.mc.client.gui.components.*;
 import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import ltd.opens.mg.mc.client.gui.blueprint.manager.MarkerSearchManager;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.util.Util;
+import ltd.opens.mg.mc.client.gui.screens.BlueprintScreen;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,6 +88,10 @@ public class BlueprintState {
     public int lastHistorySelectedIndex = -1;
     public boolean isEnterDown = false;
     public boolean isMouseDown = false;
+    public boolean isWDown = false;
+    public boolean wTriggered = false; // Add this to prevent repeated triggers
+    public float wPressProgress = 0f;
+    public String wPressUrl = null;
 
     // Drag-to-create-node context
     public GuiNode pendingConnectionSourceNode = null;
@@ -120,6 +129,52 @@ public class BlueprintState {
         if (notificationTimer > 0) notificationTimer--;
         viewManager.tick();
         layoutManager.tick();
+
+        // W Long Press Logic
+        if (isWDown && selectedNodes.size() == 1 && !showQuickSearch && editingMarkerNode == null) {
+            if (wTriggered) {
+                // If already triggered, keep progress at 0 or 1, and don't do anything
+                wPressProgress = 0f;
+            } else {
+                // Find first selected node with a web_url
+                String url = null;
+                for (GuiNode node : selectedNodes) {
+                    if (node.definition != null && node.definition.properties().containsKey("web_url")) {
+                        url = (String) node.definition.properties().get("web_url");
+                        break;
+                    }
+                }
+
+                if (url != null) {
+                    wPressUrl = url;
+                    wPressProgress += 0.04f; // 25 ticks = 1.25s
+                    if (wPressProgress >= 1.0f) {
+                        System.out.println("MGMC: Long press W completed for URL: " + url);
+                        wPressProgress = 0f;
+                        wTriggered = true; // Mark as triggered
+                        openWebpage(url);
+                    }
+                } else {
+                    if (wPressProgress > 0) {
+                        System.out.println("MGMC: W down but no web_url found in selected nodes");
+                    }
+                    wPressProgress *= 0.8f;
+                    if (wPressProgress < 0.01f) {
+                        wPressProgress = 0f;
+                        wPressUrl = null;
+                    }
+                }
+            }
+        } else {
+            if (!isWDown) {
+                wTriggered = false; // Reset when key is released
+            }
+            wPressProgress *= 0.8f;
+            if (wPressProgress < 0.01f) {
+                wPressProgress = 0f;
+                wPressUrl = null;
+            }
+        }
 
         // Confirm progress logic (Long press Enter or Mouse for history)
         if (showQuickSearch && quickSearchEditBox != null && quickSearchEditBox.getValue().isEmpty()) {
@@ -164,6 +219,30 @@ public class BlueprintState {
 
     public void jumpToNode(GuiNode node, int screenWidth, int screenHeight) {
         viewManager.jumpToNode(node, screenWidth, screenHeight);
+    }
+
+    private void openWebpage(String url) {
+        if (url == null || url.isEmpty()) return;
+        
+        System.out.println("MGMC: Attempting to open webpage: " + url);
+        
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            mc.player.displayClientMessage(Component.literal("§a[MGMC] §7 Try open URL: §n" + url), false);
+        }
+
+        // 先尝试最直接的方式
+        try {
+            if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+                return;
+            }
+        } catch (Exception e) {
+            System.err.println("MGMC: Desktop browse failed, falling back to Util: " + e.getMessage());
+        }
+
+        // 保底方案
+        Util.getPlatform().openUri(url);
     }
 
     public void updateQuickSearchMatches() {

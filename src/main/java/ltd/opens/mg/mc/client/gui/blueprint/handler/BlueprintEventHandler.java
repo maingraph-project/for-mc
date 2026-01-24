@@ -221,10 +221,18 @@ public class BlueprintEventHandler {
         if (event.key() == GLFW.GLFW_KEY_ENTER) {
             state.isEnterDown = false;
         }
+        if (event.key() == GLFW.GLFW_KEY_W) {
+            state.isWDown = false;
+        }
         return false;
     }
 
     public boolean keyPressed(KeyEvent event, BlueprintScreen screen) {
+        if (event.key() == GLFW.GLFW_KEY_W && !state.showQuickSearch && state.editingMarkerNode == null) {
+            state.isWDown = true;
+            // No return true here to allow other controls (like WASD panning if implemented) 
+            // but currently W is not used for panning in this editor.
+        }
         if (event.key() == GLFW.GLFW_KEY_M) {
             state.showMinimap = !state.showMinimap;
             return true;

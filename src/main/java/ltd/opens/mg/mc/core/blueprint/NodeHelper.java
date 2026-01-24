@@ -65,6 +65,14 @@ public class NodeHelper {
     }
 
     /**
+     * 设置节点属性
+     */
+    public NodeHelper property(String key, Object value) {
+        builder.addProperty(key, value);
+        return this;
+    }
+
+    /**
      * 添加输入端口
      */
     public NodeHelper input(String id, String displayNameKey, NodeDefinition.PortType type, int color) {
@@ -125,10 +133,6 @@ public class NodeHelper {
     public NodeHelper flag(String key, Object value) {
         builder.addProperty(key, value);
         return this;
-    }
-
-    public NodeHelper property(String key, Object value) {
-        return flag(key, value);
     }
 
     /**

@@ -154,6 +154,33 @@ public class BlueprintRenderer {
         guiGraphics.renderOutline(minX, minY, maxX - minX, maxY - minY, 0xFF4488FF);
     }
 
+    public static void drawNodeWProgressBar(GuiGraphics guiGraphics, GuiNode node, float progress) {
+        if (progress <= 0) return;
+
+        // 进度条位置在节点正上方
+        float barWidth = node.width * 0.8f;
+        float barHeight = 2.0f;
+        float x = node.x + (node.width - barWidth) / 2f;
+        float y = node.y - 6.0f;
+
+        // 背景
+        guiGraphics.fill((int)x, (int)y, (int)(x + barWidth), (int)(y + barHeight), 0xAA000000);
+        
+        // 进度主体
+        int color = 0xFF55FFFF;
+        if (progress > 0.9f) {
+            color = 0xFFFFFFFF; // 临近完成闪白
+        }
+        
+        float currentWidth = barWidth * progress;
+        guiGraphics.fill((int)x, (int)y, (int)(x + currentWidth), (int)(y + barHeight), color);
+        
+        // 末端光点
+        if (currentWidth > 0) {
+            guiGraphics.fill((int)(x + currentWidth - 0.5f), (int)(y - 0.5f), (int)(x + currentWidth + 0.5f), (int)(y + barHeight + 0.5f), 0xFFFFFFFF);
+        }
+    }
+
     public static void drawMinimap(GuiGraphics guiGraphics, BlueprintState state, int screenWidth, int screenHeight) {
         if (!state.showMinimap || state.nodes.isEmpty()) return;
 
