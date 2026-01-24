@@ -1,5 +1,6 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
+import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.client.network.NetworkService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,11 +16,13 @@ public class BlueprintSelectionForMappingScreen extends Screen {
     private final BlueprintMappingScreen parent;
     private final String targetId;
     private BlueprintList list;
+    private final boolean isGlobalMode;
 
     public BlueprintSelectionForMappingScreen(BlueprintMappingScreen parent, String targetId) {
         super(Component.translatable("gui.mgmc.mapping.select_blueprint.title"));
         this.parent = parent;
         this.targetId = targetId;
+        this.isGlobalMode = Minecraft.getInstance().level == null;
     }
 
     @Override
@@ -48,7 +51,25 @@ public class BlueprintSelectionForMappingScreen extends Screen {
 
     private void refreshList() {
         this.list.clearEntries();
-        NetworkService.getInstance().requestBlueprintList();
+        if (isGlobalMode) {
+            try {
+                java.nio.file.Path dir = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir();
+                java.util.List<String> files = new java.util.ArrayList<>();
+                if (java.nio.file.Files.exists(dir)) {
+                    try (java.util.stream.Stream<java.nio.file.Path> stream = java.nio.file.Files.list(dir)) {
+                        stream.filter(p -> !java.nio.file.Files.isDirectory(p) && p.toString().endsWith(".json"))
+                              .map(p -> p.getFileName().toString())
+                              .forEach(files::add);
+                    }
+                }
+                java.util.Collections.sort(files);
+                updateListFromServer(files);
+            } catch (java.io.IOException e) {
+                MaingraphforMC.LOGGER.error("Failed to list global blueprints for mapping", e);
+            }
+        } else {
+            NetworkService.getInstance().requestBlueprintList();
+        }
     }
 
     public void updateListFromServer(List<String> blueprints) {

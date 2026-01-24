@@ -1,5 +1,6 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
+import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.utils.IdMetadataHelper;
@@ -25,6 +26,7 @@ public class BlueprintMappingScreen extends Screen {
     private IdList idList;
     private BlueprintSelectionList blueprintList;
     private String selectedId = null;
+    private final boolean isGlobalMode;
 
     // 右键菜单状态
     private final GuiContextMenu contextMenu = new GuiContextMenu();
@@ -32,6 +34,7 @@ public class BlueprintMappingScreen extends Screen {
     public BlueprintMappingScreen(Screen parent) {
         super(Component.translatable("gui.mgmc.mapping.title"));
         this.parent = parent;
+        this.isGlobalMode = Minecraft.getInstance().level == null;
     }
 
     @Override
@@ -43,7 +46,11 @@ public class BlueprintMappingScreen extends Screen {
     protected void init() {
         // 只有在没有数据时才请求，避免覆盖本地未保存的修改
         if (this.workingMappings.isEmpty()) {
-            NetworkService.getInstance().requestMappings();
+            if (isGlobalMode) {
+                loadGlobalMappings();
+            } else {
+                NetworkService.getInstance().requestMappings();
+            }
         }
 
         int sidePanelWidth = this.width / 3;
@@ -87,7 +94,11 @@ public class BlueprintMappingScreen extends Screen {
         // 保存和返回按钮 (最底部)
         int footerY = this.height - 30;
         this.addRenderableWidget(Button.builder(Component.translatable("gui.mgmc.mapping.save"), b -> {
-            NetworkService.getInstance().saveMappings(workingMappings);
+            if (isGlobalMode) {
+                saveGlobalMappings();
+            } else {
+                NetworkService.getInstance().saveMappings(workingMappings);
+            }
             this.onClose();
         }).bounds(this.width - 110, footerY, 100, 20).build());
 
@@ -100,6 +111,44 @@ public class BlueprintMappingScreen extends Screen {
         // 默认选中 GLOBAL_ID
         if (selectedId == null) {
             selectId(BlueprintRouter.GLOBAL_ID);
+        }
+    }
+
+    private void saveGlobalMappings() {
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get("mgmc_blueprints/.routing/mappings.json");
+            java.nio.file.Files.createDirectories(path.getParent());
+            com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+            for (Map.Entry<String, Set<String>> entry : workingMappings.entrySet()) {
+                com.google.gson.JsonArray array = new com.google.gson.JsonArray();
+                entry.getValue().forEach(array::add);
+                json.add(entry.getKey(), array);
+            }
+            String jsonStr = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(json);
+            java.nio.file.Files.write(path, jsonStr.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            MaingraphforMC.LOGGER.error("Failed to save global mappings", e);
+        }
+    }
+
+    private void loadGlobalMappings() {
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get("mgmc_blueprints/.routing/mappings.json");
+            if (java.nio.file.Files.exists(path)) {
+                String jsonStr = new String(java.nio.file.Files.readAllBytes(path), java.nio.charset.StandardCharsets.UTF_8);
+                com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(jsonStr).getAsJsonObject();
+                Map<String, Set<String>> mappings = new HashMap<>();
+                for (Map.Entry<String, com.google.gson.JsonElement> entry : json.entrySet()) {
+                    Set<String> set = new HashSet<>();
+                    for (com.google.gson.JsonElement e : entry.getValue().getAsJsonArray()) {
+                        set.add(e.getAsString());
+                    }
+                    mappings.put(entry.getKey(), set);
+                }
+                updateMappingsFromServer(mappings);
+            }
+        } catch (Exception e) {
+            MaingraphforMC.LOGGER.error("Failed to load global mappings", e);
         }
     }
 

@@ -89,6 +89,9 @@ public class BlueprintManager {
     }
 
     public Path getBlueprintsDir(ServerLevel level) {
+        if (level == null) {
+            return getGlobalBlueprintsDir();
+        }
         Path dir = level.getServer().getWorldPath(LevelResource.ROOT).resolve("mgmc_blueprints");
         if (!Files.exists(dir)) {
             try {
@@ -100,13 +103,50 @@ public class BlueprintManager {
         return dir;
     }
 
+    public static Path getGlobalBlueprintsDir() {
+        Path dir = java.nio.file.Paths.get("mgmc_blueprints");
+        if (!Files.exists(dir)) {
+            try {
+                Files.createDirectories(dir);
+            } catch (Exception e) {
+                LogManager.getLogger().error("Failed to create global blueprints directory: " + dir, e);
+            }
+        }
+        return dir;
+    }
+
+    public static boolean isMultiplayer(ServerLevel level) {
+        if (level == null || level.getServer() == null) return false;
+        return level.getServer().isDedicatedServer() || level.getServer().isPublished();
+    }
+
     public JsonObject getBlueprint(ServerLevel level, String name) {
         if (!isValidFileName(name)) return null;
         try {
             final String fileName = name.endsWith(".json") ? name : name + ".json";
-            Path dataFile = getBlueprintsDir(level).resolve(fileName);
             
-            if (Files.exists(dataFile)) {
+            // 1. 尝试从存档目录加载
+            Path dataFile = null;
+            if (level != null) {
+                dataFile = getBlueprintsDir(level).resolve(fileName);
+            }
+            
+            // 2. 如果存档目录没有，且不是专服/联机模式，尝试从全局目录加载
+            if ((dataFile == null || !Files.exists(dataFile)) && level != null) {
+                if (!isMultiplayer(level)) {
+                    Path globalFile = getGlobalBlueprintsDir().resolve(fileName);
+                    if (Files.exists(globalFile)) {
+                        dataFile = globalFile;
+                    }
+                }
+            }
+            
+            // 如果是主界面模式 (level == null)，直接用全局目录
+            if (level == null) {
+                dataFile = getGlobalBlueprintsDir().resolve(fileName);
+            }
+            
+            if (dataFile != null && Files.exists(dataFile)) {
                 long lastModified = Files.getLastModifiedTime(dataFile).toMillis();
                 CachedBlueprint cached = blueprintCache.get(fileName);
                 
@@ -297,25 +337,42 @@ public class BlueprintManager {
             }
         }
 
-        List<JsonObject> all = new ArrayList<>();
+        Map<String, JsonObject> all = new LinkedHashMap<>();
         try {
+            // 1. 优先加载存档蓝图
             Path dir = getBlueprintsDir(level);
             try (var stream = Files.list(dir)) {
                 stream.filter(p -> p.toString().endsWith(".json")).forEach(p -> {
                     String name = p.getFileName().toString();
                     JsonObject bp = getBlueprint(level, name);
-                    if (bp != null) all.add(bp);
+                    if (bp != null) all.put(name, bp);
                 });
             }
+
+            // 2. 如果不是专服/联机模式，加载全局蓝图（不覆盖同名存档蓝图）
+            if (!isMultiplayer(level)) {
+                Path globalDir = getGlobalBlueprintsDir();
+                try (var stream = Files.list(globalDir)) {
+                    stream.filter(p -> p.toString().endsWith(".json")).forEach(p -> {
+                        String name = p.getFileName().toString();
+                        if (!all.containsKey(name)) {
+                            JsonObject bp = getBlueprint(level, name);
+                            if (bp != null) all.put(name, bp);
+                        }
+                    });
+                }
+            }
+
             synchronized (allBlueprintsCache) {
                 allBlueprintsCache.clear();
-                allBlueprintsCache.addAll(all);
+                allBlueprintsCache.addAll(all.values());
                 lastAllBlueprintsRefresh = now;
             }
         } catch (IOException e) {
-            LOGGER.error("Failed to list blueprints in " + getBlueprintsDir(level), e);
+            LOGGER.error("Failed to list blueprints", e);
         }
-        return all;
+
+        return new ArrayList<>(all.values());
     }
 
     public List<JsonObject> getBlueprintsForId(ServerLevel level, String... ids) {

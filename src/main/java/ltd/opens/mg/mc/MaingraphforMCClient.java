@@ -14,6 +14,8 @@ import ltd.opens.mg.mc.client.gui.screens.AboutScreen;
 
 import net.minecraft.client.KeyMapping;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.settings.KeyModifier;
@@ -33,7 +35,7 @@ public class MaingraphforMCClient {
 
     public static final KeyMapping BLUEPRINT_KEY = new KeyMapping(
         "key.mgmc.open_blueprint",
-        KeyConflictContext.IN_GAME,
+        KeyConflictContext.UNIVERSAL,
         KeyModifier.CONTROL,
         InputConstants.Type.KEYSYM,
         GLFW.GLFW_KEY_M,
@@ -56,15 +58,35 @@ public class MaingraphforMCClient {
     }
 
     @SubscribeEvent
-    public void onClientTick(ClientTickEvent.Post event) {
-        Minecraft mc = Minecraft.getInstance();
-        while (BLUEPRINT_KEY.consumeClick()) {
-            if (mc.player != null && mc.player.isCreative()) {
-                mc.setScreen(new BlueprintSelectionScreen());
-            } else {
-                mc.setScreen(new AboutScreen(null));
+    public void onKeyInput(InputEvent.Key event) {
+        if (event.getAction() == GLFW.GLFW_PRESS && event.getKey() == GLFW.GLFW_KEY_M) {
+            if ((event.getModifiers() & GLFW.GLFW_MOD_CONTROL) != 0) {
+                Minecraft mc = Minecraft.getInstance();
+                // If we are in a screen, check if we're typing in an EditBox
+                if (mc.screen != null && mc.screen.getFocused() instanceof net.minecraft.client.gui.components.EditBox) {
+                    return;
+                }
+                handleBlueprintKey();
             }
         }
+    }
+
+    private void handleBlueprintKey() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            // Main Menu - Global Mode
+            mc.setScreen(new BlueprintSelectionScreen());
+        } else if (mc.player != null && mc.player.isCreative()) {
+            // In Game - Server Mode (Local or Remote)
+            mc.setScreen(new BlueprintSelectionScreen());
+        } else if (mc.level != null) {
+            mc.setScreen(new AboutScreen(null));
+        }
+    }
+
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent.Post event) {
+        // We now handle this in onKeyInput for better screen support
     }
 
     @SubscribeEvent

@@ -1,5 +1,6 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
+import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.gui.blueprint.*;
 
@@ -20,6 +21,8 @@ public class BlueprintScreen extends Screen {
     private final BlueprintState state = new BlueprintState();
     private final BlueprintEventHandler eventHandler;
     private boolean forceOpen = false;
+
+    private final boolean isGlobalMode;
 
     public BlueprintScreen(String name) {
         this(null, name);
@@ -46,6 +49,7 @@ public class BlueprintScreen extends Screen {
         this.blueprintName = name.endsWith(".json") ? name : name + ".json";
         this.eventHandler = new BlueprintEventHandler(state);
         this.forceOpen = forceOpen;
+        this.isGlobalMode = Minecraft.getInstance().level == null;
 
         if (isSpecialBlueprint()) {
             state.readOnly = true;
@@ -56,9 +60,21 @@ public class BlueprintScreen extends Screen {
             state.viewport.zoom = 0.5f; // "缩小" effect
         }
 
-        // Request data from server (works for both local and remote servers)
+        // Request data
         if (blueprintName != null && !blueprintName.isEmpty()) {
-            NetworkService.getInstance().requestBlueprintData(blueprintName);
+            if (isGlobalMode) {
+                try {
+                    java.nio.file.Path path = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir().resolve(blueprintName);
+                    if (java.nio.file.Files.exists(path)) {
+                        String json = new String(java.nio.file.Files.readAllBytes(path), java.nio.charset.StandardCharsets.UTF_8);
+                        loadFromNetwork(json, -1);
+                    }
+                } catch (java.io.IOException e) {
+                    MaingraphforMC.LOGGER.error("Failed to load global blueprint data: " + blueprintName, e);
+                }
+            } else {
+                NetworkService.getInstance().requestBlueprintData(blueprintName);
+            }
         }
     }
 
@@ -447,7 +463,17 @@ public class BlueprintScreen extends Screen {
 
                 String json = BlueprintIO.serialize(state.nodes, state.connections);
                 if (json != null) {
-                    NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
+                    if (isGlobalMode) {
+                        try {
+                            java.nio.file.Path path = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir().resolve(blueprintName);
+                            java.nio.file.Files.write(path, json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                            state.showNotification(Component.translatable("gui.mgmc.notification.saved").getString());
+                        } catch (java.io.IOException e) {
+                            MaingraphforMC.LOGGER.error("Failed to save global blueprint: " + blueprintName, e);
+                        }
+                    } else {
+                        NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
+                    }
                 }
                 return true;
             }

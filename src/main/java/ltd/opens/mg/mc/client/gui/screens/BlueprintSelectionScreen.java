@@ -1,5 +1,6 @@
 package ltd.opens.mg.mc.client.gui.screens;
 
+import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.gui.screens.InputModalScreen;
@@ -22,9 +23,11 @@ public class BlueprintSelectionScreen extends Screen {
     private Button openButton;
     private Button createButton;
     private final GuiContextMenu contextMenu = new GuiContextMenu();
+    private final boolean isGlobalMode;
 
     public BlueprintSelectionScreen() {
         super(Component.translatable("gui.mgmc.blueprint_selection.title"));
+        this.isGlobalMode = Minecraft.getInstance().level == null;
     }
 
     @Override
@@ -57,8 +60,18 @@ public class BlueprintSelectionScreen extends Screen {
                 if (!name.endsWith(".json")) name += ".json";
                 
                 this.setFocused(null);
-                NetworkService.getInstance().saveBlueprint(name, "{}", -1);
-                Minecraft.getInstance().setScreen(new BlueprintScreen(this, name));
+                if (isGlobalMode) {
+                    try {
+                        java.nio.file.Path path = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir().resolve(name);
+                        java.nio.file.Files.write(path, "{}".getBytes());
+                        Minecraft.getInstance().setScreen(new BlueprintScreen(this, name));
+                    } catch (java.io.IOException e) {
+                        MaingraphforMC.LOGGER.error("Failed to create global blueprint: " + name, e);
+                    }
+                } else {
+                    NetworkService.getInstance().saveBlueprint(name, "{}", -1);
+                    Minecraft.getInstance().setScreen(new BlueprintScreen(this, name));
+                }
             }
         }).bounds(createX + createWidth + 5, createY, 50, createHeight).build();
         this.addRenderableWidget(this.createButton);
@@ -108,8 +121,24 @@ public class BlueprintSelectionScreen extends Screen {
 
     private void refreshFileList() {
         this.list.clearEntries();
-        // Always request from server (works for both local and remote servers)
-        NetworkService.getInstance().requestBlueprintList();
+        if (isGlobalMode) {
+            try {
+                java.nio.file.Path dir = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir();
+                java.util.List<String> files = new java.util.ArrayList<>();
+                try (java.util.stream.Stream<java.nio.file.Path> stream = java.nio.file.Files.list(dir)) {
+                    stream.filter(p -> !java.nio.file.Files.isDirectory(p) && p.toString().endsWith(".json"))
+                          .map(p -> p.getFileName().toString())
+                          .forEach(files::add);
+                }
+                java.util.Collections.sort(files);
+                updateListFromServer(files);
+            } catch (java.io.IOException e) {
+                MaingraphforMC.LOGGER.error("Failed to list global blueprints", e);
+            }
+        } else {
+            // Always request from server (works for both local and remote servers)
+            NetworkService.getInstance().requestBlueprintList();
+        }
     }
 
     public void updateListFromServer(List<String> blueprints) {
@@ -240,8 +269,18 @@ public class BlueprintSelectionScreen extends Screen {
                         newName -> {
                             if (!newName.isEmpty() && !newName.equals(this.displayName)) {
                                 String finalNewName = newName.endsWith(".json") ? newName : newName + ".json";
-                                NetworkService.getInstance().renameBlueprint(this.fullName, finalNewName);
-                                BlueprintSelectionScreen.this.refreshFileList();
+                                if (isGlobalMode) {
+                                    try {
+                                        java.nio.file.Path dir = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir();
+                                        java.nio.file.Files.move(dir.resolve(this.fullName), dir.resolve(finalNewName));
+                                        BlueprintSelectionScreen.this.refreshFileList();
+                                    } catch (java.io.IOException e) {
+                                        MaingraphforMC.LOGGER.error("Failed to rename global blueprint", e);
+                                    }
+                                } else {
+                                    NetworkService.getInstance().renameBlueprint(this.fullName, finalNewName);
+                                    BlueprintSelectionScreen.this.refreshFileList();
+                                }
                             }
                         }
                     ));
@@ -256,8 +295,18 @@ public class BlueprintSelectionScreen extends Screen {
                         newName -> {
                             if (!newName.isEmpty()) {
                                 String finalNewName = newName.endsWith(".json") ? newName : newName + ".json";
-                                NetworkService.getInstance().duplicateBlueprint(this.fullName, finalNewName);
-                                BlueprintSelectionScreen.this.refreshFileList();
+                                if (isGlobalMode) {
+                                    try {
+                                        java.nio.file.Path dir = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir();
+                                        java.nio.file.Files.copy(dir.resolve(this.fullName), dir.resolve(finalNewName));
+                                        BlueprintSelectionScreen.this.refreshFileList();
+                                    } catch (java.io.IOException e) {
+                                        MaingraphforMC.LOGGER.error("Failed to duplicate global blueprint", e);
+                                    }
+                                } else {
+                                    NetworkService.getInstance().duplicateBlueprint(this.fullName, finalNewName);
+                                    BlueprintSelectionScreen.this.refreshFileList();
+                                }
                             }
                         }
                     ));
@@ -276,8 +325,18 @@ public class BlueprintSelectionScreen extends Screen {
                         InputModalScreen.Mode.SELECTION,
                         choice -> {
                             if (choice.equals(Component.translatable("gui.mgmc.modal.confirm").getString())) {
-                                NetworkService.getInstance().deleteBlueprint(this.fullName);
-                                BlueprintSelectionScreen.this.refreshFileList();
+                                if (isGlobalMode) {
+                                    try {
+                                        java.nio.file.Path dir = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir();
+                                        java.nio.file.Files.deleteIfExists(dir.resolve(this.fullName));
+                                        BlueprintSelectionScreen.this.refreshFileList();
+                                    } catch (java.io.IOException e) {
+                                        MaingraphforMC.LOGGER.error("Failed to delete global blueprint", e);
+                                    }
+                                } else {
+                                    NetworkService.getInstance().deleteBlueprint(this.fullName);
+                                    BlueprintSelectionScreen.this.refreshFileList();
+                                }
                             }
                         }
                     ));
