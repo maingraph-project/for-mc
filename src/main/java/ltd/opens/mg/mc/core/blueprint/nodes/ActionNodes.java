@@ -42,7 +42,7 @@ public class ActionNodes {
         NodeHelper.setup("print_chat", "node.mgmc.print_chat.name")
             .category("node_category.mgmc.action.player")
             .color(NodeThemes.COLOR_NODE_ACTION)
-            .property("web_url", "https://mc.maingraph.nb6.ltd/docs/nodes/action/print_chat")
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/action/player/print_chat")
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .input(NodePorts.MESSAGE, "node.mgmc.port.message", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
