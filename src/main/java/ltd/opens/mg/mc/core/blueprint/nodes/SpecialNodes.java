@@ -19,6 +19,7 @@ public class SpecialNodes {
         NodeHelper.setup("marker", "node.mgmc.marker.name")
             .category("node_category.mgmc.special")
             .color(NodeThemes.COLOR_NODE_COMMENT)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/special/marker")
             .input(NodePorts.COMMENT, "node.mgmc.port.comment", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .property("is_marker", true)
             .property("ui_multiline", true)
