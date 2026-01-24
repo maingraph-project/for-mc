@@ -33,6 +33,7 @@ public class GetEntityInfoNode {
         NodeHelper.setup("get_entity_info_byuuid", "node.mgmc.get_entity_info_byuuid.name")
             .category("node_category.mgmc.variable.entity")
             .color(NodeThemes.COLOR_NODE_ENTITY)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/entity/get_entity_info_byuuid")
             .input(NodePorts.UUID, "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, NodeThemes.COLOR_PORT_UUID, "")
             .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
             .output(NodePorts.UUID, "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, NodeThemes.COLOR_PORT_UUID)
@@ -62,6 +63,7 @@ public class GetEntityInfoNode {
         NodeHelper.setup("get_entity_info_byentity", "node.mgmc.get_entity_info_byentity.name")
             .category("node_category.mgmc.variable.entity")
             .color(NodeThemes.COLOR_NODE_ENTITY)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/entity/get_entity_info_byentity")
             .input(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
             .output(NodePorts.UUID, "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, NodeThemes.COLOR_PORT_UUID)
             .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
@@ -86,6 +88,7 @@ public class GetEntityInfoNode {
         NodeHelper.setup("get_entity_by_uuid", "node.mgmc.get_entity_by_uuid.name")
             .category("node_category.mgmc.variable.entity")
             .color(NodeThemes.COLOR_NODE_ENTITY)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/entity/get_entity_by_uuid")
             .input(NodePorts.UUID, "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, NodeThemes.COLOR_PORT_UUID, "")
             .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
             .registerValue((node, pinId, ctx) -> {
@@ -101,6 +104,7 @@ public class GetEntityInfoNode {
         NodeHelper.setup("self", "node.mgmc.self.name")
             .category("node_category.mgmc.variable.entity")
             .color(NodeThemes.COLOR_NODE_ENTITY)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/entity/self")
             .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
             .output(NodePorts.UUID, "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, NodeThemes.COLOR_PORT_UUID)
             .registerValue((node, pinId, ctx) -> {
