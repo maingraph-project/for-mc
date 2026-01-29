@@ -11,7 +11,9 @@ import ltd.opens.mg.mc.client.gui.components.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.*;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 public class BlueprintScreen extends Screen {
     private final Screen parent;
@@ -177,6 +179,12 @@ public class BlueprintScreen extends Screen {
 
     private boolean isHovering(int mouseX, int mouseY, int x, int y, int w, int h) {
         return mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // Do nothing to prevent default background blur/darkening in 1.21.1
+        // We draw our own background in render() via BlueprintRenderer.drawGrid()
     }
 
     @Override
@@ -368,22 +376,27 @@ public class BlueprintScreen extends Screen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         state.buttonLongPressTarget = null;
         state.isMouseDown = false;
-        return eventHandler.mouseReleased(mouseX, mouseY, button, this) || super.mouseReleased(mouseX, mouseY, button);
+        int modifiers = (hasControlDown() ? 2 : 0) | (hasShiftDown() ? 1 : 0) | (hasAltDown() ? 4 : 0);
+        MouseButtonEvent event = new MouseButtonEvent(mouseX, mouseY, new ButtonInfo(button, 0, modifiers));
+        return eventHandler.mouseReleased(event, this) || super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
-        return eventHandler.charTyped(codePoint, modifiers) || super.charTyped(codePoint, modifiers);
+        CharacterEvent event = new CharacterEvent(codePoint, modifiers);
+        return eventHandler.charTyped(event) || super.charTyped(codePoint, modifiers);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return eventHandler.keyPressed(keyCode, scanCode, modifiers, this) || super.keyPressed(keyCode, scanCode, modifiers);
+        KeyEvent event = new KeyEvent(keyCode, scanCode, 1, modifiers);
+        return eventHandler.keyPressed(event, this) || super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return eventHandler.keyReleased(keyCode, scanCode, modifiers, this) || super.keyReleased(keyCode, scanCode, modifiers);
+        KeyEvent event = new KeyEvent(keyCode, scanCode, 0, modifiers);
+        return eventHandler.keyReleased(event, this) || super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -468,11 +481,20 @@ public class BlueprintScreen extends Screen {
             return true; // Clicked on top bar but not on buttons
         }
 
-        return eventHandler.mouseClicked(mouseX, mouseY, button, false, font, this) || super.mouseClicked(mouseX, mouseY, button);
+        int modifiers = (hasControlDown() ? 2 : 0) | (hasShiftDown() ? 1 : 0) | (hasAltDown() ? 4 : 0);
+        MouseButtonEvent event = new MouseButtonEvent(mouseX, mouseY, new ButtonInfo(button, 1, modifiers));
+        return eventHandler.mouseClicked(event, false, font, this) || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        return eventHandler.mouseDragged(mouseX, mouseY, button, dragX, dragY) || super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        int modifiers = (hasControlDown() ? 2 : 0) | (hasShiftDown() ? 1 : 0) | (hasAltDown() ? 4 : 0);
+        MouseButtonEvent event = new MouseButtonEvent(mouseX, mouseY, new ButtonInfo(button, 2, modifiers));
+        return eventHandler.mouseDragged(event, dragX, dragY) || super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollHorizontal, double scrollVertical) {
+        return eventHandler.mouseScrolled(mouseX, mouseY, scrollHorizontal, scrollVertical, this) || super.mouseScrolled(mouseX, mouseY, scrollHorizontal, scrollVertical);
     }
 }

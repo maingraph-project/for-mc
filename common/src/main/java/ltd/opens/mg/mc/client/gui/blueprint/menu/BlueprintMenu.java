@@ -11,6 +11,9 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -447,16 +450,16 @@ public class BlueprintMenu {
         BlueprintMenuInputHandler.handleMouseScrolled(this, mouseX, mouseY, menuX, menuY, screenWidth, screenHeight, amount);
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return BlueprintMenuInputHandler.handleKeyPressed(this, keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyEvent event) {
+        return BlueprintMenuInputHandler.handleKeyPressed(this, event);
     }
 
-    public boolean charTyped(char codePoint, int modifiers) {
-        return BlueprintMenuInputHandler.handleCharTyped(this, codePoint, modifiers);
+    public boolean charTyped(CharacterEvent event) {
+        return BlueprintMenuInputHandler.handleCharTyped(this, event);
     }
 
-    public NodeDefinition onClickNodeMenu(double mouseX, double mouseY, int button, double menuX, double menuY, int screenWidth, int screenHeight) {
-        return BlueprintMenuInputHandler.handleOnClickNodeMenu(this, mouseX, mouseY, button, menuX, menuY, screenWidth, screenHeight);
+    public NodeDefinition onClickNodeMenu(MouseButtonEvent event, double menuX, double menuY, int screenWidth, int screenHeight) {
+        return BlueprintMenuInputHandler.handleOnClickNodeMenu(this, event, menuX, menuY, screenWidth, screenHeight);
     }
 
     public boolean isClickInsideNodeMenu(double mouseX, double mouseY, double menuX, double menuY, int screenWidth, int screenHeight) {

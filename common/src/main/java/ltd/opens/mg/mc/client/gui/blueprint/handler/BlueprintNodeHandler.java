@@ -18,6 +18,9 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+
 public class BlueprintNodeHandler {
     private final BlueprintState state;
 
@@ -25,7 +28,11 @@ public class BlueprintNodeHandler {
         this.state = state;
     }
 
-    public boolean mouseClicked(double mouseX, double mouseY, int button, boolean isDouble, double worldMouseX, double worldMouseY, Font font, BlueprintScreen screen) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean isDouble, Font font, BlueprintScreen screen) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double worldMouseX = state.viewport.toWorldX(mouseX);
+        double worldMouseY = state.viewport.toWorldY(mouseY);
         boolean isShiftDown = Screen.hasShiftDown();
         boolean isCtrlDown = Screen.hasControlDown();
 
@@ -129,8 +136,8 @@ public class BlueprintNodeHandler {
         
         // Start box selection
         state.isBoxSelecting = true;
-        state.boxSelectStartX = mouseX;
-        state.boxSelectStartY = mouseY;
+        state.boxSelectStartX = event.x();
+        state.boxSelectStartY = event.y();
         state.boxSelectEndX = state.boxSelectStartX;
         state.boxSelectEndY = state.boxSelectStartY;
 
@@ -280,7 +287,7 @@ public class BlueprintNodeHandler {
         }
     }
 
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (state.isBoxSelecting) {
             state.isBoxSelecting = false;
             
@@ -326,7 +333,12 @@ public class BlueprintNodeHandler {
         return false;
     }
 
-    public boolean mouseDragged(double worldMouseX, double worldMouseY, double mouseX, double mouseY) {
+    public boolean mouseDragged(MouseButtonEvent event) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double worldMouseX = state.viewport.toWorldX(mouseX);
+        double worldMouseY = state.viewport.toWorldY(mouseY);
+
         if (state.isBoxSelecting) {
             state.boxSelectEndX = mouseX;
             state.boxSelectEndY = mouseY;
@@ -354,7 +366,8 @@ public class BlueprintNodeHandler {
         return false;
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
+        int keyCode = event.key();
         boolean isCtrlDown = Screen.hasControlDown();
         boolean isShiftDown = Screen.hasShiftDown();
 

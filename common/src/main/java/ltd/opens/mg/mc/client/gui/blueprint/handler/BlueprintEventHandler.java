@@ -12,6 +12,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.lwjgl.glfw.GLFW;
 
 public class BlueprintEventHandler {
@@ -29,17 +32,21 @@ public class BlueprintEventHandler {
         this.nodeHandler = new BlueprintNodeHandler(state);
     }
 
-    public boolean mouseClicked(double mouseX, double mouseY, int button, boolean isDouble, Font font, BlueprintScreen screen) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean isDouble, Font font, BlueprintScreen screen) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
+
         // 0. Quick Search interactions
         if (state.showQuickSearch) {
             if (state.quickSearchEditBox != null) {
                 // Position it for click detection
-                int searchW = 200;
-                int x = (screen.width - searchW) / 2;
-                int y = screen.height / 4;
-                state.quickSearchEditBox.setX(x + 5);
-                state.quickSearchEditBox.setY(y + 15);
-                state.quickSearchEditBox.setWidth(searchW - 10);
+                int qsw = 200;
+                int qsx = (screen.width - qsw) / 2;
+                int qsy = screen.height / 4;
+                state.quickSearchEditBox.setX(qsx + 5);
+                state.quickSearchEditBox.setY(qsy + 15);
+                state.quickSearchEditBox.setWidth(qsw - 10);
 
                 if (state.quickSearchEditBox.mouseClicked(mouseX, mouseY, button)) {
                     return true;
@@ -47,10 +54,10 @@ public class BlueprintEventHandler {
                 
                 // Check if clicked on a candidate
                 int itemHeight = 18;
-                int listY = y + 42; // Match BlueprintRenderer listY
+                int listY = qsy + 42; // Match BlueprintRenderer listY
                 List<GuiNode> displayList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
                 
-                if (mouseX >= x && mouseX <= x + searchW && !displayList.isEmpty()) {
+                if (mouseX >= qsx && mouseX <= qsx + qsw && !displayList.isEmpty()) {
                     int clickedVisibleIdx = (int) ((mouseY - (listY + 3)) / itemHeight);
                     int clickedIdx = clickedVisibleIdx + state.quickSearchScrollOffset;
                     if (clickedVisibleIdx >= 0 && clickedVisibleIdx < Math.min(displayList.size() - state.quickSearchScrollOffset, BlueprintState.MAX_QUICK_SEARCH_VISIBLE)) {
@@ -72,31 +79,31 @@ public class BlueprintEventHandler {
 
         // 0.1 Marker Editing interactions
         if (state.editingMarkerNode != null && state.markerEditBox != null) {
-            // Position the edit box for click detection (Screen Space)
+            // Project node bounds to screen space for clicking
             ltd.opens.mg.mc.client.gui.blueprint.Viewport viewport = state.viewport;
             ltd.opens.mg.mc.client.gui.components.GuiNode node = state.editingMarkerNode;
-            
             int sx = (int) viewport.toScreenX(node.x);
             int sy = (int) viewport.toScreenY(node.y);
             int sw = (int) (node.width * viewport.zoom);
+            int sh = (int) (node.height * viewport.zoom);
             int headerH = (int) (node.headerHeight * viewport.zoom);
-
+            
+            // Update EditBox position before click check
             state.markerEditBox.setX(sx + (int)(10 * viewport.zoom));
             state.markerEditBox.setY(sy + headerH + (int)(10 * viewport.zoom));
             state.markerEditBox.setWidth(sw - (int)(20 * viewport.zoom));
+            state.markerEditBox.setHeight((int)(20 * viewport.zoom));
 
             if (state.markerEditBox.mouseClicked(mouseX, mouseY, button)) {
                 return true;
             }
 
-            // If clicked outside the node area, finish editing
-            double worldMouseX = state.viewport.toWorldX(mouseX);
-            double worldMouseY = state.viewport.toWorldY(mouseY);
-            if (!(worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height)) {
+            // If clicked outside the node, finish editing
+            if (!(mouseX >= sx && mouseX <= sx + sw && mouseY >= sy && mouseY <= sy + sh)) {
                 finishMarkerEditing();
-                return false; // Let the click pass through to potentially select other things
+            } else {
+                return true; // Clicked inside node but not in EditBox, still consume
             }
-            return true; // Clicked inside node but not in editbox, still block
         }
 
         // Block all blueprint interactions if clicking the top bar
@@ -115,15 +122,11 @@ public class BlueprintEventHandler {
         if (state.readOnly) {
             // Skip node menu and context menu in read-only
         } else {
-            if (menuHandler.mouseClicked(mouseX, mouseY, button, screen.width, screen.height)) return true;
+            if (menuHandler.mouseClicked(event, screen.width, screen.height)) return true;
         }
 
         // 2. View interactions (panning start)
-        if (viewHandler.mouseClicked(mouseX, mouseY, button)) return true;
-
-        // World coordinates for other interactions
-        double worldMouseX = state.viewport.toWorldX(mouseX);
-        double worldMouseY = state.viewport.toWorldY(mouseY);
+        if (viewHandler.mouseClicked(event)) return true;
 
         if (button == 0) { // Left click
             state.focusedNode = null;
@@ -131,68 +134,60 @@ public class BlueprintEventHandler {
             
             if (!state.readOnly) {
                 // 3. Connection interactions (port click start)
-                if (connectionHandler.mouseClicked(worldMouseX, worldMouseY)) return true;
+                if (connectionHandler.mouseClicked(event)) return true;
 
                 // 4. Node interactions (input box or header drag start)
-                if (nodeHandler.mouseClicked(mouseX, mouseY, button, isDouble, worldMouseX, worldMouseY, font, screen)) return true;
+                if (nodeHandler.mouseClicked(event, isDouble, font, screen)) return true;
             }
         }
 
         return false;
     }
 
-    public boolean mouseReleased(double mouseX, double mouseY, int button, BlueprintScreen screen) {
+    public boolean mouseReleased(MouseButtonEvent event, BlueprintScreen screen) {
         if (state.showQuickSearch) {
             state.isMouseDown = false;
         }
 
         // 1. View interactions (panning end)
-        if (viewHandler.mouseReleased(mouseX, mouseY, button)) return true;
+        if (viewHandler.mouseReleased(event)) return true;
 
         if (state.readOnly) return false;
 
         // 2. Menu interactions (open context menu on right click release)
-        if (menuHandler.mouseReleased(mouseX, mouseY, button, screen.width, screen.height)) return true;
-
-        // World coordinates for other interactions
-        double worldMouseX = state.viewport.toWorldX(mouseX);
-        double worldMouseY = state.viewport.toWorldY(mouseY);
+        if (menuHandler.mouseReleased(event, screen.width, screen.height)) return true;
 
         // 2. Connection interactions (link creation)
-        if (connectionHandler.mouseReleased(worldMouseX, worldMouseY)) return true;
+        if (connectionHandler.mouseReleased(event)) return true;
 
         // 3. Node interactions (drag end)
-        if (nodeHandler.mouseReleased(mouseX, mouseY, button)) return true;
+        if (nodeHandler.mouseReleased(event)) return true;
 
         return false;
     }
 
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
         // 1. View interactions (panning drag)
-        if (viewHandler.mouseDragged(mouseX, mouseY)) return true;
+        if (viewHandler.mouseDragged(event)) return true;
 
         if (state.readOnly) return false;
 
-        // World coordinates for other interactions
-        double worldMouseX = state.viewport.toWorldX(mouseX);
-        double worldMouseY = state.viewport.toWorldY(mouseY);
-
         // 2. Node interactions (node drag)
-        if (nodeHandler.mouseDragged(worldMouseX, worldMouseY, mouseX, mouseY)) return true;
+        if (nodeHandler.mouseDragged(event)) return true;
 
         return false;
     }
 
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY, BlueprintScreen screen) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollHorizontal, double scrollVertical, BlueprintScreen screen) {
         if (state.showQuickSearch) {
             List<GuiNode> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
             if (!currentList.isEmpty() && currentList.size() > BlueprintState.MAX_QUICK_SEARCH_VISIBLE) {
-                state.quickSearchScrollOffset = Math.max(0, Math.min(currentList.size() - BlueprintState.MAX_QUICK_SEARCH_VISIBLE, state.quickSearchScrollOffset - (int) scrollY));
+                state.quickSearchScrollOffset = Math.max(0, Math.min(currentList.size() - BlueprintState.MAX_QUICK_SEARCH_VISIBLE, state.quickSearchScrollOffset - (int) scrollVertical));
                 return true;
             }
         }
-        if (menuHandler.mouseScrolled(mouseX, mouseY, screen.width, screen.height, scrollY)) return true;
-        return viewHandler.mouseScrolled(mouseX, mouseY, scrollY);
+        if (menuHandler.mouseScrolled(mouseX, mouseY, screen.width, screen.height, scrollVertical)) return true;
+        return viewHandler.mouseScrolled(mouseX, mouseY, scrollVertical);
     }
 
     private void ensureQuickSearchSelectionVisible() {
@@ -223,17 +218,34 @@ public class BlueprintEventHandler {
         }
     }
 
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers, BlueprintScreen screen) {
-        if (keyCode == GLFW.GLFW_KEY_ENTER) {
+    public boolean keyReleased(KeyEvent event, BlueprintScreen screen) {
+        if (event.key() == GLFW.GLFW_KEY_ENTER) {
             state.isEnterDown = false;
         }
-        if (keyCode == GLFW.GLFW_KEY_W) {
+        if (event.key() == GLFW.GLFW_KEY_W) {
             state.isWDown = false;
         }
         return false;
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers, BlueprintScreen screen) {
+    public boolean keyPressed(KeyEvent event, BlueprintScreen screen) {
+        int keyCode = event.key();
+        int modifiers = event.modifiers();
+        int scanCode = event.scanCode();
+        // Marker Editing keys
+        if (state.editingMarkerNode != null && state.markerEditBox != null) {
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_ENTER) {
+                finishMarkerEditing();
+                return true;
+            }
+            if (state.markerEditBox.keyPressed(keyCode, scanCode, modifiers)) {
+                state.editingMarkerNode.inputValues.addProperty(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT, state.markerEditBox.getValue());
+                state.editingMarkerNode.setSizeDirty(true);
+                return true;
+            }
+            return true;
+        }
+
         if (keyCode == GLFW.GLFW_KEY_W && !state.showQuickSearch && state.editingMarkerNode == null) {
             state.isWDown = true;
             // No return true here to allow other controls (like WASD panning if implemented) 
@@ -314,27 +326,16 @@ public class BlueprintEventHandler {
             return true; // Block other keys when search is open
         }
 
-        // Marker Editing keys
-        if (state.editingMarkerNode != null && state.markerEditBox != null) {
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_ENTER) {
-                finishMarkerEditing();
-                return true;
-            }
-            return state.markerEditBox.keyPressed(keyCode, scanCode, modifiers);
-        }
-
         if (state.readOnly) return false;
-        if (state.showNodeMenu) {
-            return state.menu.keyPressed(keyCode, scanCode, modifiers);
-        }
-        return nodeHandler.keyPressed(keyCode, scanCode, modifiers);
+        if (menuHandler.keyPressed(event)) return true;
+        return nodeHandler.keyPressed(event);
     }
 
-    public boolean charTyped(char codePoint, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (state.showQuickSearch) {
             if (state.quickSearchEditBox != null) {
                 String oldVal = state.quickSearchEditBox.getValue();
-                boolean handled = state.quickSearchEditBox.charTyped(codePoint, modifiers);
+                boolean handled = state.quickSearchEditBox.charTyped((char)event.codePoint(), event.modifiers());
                 if (handled && !state.quickSearchEditBox.getValue().equals(oldVal)) {
                     state.updateQuickSearchMatches();
                 }
@@ -344,7 +345,7 @@ public class BlueprintEventHandler {
         }
 
         if (state.editingMarkerNode != null && state.markerEditBox != null) {
-            boolean handled = state.markerEditBox.charTyped(codePoint, modifiers);
+            boolean handled = state.markerEditBox.charTyped((char)event.codePoint(), event.modifiers());
             if (handled || state.markerEditBox.isFocused()) {
                 state.editingMarkerNode.inputValues.addProperty(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT, state.markerEditBox.getValue());
                 state.editingMarkerNode.setSizeDirty(true);
@@ -353,7 +354,7 @@ public class BlueprintEventHandler {
             return handled;
         }
         if (state.readOnly) return false;
-        return menuHandler.charTyped(codePoint, modifiers);
+        return menuHandler.charTyped(event);
     }
 }
 

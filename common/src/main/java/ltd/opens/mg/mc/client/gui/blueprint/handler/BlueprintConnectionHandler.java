@@ -6,6 +6,8 @@ import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 import ltd.opens.mg.mc.client.gui.components.*;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 
+import net.minecraft.client.input.MouseButtonEvent;
+
 public class BlueprintConnectionHandler {
     private final BlueprintState state;
 
@@ -13,7 +15,9 @@ public class BlueprintConnectionHandler {
         this.state = state;
     }
 
-    public boolean mouseClicked(double worldMouseX, double worldMouseY) {
+    public boolean mouseClicked(MouseButtonEvent event) {
+        double worldMouseX = state.viewport.toWorldX(event.x());
+        double worldMouseY = state.viewport.toWorldY(event.y());
         for (int i = state.nodes.size() - 1; i >= 0; i--) {
             GuiNode node = state.nodes.get(i);
             // Check inputs
@@ -58,7 +62,9 @@ public class BlueprintConnectionHandler {
         return type1 == type2;
     }
 
-    public boolean mouseReleased(double worldMouseX, double worldMouseY) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        double worldMouseX = state.viewport.toWorldX(event.x());
+        double worldMouseY = state.viewport.toWorldY(event.y());
         if (state.connectionStartNode != null) {
             boolean connected = false;
             for (GuiNode node : state.nodes) {

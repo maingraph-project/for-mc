@@ -210,12 +210,12 @@ public class MaingraphforMC {
                 .executes(context -> {
                     BlueprintManager manager = getServerManager();
                     if (manager != null) {
-                        java.util.List<ltd.opens.mg.mc.core.blueprint.BlueprintManager.LogEntry> logs = manager.getLogs();
+                        java.util.List<BlueprintManager.LogEntry> logs = manager.getLogs();
                         if (logs.isEmpty()) {
                             context.getSource().sendSuccess(() -> Component.literal("§7[MGMC] No logs available."), false);
                         } else {
                             context.getSource().sendSuccess(() -> Component.literal("§6--- MGMC Runtime Logs (Last " + logs.size() + ") ---"), false);
-                            for (ltd.opens.mg.mc.core.blueprint.BlueprintManager.LogEntry log : logs) {
+                            for (var log : logs) {
                                 String color = log.level().equals("ERROR") ? "§c" : "§f";
                                 String time = new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(log.timestamp()));
                                 context.getSource().sendSuccess(() -> Component.literal(

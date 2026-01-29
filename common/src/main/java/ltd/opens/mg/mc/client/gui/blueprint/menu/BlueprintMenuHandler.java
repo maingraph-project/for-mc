@@ -5,6 +5,9 @@ import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 
 import ltd.opens.mg.mc.client.gui.components.*;
 import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.network.chat.Component;
 
@@ -18,9 +21,9 @@ public class BlueprintMenuHandler {
         this.state = state;
     }
 
-    public boolean mouseClicked(double mouseX, double mouseY, int button, int screenWidth, int screenHeight) {
+    public boolean mouseClicked(MouseButtonEvent event, int screenWidth, int screenHeight) {
         if (state.contextMenu.isVisible()) {
-            if (state.contextMenu.mouseClicked(mouseX, mouseY, button)) {
+            if (state.contextMenu.mouseClicked(event.x(), event.y(), event.buttonInfo().button())) {
                 return true;
             }
             state.contextMenu.hide();
@@ -28,13 +31,13 @@ public class BlueprintMenuHandler {
         }
 
         if (state.showNodeMenu) {
-            NodeDefinition def = state.menu.onClickNodeMenu(mouseX, mouseY, button, state.menuX, state.menuY, screenWidth, screenHeight);
+            NodeDefinition def = state.menu.onClickNodeMenu(event, state.menuX, state.menuY, screenWidth, screenHeight);
             if (def != null) {
                 createNodeAtMenu(def);
                 return true;
             }
 
-            if (!state.menu.isClickInsideNodeMenu(mouseX, mouseY, state.menuX, state.menuY, screenWidth, screenHeight)) {
+            if (!state.menu.isClickInsideNodeMenu(event.x(), event.y(), state.menuX, state.menuY, screenWidth, screenHeight)) {
                 state.showNodeMenu = false;
                 state.menu.reset();
                 state.pendingConnectionSourceNode = null;
@@ -98,8 +101,9 @@ public class BlueprintMenuHandler {
         return type1 == type2;
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (state.showNodeMenu) {
+            int keyCode = event.key();
             if (keyCode == 257 || keyCode == 335) { // Enter or Numpad Enter
                 NodeDefinition def = state.menu.getSelectedNode();
                 if (def != null) {
@@ -107,14 +111,7 @@ public class BlueprintMenuHandler {
                     return true;
                 }
             }
-            return state.menu.keyPressed(keyCode, scanCode, modifiers);
-        }
-        return false;
-    }
-
-    public boolean charTyped(char codePoint, int modifiers) {
-        if (state.showNodeMenu) {
-            return state.menu.charTyped(codePoint, modifiers);
+            return state.menu.keyPressed(event);
         }
         return false;
     }
@@ -127,7 +124,17 @@ public class BlueprintMenuHandler {
         return false;
     }
 
-    public boolean mouseReleased(double mouseX, double mouseY, int button, int screenWidth, int screenHeight) {
+    public boolean charTyped(CharacterEvent event) {
+        if (state.showNodeMenu) {
+            return state.menu.charTyped(event);
+        }
+        return false;
+    }
+
+    public boolean mouseReleased(MouseButtonEvent event, int screenWidth, int screenHeight) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
         if (button == 1) { // Right click
             double worldMouseX = state.viewport.toWorldX(mouseX);
             double worldMouseY = state.viewport.toWorldY(mouseY);

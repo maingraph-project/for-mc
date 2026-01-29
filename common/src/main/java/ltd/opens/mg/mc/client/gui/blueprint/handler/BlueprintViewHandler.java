@@ -3,6 +3,8 @@ package ltd.opens.mg.mc.client.gui.blueprint.handler;
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 
 
+import net.minecraft.client.input.MouseButtonEvent;
+
 public class BlueprintViewHandler {
     private final BlueprintState state;
 
@@ -10,7 +12,10 @@ public class BlueprintViewHandler {
         this.state = state;
     }
 
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
         if (button == 2 || button == 1) { // Middle click or Right click for panning
             state.isPanning = true;
             state.isAnimatingView = false; // Stop animation if user starts manual panning
@@ -23,15 +28,18 @@ public class BlueprintViewHandler {
         return false;
     }
 
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
         if (state.isPanning && (button == 2 || button == 1)) {
             state.isPanning = false;
             
-            // 濡傛灉鏄彸閿紝涓斾綅绉诲緢灏忥紝杩斿洖 false锛岃澶栧眰閫昏緫瑙﹀彂鑿滃崟
+            // 如果是右键，且位移很小，返回 false，让外层逻辑触发菜单
             if (button == 1) {
                 double dist = Math.sqrt(Math.pow(mouseX - state.startMouseX, 2) + Math.pow(mouseY - state.startMouseY, 2));
                 if (dist < 5.0) {
-                    return false; // 涓嶆秷璐逛簨浠讹紝浜ょ粰鑿滃崟澶勭悊鍣?
+                    return false; // 不消费事件，交给菜单处理器
                 }
             }
             return true;
@@ -39,7 +47,9 @@ public class BlueprintViewHandler {
         return false;
     }
 
-    public boolean mouseDragged(double mouseX, double mouseY) {
+    public boolean mouseDragged(MouseButtonEvent event) {
+        double mouseX = event.x();
+        double mouseY = event.y();
         if (state.isPanning) {
             state.viewport.pan(mouseX - state.lastMouseX, mouseY - state.lastMouseY);
             state.lastMouseX = mouseX;

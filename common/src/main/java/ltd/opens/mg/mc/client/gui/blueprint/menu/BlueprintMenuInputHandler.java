@@ -4,6 +4,10 @@ import ltd.opens.mg.mc.client.gui.blueprint.manager.*;
 
 
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+
 import java.util.List;
 
 
@@ -34,10 +38,10 @@ public class BlueprintMenuInputHandler {
         menu.setScrollAmount(menu.getScrollAmount() - (amount * 15));
     }
 
-    public static boolean handleKeyPressed(BlueprintMenu menu, int keyCode, int scanCode, int modifiers) {
+    public static boolean handleKeyPressed(BlueprintMenu menu, KeyEvent event) {
         if (menu.getSearchEditBox() != null) {
             String oldQuery = menu.getSearchQuery();
-            if (menu.getSearchEditBox().keyPressed(keyCode, scanCode, modifiers)) {
+            if (menu.getSearchEditBox().keyPressed(event.key(), event.scanCode(), event.modifiers())) {
                 if (!oldQuery.equals(menu.getSearchQuery())) {
                     menu.updateSearch();
                     menu.setScrollAmount(0);
@@ -46,7 +50,8 @@ public class BlueprintMenuInputHandler {
             }
         }
 
-        if (keyCode == 257) { // Enter
+        int keyCode = event.key();
+        if (keyCode == 257 || keyCode == 335) { // Enter or Numpad Enter
             if (!menu.getFilteredResults().isEmpty() && !menu.getSearchQuery().isEmpty()) {
                 BlueprintSearchManager.SearchResult res = menu.getFilteredResults().get(menu.getSelectedIndex());
                 if (res.isCategory()) {
@@ -68,10 +73,10 @@ public class BlueprintMenuInputHandler {
         return false;
     }
 
-    public static boolean handleCharTyped(BlueprintMenu menu, char codePoint, int modifiers) {
+    public static boolean handleCharTyped(BlueprintMenu menu, CharacterEvent event) {
         if (menu.getSearchEditBox() != null) {
             String oldQuery = menu.getSearchQuery();
-            if (menu.getSearchEditBox().charTyped(codePoint, modifiers)) {
+            if (menu.getSearchEditBox().charTyped((char)event.codePoint(), event.modifiers())) {
                 if (!oldQuery.equals(menu.getSearchQuery())) {
                     menu.updateSearch();
                     menu.setScrollAmount(0);
@@ -82,7 +87,10 @@ public class BlueprintMenuInputHandler {
         return false;
     }
 
-    public static NodeDefinition handleOnClickNodeMenu(BlueprintMenu menu, double mouseX, double mouseY, int button, double menuX, double menuY, int screenWidth, int screenHeight) {
+    public static NodeDefinition handleOnClickNodeMenu(BlueprintMenu menu, MouseButtonEvent event, double menuX, double menuY, int screenWidth, int screenHeight) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
         int x = (int) menuX;
         int width = menu.getMenuWidth();
         if (x + width > screenWidth) x -= width;

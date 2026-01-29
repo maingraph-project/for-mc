@@ -273,6 +273,7 @@ public class BlueprintRenderer {
         state.markerEditBox.setX(sx + (int)(10 * viewport.zoom));
         state.markerEditBox.setY(sy + headerH + (int)(10 * viewport.zoom));
         state.markerEditBox.setWidth(sw - (int)(20 * viewport.zoom));
+        state.markerEditBox.setHeight((int)(20 * viewport.zoom));
         
         state.markerEditBox.render(guiGraphics, 0, 0, 0);
     }
