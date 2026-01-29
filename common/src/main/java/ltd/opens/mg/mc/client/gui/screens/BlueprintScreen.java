@@ -21,6 +21,7 @@ public class BlueprintScreen extends Screen {
     private final BlueprintState state = new BlueprintState();
     private final BlueprintEventHandler eventHandler;
     private boolean forceOpen = false;
+    private long lastClickTime = 0;
 
     private final boolean isGlobalMode;
 
@@ -401,6 +402,10 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        long currentTime = System.currentTimeMillis();
+        boolean isDouble = (currentTime - lastClickTime) < 300;
+        lastClickTime = currentTime;
+
         // Handle Notification Close
         if (state.notificationMessage != null && state.notificationTimer > 0) {
             int msgW = font.width(state.notificationMessage);
@@ -483,7 +488,7 @@ public class BlueprintScreen extends Screen {
 
         int modifiers = (hasControlDown() ? 2 : 0) | (hasShiftDown() ? 1 : 0) | (hasAltDown() ? 4 : 0);
         MouseButtonEvent event = new MouseButtonEvent(mouseX, mouseY, new ButtonInfo(button, 1, modifiers));
-        return eventHandler.mouseClicked(event, false, font, this) || super.mouseClicked(mouseX, mouseY, button);
+        return eventHandler.mouseClicked(event, isDouble, font, this) || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
