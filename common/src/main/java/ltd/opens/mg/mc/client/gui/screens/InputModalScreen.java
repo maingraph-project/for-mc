@@ -92,7 +92,7 @@ public class InputModalScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.fill(0, 0, this.width, this.height, 0x88000000);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         
         int width = 200;
         int height = (mode == Mode.SELECTION && options != null) ? Math.min(200, 40 + options.length * 22 + 30) : 80;
@@ -103,8 +103,6 @@ public class InputModalScreen extends Screen {
         guiGraphics.renderOutline(startX, startY, width, height, 0xFFFFFFFF);
         
         guiGraphics.drawString(font, titleStr, startX + 10, startY + 10, 0xFFFFFFFF, false);
-        
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override

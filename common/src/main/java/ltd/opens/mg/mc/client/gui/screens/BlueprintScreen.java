@@ -181,6 +181,7 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         BlueprintRenderer.drawGrid(guiGraphics, this.width, this.height, state.viewport);
 
         guiGraphics.pose().pushPose();
@@ -293,8 +294,6 @@ public class BlueprintScreen extends Screen {
             int closeColor = (alphaInt << 24) | 0x888888;
             guiGraphics.drawString(font, "×", popupX + popupW - 12, popupY + (popupH - 9) / 2, closeColor, false);
         }
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
