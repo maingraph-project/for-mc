@@ -1,0 +1,228 @@
+package ltd.opens.mg.mc.core.blueprint.nodes;
+
+import com.google.gson.JsonObject;
+import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
+import ltd.opens.mg.mc.core.blueprint.NodeHelper;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
+import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
+import ltd.opens.mg.mc.core.blueprint.NodePorts;
+import ltd.opens.mg.mc.core.blueprint.NodeThemes;
+import ltd.opens.mg.mc.core.blueprint.engine.TickScheduler;
+import ltd.opens.mg.mc.MaingraphforMC;
+import ltd.opens.mg.mc.core.blueprint.engine.BlueprintEngine;
+import net.minecraft.server.level.ServerLevel;
+import java.util.List;
+import java.util.ArrayList;
+
+/**
+ * 控制流相关节点
+ */
+public class ControlFlowNodes {
+
+    @SuppressWarnings("unchecked")
+    public static void register() {
+        // 分支节点 (Branch)
+        NodeHelper.setup("branch", "node.mgmc.branch.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/branch")
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.CONDITION, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, true, true)
+            .output(NodePorts.TRUE, "node.mgmc.port.true", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.FALSE, "node.mgmc.port.false", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .registerExec((node, ctx) -> {
+                boolean condition = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.CONDITION, ctx));
+                NodeLogicRegistry.triggerExec(node, condition ? NodePorts.TRUE : NodePorts.FALSE, ctx);
+            });
+
+        // 切换器节点 (Switch) - 修复硬编码，标记为动态节点
+        NodeHelper.setup("switch", "node.mgmc.switch.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/switch")
+            .property("dynamic_outputs", true) // 标记为动态输出端口节点
+            .button("node.mgmc.switch.add_branch", "add_output_modal")
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.CONTROL, "node.mgmc.switch.port.control", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
+            .output(NodePorts.DEFAULT, "node.mgmc.switch.port.default", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .registerExec((node, ctx) -> {
+                String controlValue = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.CONTROL, ctx));
+                if (node.has("outputs")) {
+                    var outputs = node.getAsJsonObject("outputs");
+                    for (String key : outputs.keySet()) {
+                        if (key.equals(NodePorts.DEFAULT) || key.equals(NodePorts.EXEC)) continue;
+                        if (controlValue.equals(key)) {
+                            NodeLogicRegistry.triggerExec(node, key, ctx);
+                            return;
+                        }
+                    }
+                }
+                NodeLogicRegistry.triggerExec(node, NodePorts.DEFAULT, ctx);
+            });
+
+        // 循环节点 (For Loop)
+        NodeHelper.setup("for_loop", "node.mgmc.for_loop.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/for_loop")
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.START, "node.mgmc.for_loop.port.start", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 0)
+            .input(NodePorts.END, "node.mgmc.for_loop.port.end", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 10)
+            .input(NodePorts.BREAK, "node.mgmc.for_loop.port.break", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.LOOP_BODY, "node.mgmc.for_loop.port.loop_body", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.COMPLETED, "node.mgmc.for_loop.port.completed", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.INDEX, "node.mgmc.for_loop.port.index", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .register(new NodeHelper.NodeHandlerAdapter() {
+                @Override
+                public void execute(JsonObject node, NodeContext ctx) {
+                    if (NodePorts.BREAK.equals(ctx.lastTriggeredPin)) {
+                        ctx.breakRequested.set(true);
+                        return;
+                    }
+                    int start = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.START, ctx));
+                    int end = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.END, ctx));
+                    boolean previousBreakRequested = ctx.breakRequested.get();
+                    ctx.breakRequested.set(false);
+                    String nodeId = node.get("id").getAsString();
+                    for (int i = start; i <= end; i++) {
+                        ctx.setRuntimeData(nodeId, "index", i);
+                        NodeLogicRegistry.triggerExec(node, NodePorts.LOOP_BODY, ctx);
+                        if (ctx.breakRequested.get()) {
+                            ctx.breakRequested.set(false);
+                            break;
+                        }
+                    }
+                    ctx.breakRequested.set(previousBreakRequested);
+                    NodeLogicRegistry.triggerExec(node, NodePorts.COMPLETED, ctx);
+                }
+
+                @Override
+                public Object getValue(JsonObject node, String portId, NodeContext ctx) {
+                    if (NodePorts.INDEX.equals(portId)) {
+                        return ctx.getRuntimeData(node.get("id").getAsString(), "index", 0);
+                    }
+                    return null;
+                }
+            });
+
+        // 等待刻 (Wait Tick)
+        NodeHelper.setup("wait_tick", "node.mgmc.wait_tick.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/wait_tick")
+            .execIn()
+            .input(NodePorts.TICKS, "node.mgmc.port.ticks", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 20)
+            .execOut()
+            .registerExec((node, ctx) -> {
+                int ticks = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.TICKS, ctx));
+                if (ticks <= 0) {
+                    NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+                } else {
+                    TickScheduler.schedule(ctx, node, NodePorts.EXEC, ticks);
+                }
+            });
+
+        // 等待秒 (Wait Second)
+        NodeHelper.setup("wait_s", "node.mgmc.wait_s.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/wait_s")
+            .execIn()
+            .input(NodePorts.SECONDS, "node.mgmc.port.seconds", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 1.0)
+            .execOut()
+            .registerExec((node, ctx) -> {
+                double seconds = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.SECONDS, ctx));
+                int ticks = (int) (seconds * 20);
+                if (ticks <= 0) {
+                    NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+                } else {
+                    TickScheduler.schedule(ctx, node, NodePorts.EXEC, ticks);
+                }
+            });
+
+        // 中断节点 (Break Loop)
+        NodeHelper.setup("break_loop", "node.mgmc.break_loop.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/break_loop")
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.BREAK, "node.mgmc.break_loop.port.break", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .registerExec((node, ctx) -> {
+                ctx.breakRequested.set(true);
+            });
+
+        // 调用本存档其他蓝图 (Call Other Blueprint)
+        NodeHelper.setup("call_blueprint", "node.mgmc.call_blueprint.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/call_blueprint")
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.BLUEPRINT, "node.mgmc.port.blueprint_name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, true, "")
+            .input(NodePorts.LIST, "node.mgmc.port.args_list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
+            .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.LIST, "node.mgmc.port.result_list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
+            .register(new NodeHelper.NodeHandlerAdapter() {
+                @Override
+                public void execute(JsonObject node, NodeContext ctx) {
+                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.BLUEPRINT, ctx));
+                    Object argsObj = NodeLogicRegistry.evaluateInput(node, NodePorts.LIST, ctx);
+                    List<Object> argsList = TypeConverter.toList(argsObj);
+                    
+                    if (ctx.level instanceof ServerLevel serverLevel) {
+                        ltd.opens.mg.mc.core.blueprint.BlueprintManager manager = MaingraphforMC.getServerManager();
+                        if (manager != null) {
+                            JsonObject bpJson = manager.getBlueprint(serverLevel, name);
+                            if (bpJson != null) {
+                            String[] argsArr = argsList.stream().map(TypeConverter::toString).toArray(String[]::new);
+                            NodeContext.Builder builder = new NodeContext.Builder(serverLevel)
+                                .blueprintName(name)
+                                .eventName("")
+                                .args(argsArr)
+                                .parentContext(ctx)
+                                .triggerUuid(ctx.triggerUuid)
+                                .triggerName(ctx.triggerName)
+                                .triggerEntity(ctx.triggerEntity)
+                                .triggerX(ctx.triggerX).triggerY(ctx.triggerY).triggerZ(ctx.triggerZ)
+                                .triggerSpeed(ctx.triggerSpeed)
+                                .triggerBlockId(ctx.triggerBlockId)
+                                .triggerItemId(ctx.triggerItemId)
+                                .triggerValue(ctx.triggerValue)
+                                .triggerExtraUuid(ctx.triggerExtraUuid)
+                                .triggerExtraEntity(ctx.triggerExtraEntity);
+                            
+                            NodeContext resultCtx = BlueprintEngine.executeWithReturn(serverLevel, bpJson, "on_blueprint_called", builder);
+                            if (resultCtx != null) {
+                                ctx.setRuntimeData(node.get("id").getAsString(), "results", new ArrayList<>(resultCtx.returnList));
+                            }
+                        }
+                    }
+                }
+                NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+            }
+
+                @Override
+                public Object getValue(JsonObject node, String portId, NodeContext ctx) {
+                    if (NodePorts.LIST.equals(portId)) {
+                        return ctx.getRuntimeData(node.get("id").getAsString(), "results", new ArrayList<>());
+                    }
+                    return null;
+                }
+            });
+
+        // 返回列表到调用蓝图 (Return List to Calling Blueprint)
+        NodeHelper.setup("return_to_caller", "node.mgmc.return_to_caller.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/return_to_caller")
+            .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .input(NodePorts.LIST, "node.mgmc.port.result_list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
+            .registerExec((node, ctx) -> {
+                Object resultObj = NodeLogicRegistry.evaluateInput(node, NodePorts.LIST, ctx);
+                if (resultObj instanceof List) {
+                    ctx.returnList.clear();
+                    ctx.returnList.addAll((List<Object>) resultObj);
+                }
+            });
+    }
+}
