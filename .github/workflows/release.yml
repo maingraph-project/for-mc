@@ -35,14 +35,17 @@ jobs:
         id: get_version
         run: |
           VERSION=$(grep "mod_version=" gradle.properties | cut -d'=' -f2)
+          MOD_ID=$(grep "mod_id=" gradle.properties | cut -d'=' -f2)
           echo "MOD_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "MOD_ID=$MOD_ID" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Update Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            build/libs/*.jar
+            fabric/build/libs/${{ env.MOD_ID }}-fabric-${{ env.MOD_VERSION }}.jar
+            neoforge/build/libs/${{ env.MOD_ID }}-neoforge-${{ env.MOD_VERSION }}.jar
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

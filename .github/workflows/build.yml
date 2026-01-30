@@ -28,3 +28,19 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build
+
+      - name: Get Version
+        id: get_version
+        run: |
+          VERSION=$(grep "mod_version=" gradle.properties | cut -d'=' -f2)
+          MOD_ID=$(grep "mod_id=" gradle.properties | cut -d'=' -f2)
+          echo "MOD_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "MOD_ID=$MOD_ID" >> $GITHUB_ENV
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mgmc-builds
+          path: |
+            fabric/build/libs/${{ env.MOD_ID }}-fabric-${{ env.MOD_VERSION }}.jar
+            neoforge/build/libs/${{ env.MOD_ID }}-neoforge-${{ env.MOD_VERSION }}.jar
