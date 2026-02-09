@@ -247,6 +247,10 @@ public class BlueprintScreen extends Screen {
         // Reset View
         rightX -= 70;
         renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 70, 20, "gui.mgmc.blueprint_editor.reset_view", "reset_view");
+
+        // Help
+        rightX -= 25;
+        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 20, 20, "?", "help");
         
         // Arrange
         rightX -= 45;
@@ -434,6 +438,15 @@ public class BlueprintScreen extends Screen {
                     state.buttonLongPressTarget = "reset_view";
                     state.buttonLongPressProgress = 0f;
                     state.isMouseDown = true;
+                }
+                return true;
+            }
+
+            // Help
+            rightX -= 25;
+            if (isHovering((int)mouseX, (int)mouseY, rightX, 3, 20, 20)) {
+                if (button == 0) {
+                    Minecraft.getInstance().setScreen(new BlueprintHelpScreen(this));
                 }
                 return true;
             }
