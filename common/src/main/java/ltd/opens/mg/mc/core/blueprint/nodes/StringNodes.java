@@ -70,10 +70,10 @@ public class StringNodes {
             .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/string/string_length")
             .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
-            .output(NodePorts.LENGTH, "node.mgmc.port.length", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.LENGTH, "node.mgmc.port.length", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
             .registerValue((node, portId, ctx) -> {
                 String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
-                return s == null ? 0.0 : (double) s.length();
+                return s == null ? 0 : s.length();
             });
 
         // 字符串包含 (Contains)
@@ -113,8 +113,8 @@ public class StringNodes {
             .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/string/string_substring")
             .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
-            .input(NodePorts.START, "node.mgmc.string_substring.port.start", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 0.0)
-            .input(NodePorts.END, "node.mgmc.string_substring.port.end", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 5.0)
+            .input(NodePorts.START, "node.mgmc.string_substring.port.start", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, true, 0)
+            .input(NodePorts.END, "node.mgmc.string_substring.port.end", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, true, 5)
             .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));

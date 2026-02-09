@@ -26,7 +26,7 @@ public class ListNodes {
             .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/list/get_list_item")
             .input(NodePorts.LIST, "node.mgmc.get_list_item.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
-            .input(NodePorts.INDEX, "node.mgmc.get_list_item.port.index", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.INDEX, "node.mgmc.get_list_item.port.index", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 0)
             .output(NodePorts.VALUE, "node.mgmc.get_list_item.port.value", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
             .registerValue((node, portId, ctx) -> {
                 try {
@@ -60,11 +60,11 @@ public class ListNodes {
             .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/list/list_remove")
             .input(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
-            .input(NodePorts.INDEX, "node.mgmc.port.index", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.INDEX, "node.mgmc.port.index", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 0)
             .output(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
             .registerValue((node, portId, ctx) -> {
                 List<Object> list = new ArrayList<>(TypeConverter.toList(NodeLogicRegistry.evaluateInput(node, NodePorts.LIST, ctx)));
-                int index = (int) TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.INDEX, ctx));
+                int index = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.INDEX, ctx));
                 if (index >= 0 && index < list.size()) {
                     list.remove(index);
                 }
@@ -77,13 +77,13 @@ public class ListNodes {
             .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/list/list_length")
             .input(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
-            .output(NodePorts.LENGTH, "node.mgmc.port.length", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.LENGTH, "node.mgmc.port.length", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
             .registerValue((node, portId, ctx) -> {
                 try {
                     List<Object> list = TypeConverter.toList(NodeLogicRegistry.evaluateInput(node, NodePorts.LIST, ctx));
-                    return list != null ? (double) list.size() : 0.0;
+                    return list != null ? list.size() : 0;
                 } catch (Exception e) {
-                    return 0.0;
+                    return 0;
                 }
             });
 
@@ -123,7 +123,7 @@ public class ListNodes {
             .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/list/list_set_item")
             .input(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
-            .input(NodePorts.INDEX, "node.mgmc.port.index", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.INDEX, "node.mgmc.port.index", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 0)
             .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
             .output(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
             .registerValue((node, portId, ctx) -> {

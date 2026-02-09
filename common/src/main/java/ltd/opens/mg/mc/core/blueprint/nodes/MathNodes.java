@@ -120,14 +120,14 @@ public class MathNodes {
             .category("node_category.mgmc.logic.math")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/math/random_int")
-            .input(NodePorts.MIN, "node.mgmc.port.min", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
-            .input(NodePorts.MAX, "node.mgmc.port.max", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 100.0)
-            .mathOutput()
+            .input(NodePorts.MIN, "node.mgmc.port.min", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 0)
+            .input(NodePorts.MAX, "node.mgmc.port.max", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 100)
+            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
             .registerValue((node, portId, ctx) -> {
-                int min = (int) TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.MIN, ctx));
-                int max = (int) TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.MAX, ctx));
-                if (max <= min) return (double) min;
-                return (double) (min + RANDOM.nextInt(max - min + 1));
+                int min = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.MIN, ctx));
+                int max = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.MAX, ctx));
+                if (max <= min) return min;
+                return min + RANDOM.nextInt(max - min + 1);
             });
 
         NodeHelper.setup("random_bool", "node.mgmc.random_bool.name")
