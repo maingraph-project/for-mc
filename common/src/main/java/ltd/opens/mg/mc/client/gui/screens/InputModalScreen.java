@@ -51,6 +51,9 @@ public class InputModalScreen extends Screen {
             this.editBox = new EditBox(this.font, startX + 10, startY + 30, width - 20, 20, Component.translatable("gui.mgmc.modal.input_label"));
             this.editBox.setMaxLength(32767);
             this.editBox.setValue(initialValue);
+            this.editBox.setTextColor(0xFFFFFFFF);
+            this.editBox.setCanLoseFocus(false);
+            this.editBox.setFocused(true);
             if (isNumeric) {
                 this.editBox.setFilter(s -> s.isEmpty() || s.matches("^-?\\d*\\.?\\d*$"));
             }
@@ -92,7 +95,7 @@ public class InputModalScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.fill(0, 0, this.width, this.height, 0x88000000);
         
         int width = 200;
         int height = (mode == Mode.SELECTION && options != null) ? Math.min(200, 40 + options.length * 22 + 30) : 80;
@@ -103,12 +106,14 @@ public class InputModalScreen extends Screen {
         guiGraphics.renderOutline(startX, startY, width, height, 0xFFFFFFFF);
         
         guiGraphics.drawString(font, titleStr, startX + 10, startY + 10, 0xFFFFFFFF, false);
+
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
-            if (mode == Mode.INPUT) {
+            if (mode == Mode.INPUT && editBox != null) {
                 onConfirm.accept(editBox.getValue());
             }
             this.minecraft.setScreen(parent);
