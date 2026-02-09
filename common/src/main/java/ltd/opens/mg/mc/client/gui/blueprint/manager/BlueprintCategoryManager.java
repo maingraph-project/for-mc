@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BlueprintCategoryManager {
-    public static final String ROOT_PATH = "node_category.mgmc";
+    public static final String ROOT_PATH = "node_category";
 
     public static class CategoryData {
         public final List<String> subCategories;

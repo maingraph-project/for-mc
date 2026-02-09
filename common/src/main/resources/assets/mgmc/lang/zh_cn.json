@@ -64,6 +64,8 @@
   "gui.mgmc.help.shortcuts.zoom": "缩放视角",
   "gui.mgmc.help.shortcuts.box_select": "批量选中节点",
   "gui.mgmc.help.shortcuts.multi_select": "多选节点",
+  "node_category": "节点分类",
+  "node_category.mgmc": "MGMC",
   "gui.mgmc.blueprint_editor.instructions": "右键点击添加节点。拖拽端口进行连接。按 DEL 键删除。支持框选、多选、复制粘贴。",
   "gui.mgmc.notification.copied": "已复制 %d 个节点",
   "gui.mgmc.notification.pasted": "已粘贴 %d 个节点",
