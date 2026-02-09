@@ -245,6 +245,14 @@ public class BlueprintNetworkHandler {
                 }
             });
         }
+
+        public static void handleClientActionResponse(final ClientActionResponsePayload payload, final NetworkManager.PacketContext context) {
+            context.queue(() -> {
+                // TODO: 异步节点恢复逻辑
+                LOGGER.info("Received client action response from {}: node={}, data={}", 
+                    context.getPlayer().getName().getString(), payload.nodeId(), payload.data());
+            });
+        }
     }
 
     public static class Client {
@@ -304,6 +312,13 @@ public class BlueprintNetworkHandler {
                 if (mc.screen instanceof ltd.opens.mg.mc.client.gui.screens.BlueprintScreen blueprintScreen) {
                     blueprintScreen.onRuntimeError(payload.blueprintName(), payload.nodeId(), payload.message());
                 }
+            });
+        }
+
+        public static void handleExecuteClientAction(final ExecuteClientActionPayload payload, final NetworkManager.PacketContext context) {
+            context.queue(() -> {
+                ltd.opens.mg.mc.client.gui.blueprint.engine.ClientNodeLogicRegistry.execute(
+                    payload.blueprintName(), payload.nodeId(), payload.actionType(), payload.data());
             });
         }
     }

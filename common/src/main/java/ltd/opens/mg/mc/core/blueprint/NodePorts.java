@@ -88,6 +88,8 @@ public class NodePorts {
     public static final String SECONDS = "seconds";
     public static final String TICKS = "ticks";
     public static final String VELOCITY = "velocity";
+    public static final String URL = "url";
+    public static final String TITLE = "title";
     
     // 实体属性
     public static final String TYPE = "type";

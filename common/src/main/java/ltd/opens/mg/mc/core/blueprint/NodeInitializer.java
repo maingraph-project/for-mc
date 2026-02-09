@@ -20,14 +20,12 @@ public class NodeInitializer {
         ListNodes.register();
         ActionNodes.register();
         EventNodes.register();
+        ClientNodes.register();
         GetEntityInfoNode.register();
         SpecialNodes.register();
 
         // 发布注册事件，通知外部模块 (如果有必要，使用 Architectury Event)
         // 目前简化为直接注册
         ltd.opens.mg.mc.MaingraphforMC.LOGGER.info("MGMCNodes registered.");
-        
-        // 冻结注册表，防止运行时动态修改
-        NodeRegistry.freeze();
     }
 }

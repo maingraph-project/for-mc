@@ -19,6 +19,7 @@ public class MGMCNetwork {
         NetworkManager.registerReceiver(NetworkManager.c2s(), WorkbenchActionPayload.TYPE, WorkbenchActionPayload.STREAM_CODEC, BlueprintNetworkHandler.Server::handleWorkbenchAction);
         NetworkManager.registerReceiver(NetworkManager.c2s(), RequestExportPayload.TYPE, RequestExportPayload.STREAM_CODEC, BlueprintNetworkHandler.Server::handleRequestExport);
         NetworkManager.registerReceiver(NetworkManager.c2s(), ImportBlueprintPayload.TYPE, ImportBlueprintPayload.STREAM_CODEC, BlueprintNetworkHandler.Server::handleImport);
+        NetworkManager.registerReceiver(NetworkManager.c2s(), ClientActionResponsePayload.TYPE, ClientActionResponsePayload.STREAM_CODEC, BlueprintNetworkHandler.Server::handleClientActionResponse);
 
         // Server -> Client
         NetworkManager.registerReceiver(NetworkManager.s2c(), ResponseBlueprintListPayload.TYPE, ResponseBlueprintListPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleResponseList);
@@ -27,6 +28,7 @@ public class MGMCNetwork {
         NetworkManager.registerReceiver(NetworkManager.s2c(), ResponseMappingsPayload.TYPE, ResponseMappingsPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleResponseMappings);
         NetworkManager.registerReceiver(NetworkManager.s2c(), ResponseExportPayload.TYPE, ResponseExportPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleResponseExport);
         NetworkManager.registerReceiver(NetworkManager.s2c(), RuntimeErrorReportPayload.TYPE, RuntimeErrorReportPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleRuntimeError);
+        NetworkManager.registerReceiver(NetworkManager.s2c(), ExecuteClientActionPayload.TYPE, ExecuteClientActionPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleExecuteClientAction);
     }
 
     public static void sendToPlayer(ServerPlayer player, net.minecraft.network.protocol.common.custom.CustomPacketPayload payload) {

@@ -18,6 +18,22 @@ public class NodeLogicRegistry {
         return HANDLERS.get(typeId);
     }
 
+    /**
+     * 触发客户端动作
+     */
+    public static void triggerClientAction(JsonObject node, NodeContext ctx, String actionType, JsonObject params) {
+        if (ctx.level instanceof net.minecraft.server.level.ServerLevel && ctx.triggerEntity instanceof net.minecraft.server.level.ServerPlayer player) {
+            ltd.opens.mg.mc.network.MGMCNetwork.sendToPlayer(player, 
+                new ltd.opens.mg.mc.network.payloads.ExecuteClientActionPayload(
+                    ctx.currentBlueprintName, 
+                    node.get("id").getAsString(), 
+                    actionType, 
+                    params.toString()
+                )
+            );
+        }
+    }
+
     public static Object evaluateInput(JsonObject node, String pinId, NodeContext ctx) {
         if (!node.has("inputs")) return null;
         JsonObject inputs = node.getAsJsonObject("inputs");
