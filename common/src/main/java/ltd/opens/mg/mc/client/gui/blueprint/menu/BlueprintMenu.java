@@ -440,7 +440,7 @@ public class BlueprintMenu {
         String[] parts = path.split("\\.");
         StringBuilder fullPath = new StringBuilder();
         for (String part : parts) {
-            if (part.equals("node_category") || part.equals("mgmc")) continue;
+            if (part.equals("node_category")) continue;
             fullPath.append("/").append(Component.translatable(path.substring(0, path.indexOf(part) + part.length())).getString());
         }
         return fullPath.length() == 0 ? "/" : fullPath.toString();

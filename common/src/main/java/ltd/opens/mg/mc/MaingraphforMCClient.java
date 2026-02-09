@@ -9,6 +9,7 @@ import ltd.opens.mg.mc.client.ClientSetup;
 import ltd.opens.mg.mc.client.gui.screens.AboutScreen;
 import ltd.opens.mg.mc.client.gui.screens.BlueprintSelectionScreen;
 import ltd.opens.mg.mc.core.registry.MGMCRegistries;
+import ltd.opens.mg.mc.core.blueprint.nodes.ClientNodes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;

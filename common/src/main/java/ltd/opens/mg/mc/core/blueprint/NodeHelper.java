@@ -26,16 +26,36 @@ public class NodeHelper {
      * @return NodeHelper 实例
      */
     public static NodeHelper setup(String id, String nameKey) {
+        return setup("mgmc", id, nameKey);
+    }
+
+    /**
+     * 开始配置一个新节点（指定默认命名空间）
+     * @param namespace 默认命名空间（通常为 Mod ID）
+     * @param id 节点唯一标识
+     * @param nameKey 节点名称的 i18n key
+     * @return NodeHelper 实例
+     */
+    public static NodeHelper setup(String namespace, String id, String nameKey) {
         String finalId = id;
         if (!id.contains(":")) {
-            String namespace = "mgmc";
             finalId = namespace + ":" + id;
         }
-        return new NodeHelper(finalId, nameKey);
+        return new NodeHelper(finalId, nameKey).registeredBy(namespace);
     }
 
     public String getId() {
         return id;
+    }
+
+    /**
+     * 设置注册该节点的 Mod ID
+     * @param modId Mod ID
+     * @return NodeHelper 实例
+     */
+    public NodeHelper registeredBy(String modId) {
+        builder.registeredBy(modId);
+        return this;
     }
 
     /**
@@ -290,6 +310,47 @@ public class NodeHelper {
         registerValue((node, portId, ctx) -> {
             double input = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.INPUT, ctx));
             return op.apply(input);
+        });
+    }
+
+    @FunctionalInterface
+    public interface SimpleClientActionHandler {
+        com.google.gson.JsonObject getParameters(com.google.gson.JsonObject node, ltd.opens.mg.mc.core.blueprint.engine.NodeContext ctx);
+    }
+
+    @FunctionalInterface
+    public interface ClientActionHandler {
+        void handle(com.google.gson.JsonObject params, ltd.opens.mg.mc.client.gui.blueprint.engine.ClientNodeLogicRegistry.ClientActionContext ctx);
+    }
+
+    /**
+     * 注册客户端动作节点逻辑（自动处理网络同步与后续流转）
+     * @param actionType 动作 ID（需在客户端 ClientNodeLogicRegistry 中注册）
+     * @param paramsHandler 参数填充逻辑
+     */
+    public void registerClientAction(String actionType, SimpleClientActionHandler paramsHandler) {
+        registerExec((node, ctx) -> {
+            com.google.gson.JsonObject params = paramsHandler.getParameters(node, ctx);
+            NodeLogicRegistry.triggerClientAction(node, ctx, actionType, params);
+            NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+        });
+    }
+
+    /**
+     * 注册客户端动作节点逻辑（元数据、服务端参数打包、客户端执行逻辑合一）
+     * 使用 Supplier 包装客户端处理器以确保服务端加载类时的安全性。
+     * @param actionType 动作 ID
+     * @param paramsHandler 服务端：如何从节点端口打包参数发往客户端
+     * @param clientHandlerSupplier 客户端：提供收到动作后的执行逻辑
+     */
+    public void registerClientAction(String actionType, SimpleClientActionHandler paramsHandler, java.util.function.Supplier<ClientActionHandler> clientHandlerSupplier) {
+        registerClientAction(actionType, paramsHandler);
+        
+        // 仅在客户端环境注册处理器
+        dev.architectury.utils.EnvExecutor.runInEnv(dev.architectury.utils.Env.CLIENT, () -> () -> {
+            ltd.opens.mg.mc.client.gui.blueprint.engine.ClientNodeLogicRegistry.register(actionType, (params, ctx) -> {
+                clientHandlerSupplier.get().handle(params, ctx);
+            });
         });
     }
 }

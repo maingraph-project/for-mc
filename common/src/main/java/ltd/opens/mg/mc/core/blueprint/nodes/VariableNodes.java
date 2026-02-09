@@ -31,6 +31,17 @@ public class VariableNodes {
                 return TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx));
             });
 
+        NodeHelper.setup("int", "node.mgmc.int.name")
+            .category("node_category.mgmc.variable")
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/int")
+            .property("input_type", "int")
+            .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 0)
+            .output(NodePorts.VALUE, "node.mgmc.port.output", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
+            .registerValue((node, portId, ctx) -> {
+                return (double) TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx));
+            });
+
         NodeHelper.setup("boolean", "node.mgmc.boolean.name")
             .category("node_category.mgmc.variable.boolean")
             .color(NodeThemes.COLOR_NODE_VARIABLE)

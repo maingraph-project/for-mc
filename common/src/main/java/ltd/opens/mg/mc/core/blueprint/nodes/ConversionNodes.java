@@ -36,6 +36,18 @@ public class ConversionNodes {
                 return TypeConverter.cast(input, targetType);
             });
 
+        // to_int (浮点数转整数)
+        NodeHelper.setup("to_int", "node.mgmc.to_int.name")
+            .category("node_category.mgmc.logic.math")
+            .color(NodeThemes.COLOR_NODE_CONVERSION)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/math/to_int")
+            .input(NodePorts.INPUT, "node.mgmc.port.value", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
+            .registerValue((node, portId, ctx) -> {
+                Object input = NodeLogicRegistry.evaluateInput(node, NodePorts.INPUT, ctx);
+                return (double) TypeConverter.toInt(input); // 虽然内部是 INT，但为了兼容性返回 double
+            });
+
         // make_xyz (浮点数到XYZ)
         NodeHelper.setup("make_xyz", "node.mgmc.make_xyz.name")
             .category("node_category.mgmc.logic.math")

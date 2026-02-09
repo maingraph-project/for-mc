@@ -283,11 +283,11 @@ public class ActionNodes {
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/action/entity/set_entity_on_fire")
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .input(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
-            .input(NodePorts.SECONDS, "node.mgmc.port.seconds", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 5.0)
+            .input(NodePorts.SECONDS, "node.mgmc.port.seconds", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 5)
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
-                int seconds = (int) TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.SECONDS, ctx));
+                int seconds = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.SECONDS, ctx));
                 
                 Entity entity = null;
                 if (entityObj instanceof Entity e) entity = e;
@@ -307,15 +307,15 @@ public class ActionNodes {
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .input(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
             .input(NodePorts.EFFECT, "node.mgmc.port.effect", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "minecraft:speed")
-            .input(NodePorts.DURATION, "node.mgmc.port.duration", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 10.0)
-            .input(NodePorts.AMPLIFIER, "node.mgmc.port.amplifier", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
+            .input(NodePorts.DURATION, "node.mgmc.port.duration", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 10)
+            .input(NodePorts.AMPLIFIER, "node.mgmc.port.amplifier", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 0)
             .input(NodePorts.SHOW_PARTICLES, "node.mgmc.port.show_particles", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN, true)
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
                 String effectName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EFFECT, ctx));
-                int duration = (int) (TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.DURATION, ctx)) * 20);
-                int amplifier = (int) TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.AMPLIFIER, ctx));
+                int duration = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.DURATION, ctx)) * 20;
+                int amplifier = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.AMPLIFIER, ctx));
                 boolean showParticles = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.SHOW_PARTICLES, ctx));
                 
                 LivingEntity entity = null;

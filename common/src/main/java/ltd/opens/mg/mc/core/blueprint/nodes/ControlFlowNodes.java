@@ -67,12 +67,12 @@ public class ControlFlowNodes {
             .color(NodeThemes.COLOR_NODE_CONTROL)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/for_loop")
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
-            .input(NodePorts.START, "node.mgmc.for_loop.port.start", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 0)
-            .input(NodePorts.END, "node.mgmc.for_loop.port.end", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 10)
+            .input(NodePorts.START, "node.mgmc.for_loop.port.start", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, true, 0)
+            .input(NodePorts.END, "node.mgmc.for_loop.port.end", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, true, 10)
             .input(NodePorts.BREAK, "node.mgmc.for_loop.port.break", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .output(NodePorts.LOOP_BODY, "node.mgmc.for_loop.port.loop_body", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .output(NodePorts.COMPLETED, "node.mgmc.for_loop.port.completed", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
-            .output(NodePorts.INDEX, "node.mgmc.for_loop.port.index", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.INDEX, "node.mgmc.for_loop.port.index", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
             .register(new NodeHelper.NodeHandlerAdapter() {
                 @Override
                 public void execute(JsonObject node, NodeContext ctx) {
@@ -112,7 +112,7 @@ public class ControlFlowNodes {
             .color(NodeThemes.COLOR_NODE_CONTROL)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/wait_tick")
             .execIn()
-            .input(NodePorts.TICKS, "node.mgmc.port.ticks", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, true, 20)
+            .input(NodePorts.TICKS, "node.mgmc.port.ticks", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, true, 20)
             .execOut()
             .registerExec((node, ctx) -> {
                 int ticks = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.TICKS, ctx));
