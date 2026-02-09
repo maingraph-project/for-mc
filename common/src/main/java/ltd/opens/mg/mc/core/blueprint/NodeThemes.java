@@ -22,6 +22,7 @@ public class NodeThemes {
     public static final int COLOR_PORT_EXEC = 0xFFFFFFFF;     // 白色 - 执行流
     public static final int COLOR_PORT_STRING = 0xFFFFCC00;   // 金色 - 字符串
     public static final int COLOR_PORT_FLOAT = 0xFF55FF55;    // 亮绿 - 数值
+    public static final int COLOR_PORT_INT = 0xFF33AA33;      // 中绿 - 整数
     public static final int COLOR_PORT_BOOLEAN = 0xFF920101;  // 深红 - 布尔
     public static final int COLOR_PORT_LIST = 0xFF00FFFF;     // 青蓝 - 列表
     public static final int COLOR_PORT_UUID = 0xFFCC00FF;     // 紫色 - UUID
