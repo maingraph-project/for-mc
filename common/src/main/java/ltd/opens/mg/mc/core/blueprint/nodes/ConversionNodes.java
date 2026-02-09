@@ -40,6 +40,7 @@ public class ConversionNodes {
         NodeHelper.setup("to_int", "node.mgmc.to_int.name")
             .category("node_category.mgmc.logic.math")
             .color(NodeThemes.COLOR_NODE_CONVERSION)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/math/to_int")
             .input(NodePorts.INPUT, "node.mgmc.port.value", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, 0.0)
             .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
             .registerValue((node, portId, ctx) -> {
