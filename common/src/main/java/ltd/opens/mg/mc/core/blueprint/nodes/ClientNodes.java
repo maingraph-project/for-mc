@@ -16,7 +16,7 @@ public class ClientNodes {
     public static void register() {
         // 客户端 Toast 提示 (Show Toast)
         NodeHelper.setup("client_show_toast", "node.mgmc.client_show_toast.name")
-            .category("node_category.mgmc.client.hud")
+            .category("node_category.mgmc_client.hud")
             .color(NodeThemes.COLOR_NODE_ACTION)
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .input(NodePorts.TITLE, "node.mgmc.port.title", PortType.STRING, NodeThemes.COLOR_PORT_STRING, "Maingraph")
@@ -43,10 +43,10 @@ public class ClientNodes {
 
         // 客户端打开网页 (Open URL)
         NodeHelper.setup("client_open_url", "node.mgmc.client_open_url.name")
-            .category("node_category.mgmc.client.system")
+            .category("node_category.mgmc_client.system")
             .color(NodeThemes.COLOR_NODE_ACTION)
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
-            .input(NodePorts.URL, "node.mgmc.port.url", PortType.STRING, NodeThemes.COLOR_PORT_STRING, "http://zhcn-docs.mc.maingraph.nb6.ltd/")
+            .input(NodePorts.URL, "node.mgmc.port.url", PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerClientAction("open_url", (node, ctx) -> {
                 JsonObject params = new JsonObject();
@@ -55,13 +55,7 @@ public class ClientNodes {
             }, () -> (params, ctx) -> {
                 String url = params.has("url") ? params.get("url").getAsString() : "";
                 if (!url.isEmpty()) {
-                    net.minecraft.client.Minecraft.getInstance().execute(() -> {
-                        try {
-                            net.minecraft.Util.getPlatform().openUri(new java.net.URI(url));
-                        } catch (Exception e) {
-                            ltd.opens.mg.mc.MaingraphforMC.LOGGER.error("Failed to open URL: " + url, e);
-                        }
-                    });
+                    net.minecraft.Util.getPlatform().openUri(url);
                 }
             });
     }
