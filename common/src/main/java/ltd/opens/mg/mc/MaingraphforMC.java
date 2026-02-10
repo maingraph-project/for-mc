@@ -251,7 +251,7 @@ public class MaingraphforMC {
                             try {
                                 JsonObject blueprint = serverManager.getBlueprint(level, blueprintName);
                                 if (blueprint != null) {
-                                    BlueprintEngine.execute(level, blueprint, "mgmc:on_mgrun", eventName, args, triggerUuid, triggerName, pos.x, pos.y, pos.z, 0.0);
+                                    BlueprintEngine.execute(level, blueprint, blueprintName, "mgmc:on_mgrun", eventName, args, triggerUuid, triggerName, pos.x, pos.y, pos.z, 0.0);
                                 } else {
                                     context.getSource().sendFailure(Component.translatable("command.mgmc.mgrun.blueprint_not_found", blueprintName));
                                 }
@@ -273,7 +273,7 @@ public class MaingraphforMC {
                         try {
                             JsonObject blueprint = serverManager.getBlueprint(level, blueprintName);
                             if (blueprint != null) {
-                                BlueprintEngine.execute(level, blueprint, "mgmc:on_mgrun", eventName, new String[0], triggerUuid, triggerName, pos.x, pos.y, pos.z, 0.0);
+                                BlueprintEngine.execute(level, blueprint, blueprintName, "mgmc:on_mgrun", eventName, new String[0], triggerUuid, triggerName, pos.x, pos.y, pos.z, 0.0);
                             } else {
                                 context.getSource().sendFailure(Component.translatable("command.mgmc.mgrun.blueprint_not_found", blueprintName));
                             }

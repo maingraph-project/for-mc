@@ -28,12 +28,9 @@ public class ConversionNodes {
             .color(NodeThemes.COLOR_NODE_CONVERSION)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/math/cast")
             .input(NodePorts.INPUT, "node.mgmc.cast.port.input", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
-            .input(NodePorts.TO_TYPE, "node.mgmc.cast.port.to_type", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, true, "STRING", typeOptions)
-            .output(NodePorts.OUTPUT, "node.mgmc.cast.port.output", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
+            .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
             .registerValue((node, portId, ctx) -> {
-                Object input = NodeLogicRegistry.evaluateInput(node, NodePorts.INPUT, ctx);
-                String targetType = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TO_TYPE, ctx));
-                return TypeConverter.cast(input, targetType);
+                return NodeLogicRegistry.evaluateInput(node, NodePorts.INPUT, ctx);
             });
 
         // to_int (浮点数转整数)

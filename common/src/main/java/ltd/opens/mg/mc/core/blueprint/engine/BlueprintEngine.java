@@ -17,33 +17,33 @@ public class BlueprintEngine {
     private static final Map<JsonObject, Map<String, List<JsonObject>>> EVENT_INDEX_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<JsonObject, Map<String, JsonObject>> NODE_MAP_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
 
-    public static void execute(Level level, String json, String eventType, String name, String[] args, 
+    public static void execute(Level level, String json, String blueprintName, String eventType, String name, String[] args, 
                                 String triggerUuid, String triggerName, double tx, double ty, double tz, double speed) {
-        execute(level, json, eventType, name, args, triggerUuid, triggerName, tx, ty, tz, speed, "", "", 0.0, "");
+        execute(level, json, blueprintName, eventType, name, args, triggerUuid, triggerName, tx, ty, tz, speed, "", "", 0.0, "");
     }
 
-    public static void execute(Level level, String json, String eventType, String name, String[] args, 
+    public static void execute(Level level, String json, String blueprintName, String eventType, String name, String[] args, 
                                 String triggerUuid, String triggerName, double tx, double ty, double tz, double speed,
                                 String triggerBlockId, String triggerItemId, double triggerValue, String triggerExtraUuid) {
         try {
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-            execute(level, root, eventType, name, args, triggerUuid, triggerName, tx, ty, tz, speed, triggerBlockId, triggerItemId, triggerValue, triggerExtraUuid);
+            execute(level, root, blueprintName, eventType, name, args, triggerUuid, triggerName, tx, ty, tz, speed, triggerBlockId, triggerItemId, triggerValue, triggerExtraUuid);
         } catch (Exception e) {
             MaingraphforMC.LOGGER.error("Error parsing blueprint JSON", e);
         }
     }
 
-    public static void execute(Level level, JsonObject root, String eventType, String name, String[] args, 
+    public static void execute(Level level, JsonObject root, String blueprintName, String eventType, String name, String[] args, 
                                 String triggerUuid, String triggerName, double tx, double ty, double tz, double speed) {
-        execute(level, root, eventType, name, args, triggerUuid, triggerName, tx, ty, tz, speed, "", "", 0.0, "");
+        execute(level, root, blueprintName, eventType, name, args, triggerUuid, triggerName, tx, ty, tz, speed, "", "", 0.0, "");
     }
 
-    public static void execute(Level level, JsonObject root, String eventType, String name, String[] args, 
+    public static void execute(Level level, JsonObject root, String blueprintName, String eventType, String name, String[] args, 
                                 String triggerUuid, String triggerName, double tx, double ty, double tz, double speed,
                                 String triggerBlockId, String triggerItemId, double triggerValue, String triggerExtraUuid) {
         NodeContext.Builder builder = new NodeContext.Builder(level)
-            .blueprintName(name)
-            .eventName(eventType)
+            .blueprintName(blueprintName)
+            .eventName(name)
             .args(args)
             .triggerUuid(triggerUuid)
             .triggerName(triggerName)
