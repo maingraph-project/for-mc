@@ -223,6 +223,9 @@ public class BlueprintMappingScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 1) { // 如果是右键，直接让列表处理，不要先经过 contextMenu
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
         if (contextMenu.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
@@ -255,8 +258,14 @@ public class BlueprintMappingScreen extends Screen {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (contextMenu.mouseClicked(mouseX, mouseY, button)) return true;
-            return super.mouseClicked(mouseX, mouseY, button);
+            boolean handled = super.mouseClicked(mouseX, mouseY, button);
+            if (!handled && button == 1) {
+                IdEntry entry = this.getEntryAtPosition(mouseX, mouseY);
+                if (entry != null) {
+                    return entry.mouseClicked(mouseX, mouseY, button);
+                }
+            }
+            return handled;
         }
     }
 
@@ -354,8 +363,14 @@ public class BlueprintMappingScreen extends Screen {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (contextMenu.mouseClicked(mouseX, mouseY, button)) return true;
-            return super.mouseClicked(mouseX, mouseY, button);
+            boolean handled = super.mouseClicked(mouseX, mouseY, button);
+            if (!handled && button == 1) {
+                BlueprintMappingEntry entry = this.getEntryAtPosition(mouseX, mouseY);
+                if (entry != null) {
+                    return entry.mouseClicked(mouseX, mouseY, button);
+                }
+            }
+            return handled;
         }
     }
 
