@@ -49,6 +49,8 @@
   "gui.mgmc.help.title": "Blueprint Editor Help",
   "gui.mgmc.help.category.shortcuts": "Shortcuts",
   "gui.mgmc.help.shortcuts.title": "Editor Shortcuts",
+  "gui.mgmc.help.shortcuts.save": "Save Blueprint",
+  "gui.mgmc.help.shortcuts.select_all": "Select All Nodes",
   "gui.mgmc.help.shortcuts.copy": "Copy Selected Nodes",
   "gui.mgmc.help.shortcuts.paste": "Paste Nodes",
   "gui.mgmc.help.shortcuts.delete": "Delete Nodes",

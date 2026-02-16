@@ -74,6 +74,8 @@ public class BlueprintHelpScreen extends Screen {
         yOffset += 20;
 
         Object[][] shortcuts = {
+            {"Ctrl + S", Component.translatable("gui.mgmc.help.shortcuts.save")},
+            {"Ctrl + A", Component.translatable("gui.mgmc.help.shortcuts.select_all")},
             {"Ctrl + C", Component.translatable("gui.mgmc.help.shortcuts.copy")},
             {"Ctrl + V", Component.translatable("gui.mgmc.help.shortcuts.paste")},
             {"Del / Backspace", Component.translatable("gui.mgmc.help.shortcuts.delete")},
