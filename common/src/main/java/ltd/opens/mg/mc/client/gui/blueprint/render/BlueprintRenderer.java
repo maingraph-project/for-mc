@@ -53,6 +53,9 @@ public class BlueprintRenderer {
     }
 
     public static void drawRegions(GuiGraphics guiGraphics, List<GuiRegion> regions, net.minecraft.client.gui.Font font, Viewport viewport) {
+        float zoom = viewport.zoom;
+        boolean drawDetails = zoom > 0.5f; // LOD threshold
+
         for (GuiRegion region : regions) {
             int color = region.color;
             int borderColor = region.isSelected ? 0xFFFFFFFF : (color & 0x00FFFFFF) | 0x88000000;
@@ -60,18 +63,23 @@ public class BlueprintRenderer {
             // Background
             guiGraphics.fill((int) region.x, (int) region.y, (int) (region.x + region.width), (int) (region.y + region.height), color);
             
-            // Header
-            guiGraphics.fill((int) region.x, (int) region.y, (int) (region.x + region.width), (int) (region.y + 20), (color & 0x00FFFFFF) | 0xAA000000);
-            
-            // Border
-            guiGraphics.renderOutline((int) region.x, (int) region.y, (int) region.width, (int) region.height, borderColor);
-            
-            // Title
-            guiGraphics.drawString(font, region.title, (int) region.x + 5, (int) region.y + 6, 0xFFFFFFFF);
-            
-            // Resize handle (bottom-right)
-            if (region.isSelected) {
-                guiGraphics.fill((int) (region.x + region.width - 10), (int) (region.y + region.height - 10), (int) (region.x + region.width), (int) (region.y + region.height), 0x88FFFFFF);
+            if (drawDetails) {
+                // Header
+                guiGraphics.fill((int) region.x, (int) region.y, (int) (region.x + region.width), (int) (region.y + 20), (color & 0x00FFFFFF) | 0xAA000000);
+                
+                // Border
+                guiGraphics.renderOutline((int) region.x, (int) region.y, (int) region.width, (int) region.height, borderColor);
+                
+                // Title
+                guiGraphics.drawString(font, region.title, (int) region.x + 5, (int) region.y + 6, 0xFFFFFFFF);
+                
+                // Resize handle (bottom-right)
+                if (region.isSelected) {
+                    guiGraphics.fill((int) (region.x + region.width - 10), (int) (region.y + region.height - 10), (int) (region.x + region.width), (int) (region.y + region.height), 0x88FFFFFF);
+                }
+            } else {
+                 // Simple border for low zoom
+                 guiGraphics.renderOutline((int) region.x, (int) region.y, (int) region.width, (int) region.height, borderColor);
             }
         }
     }
@@ -206,7 +214,7 @@ public class BlueprintRenderer {
     }
 
     public static void drawMinimap(GuiGraphics guiGraphics, BlueprintState state, int screenWidth, int screenHeight) {
-        if (!state.showMinimap || state.nodes.isEmpty()) return;
+        if (!state.showMinimap || (state.nodes.isEmpty() && state.regions.isEmpty())) return;
 
         Viewport viewport = state.viewport;
         // Minimap settings
@@ -220,14 +228,21 @@ public class BlueprintRenderer {
         guiGraphics.fill(x, y, x + minimapWidth, y + minimapHeight, 0xAA121212);
         guiGraphics.renderOutline(x, y, minimapWidth, minimapHeight, 0xFF444444);
 
-        // Find bounds of all nodes
+        // Find bounds of all nodes and regions
         float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
         float maxX = Float.MIN_VALUE, maxY = Float.MIN_VALUE;
+        
         for (GuiNode node : state.nodes) {
             minX = Math.min(minX, node.x);
             minY = Math.min(minY, node.y);
             maxX = Math.max(maxX, node.x + node.width);
             maxY = Math.max(maxY, node.y + node.height);
+        }
+        for (GuiRegion region : state.regions) {
+            minX = Math.min(minX, region.x);
+            minY = Math.min(minY, region.y);
+            maxX = Math.max(maxX, region.x + region.width);
+            maxY = Math.max(maxY, region.y + region.height);
         }
 
         // Add some padding to bounds
@@ -242,6 +257,16 @@ public class BlueprintRenderer {
         // Center content in minimap
         float offsetX = x + (minimapWidth - contentWidth * scale) / 2f - minX * scale;
         float offsetY = y + (minimapHeight - contentHeight * scale) / 2f - minY * scale;
+
+        // Draw regions
+        for (GuiRegion region : state.regions) {
+            int rx = (int) (region.x * scale + offsetX);
+            int ry = (int) (region.y * scale + offsetY);
+            int rw = (int) Math.max(1, region.width * scale);
+            int rh = (int) Math.max(1, region.height * scale);
+            
+            guiGraphics.fill(rx, ry, rx + rw, ry + rh, region.color);
+        }
 
         // Draw nodes as small dots/rects
         for (GuiNode node : state.nodes) {
@@ -329,7 +354,7 @@ public class BlueprintRenderer {
         }
 
         // Candidates list or History
-        List<GuiNode> displayList = (state.quickSearchEditBox != null && state.quickSearchEditBox.getValue().isEmpty()) ? state.searchHistory : state.quickSearchMatches;
+        List<Object> displayList = (state.quickSearchEditBox != null && state.quickSearchEditBox.getValue().isEmpty()) ? state.searchHistory : state.quickSearchMatches;
         
         if (!displayList.isEmpty()) {
             int itemHeight = 18;
@@ -346,7 +371,7 @@ public class BlueprintRenderer {
                 int actualIdx = i + state.quickSearchScrollOffset;
                 if (actualIdx >= displayList.size()) break;
 
-                GuiNode node = displayList.get(actualIdx);
+                Object item = displayList.get(actualIdx);
                 int itemTop = listY + 3 + i * itemHeight;
                 boolean selected = actualIdx == state.quickSearchSelectedIndex;
                 
@@ -361,14 +386,27 @@ public class BlueprintRenderer {
                     }
                 }
                 
-                String comment = node.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 
-                                 node.inputValues.get(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT).getAsString() : "Marker";
+                String comment = "";
+                boolean isRegion = false;
+                
+                if (item instanceof GuiNode) {
+                    GuiNode node = (GuiNode) item;
+                    comment = node.inputValues.has(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT) ? 
+                                     node.inputValues.get(ltd.opens.mg.mc.core.blueprint.NodePorts.COMMENT).getAsString() : "Marker";
+                } else if (item instanceof GuiRegion) {
+                    comment = ((GuiRegion) item).title;
+                    isRegion = true;
+                }
                 
                 int textOffset = 8;
                 // Draw Clock Icon for History (MC Style)
                 if (state.quickSearchEditBox != null && state.quickSearchEditBox.getValue().isEmpty()) {
                     guiGraphics.drawString(font, "§6\u231B", x + 8, itemTop + 4, 0xFFFFFFFF, false); // Unicode hourglass as clock placeholder
                     textOffset = 20;
+                } else if (isRegion) {
+                    // Region icon (maybe a colored square or just "R")
+                    guiGraphics.drawString(font, "§b[R]", x + 8, itemTop + 4, 0xFFFFFFFF, false);
+                    textOffset = 24;
                 }
                 
                 // Truncate comment if too long

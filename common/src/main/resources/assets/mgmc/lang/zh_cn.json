@@ -233,7 +233,7 @@
   "node.mgmc.port.ticks": "刻",
   "gui.mgmc.bool.true": "真",
   "gui.mgmc.bool.false": "假",
-  "gui.mgmc.quick_search.label": "搜索标记节点 (Ctrl+P)",
+  "gui.mgmc.quick_search.label": "搜索标记或区域 (Ctrl+P)",
   "gui.mgmc.quick_search.results": "找到 %d 个匹配",
   "node.mgmc.on_mgrun.port.parameters": "参数",
   "node.mgmc.on_mgrun.port.trigger_uuid": "触发者 UUID",

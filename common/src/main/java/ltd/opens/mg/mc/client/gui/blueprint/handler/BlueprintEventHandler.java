@@ -61,7 +61,7 @@ public class BlueprintEventHandler {
                 // Check if clicked on a candidate
                 int itemHeight = 18;
                 int listY = qsy + 42; // Match BlueprintRenderer listY
-                List<GuiNode> displayList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
+                List<Object> displayList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
                 
                 if (mouseX >= qsx && mouseX <= qsx + qsw && !displayList.isEmpty()) {
                     int clickedVisibleIdx = (int) ((mouseY - (listY + 3)) / itemHeight);
@@ -71,7 +71,7 @@ public class BlueprintEventHandler {
                         if (state.quickSearchEditBox.getValue().isEmpty()) {
                             state.isMouseDown = true;
                         } else {
-                            state.jumpToNode(displayList.get(clickedIdx), screen.width, screen.height);
+                            state.jumpTo(displayList.get(clickedIdx), screen.width, screen.height);
                             state.showQuickSearch = false;
                         }
                         return true;
@@ -177,7 +177,7 @@ public class BlueprintEventHandler {
 
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY, BlueprintScreen screen) {
         if (state.showQuickSearch) {
-            List<GuiNode> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
+            List<Object> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
             if (!currentList.isEmpty() && currentList.size() > BlueprintState.MAX_QUICK_SEARCH_VISIBLE) {
                 state.quickSearchScrollOffset = Math.max(0, Math.min(currentList.size() - BlueprintState.MAX_QUICK_SEARCH_VISIBLE, state.quickSearchScrollOffset - (int) scrollY));
                 return true;
@@ -188,7 +188,7 @@ public class BlueprintEventHandler {
     }
 
     private void ensureQuickSearchSelectionVisible() {
-        List<GuiNode> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
+        List<Object> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
         if (currentList.isEmpty()) return;
         
         if (state.quickSearchSelectedIndex < state.quickSearchScrollOffset) {
@@ -270,9 +270,9 @@ public class BlueprintEventHandler {
                     if (state.quickSearchEditBox.getValue().isEmpty()) {
                         state.isEnterDown = true;
                     } else {
-                        List<GuiNode> currentList = state.quickSearchMatches;
+                        List<Object> currentList = state.quickSearchMatches;
                         if (state.quickSearchSelectedIndex >= 0 && state.quickSearchSelectedIndex < currentList.size()) {
-                            state.jumpToNode(currentList.get(state.quickSearchSelectedIndex), screen.width, screen.height);
+                            state.jumpTo(currentList.get(state.quickSearchSelectedIndex), screen.width, screen.height);
                             state.showQuickSearch = false;
                         }
                     }
@@ -280,7 +280,7 @@ public class BlueprintEventHandler {
                 }
                 
                 if (keyCode == GLFW.GLFW_KEY_UP) {
-                    List<GuiNode> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
+                    List<Object> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
                     if (!currentList.isEmpty()) {
                         state.quickSearchSelectedIndex = (state.quickSearchSelectedIndex - 1 + currentList.size()) % currentList.size();
                         state.searchConfirmProgress = 0f; // Reset on selection change
@@ -290,7 +290,7 @@ public class BlueprintEventHandler {
                 }
                 
                 if (keyCode == GLFW.GLFW_KEY_DOWN) {
-                    List<GuiNode> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
+                    List<Object> currentList = state.quickSearchEditBox.getValue().isEmpty() ? state.searchHistory : state.quickSearchMatches;
                     if (!currentList.isEmpty()) {
                         state.quickSearchSelectedIndex = (state.quickSearchSelectedIndex + 1) % currentList.size();
                         state.searchConfirmProgress = 0f; // Reset on selection change

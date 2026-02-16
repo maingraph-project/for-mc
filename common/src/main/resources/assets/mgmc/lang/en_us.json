@@ -226,7 +226,7 @@
   "node.mgmc.port.ticks": "Ticks",
   "gui.mgmc.bool.true": "True",
   "gui.mgmc.bool.false": "False",
-  "gui.mgmc.quick_search.label": "Search Marker Nodes (Ctrl+P)",
+  "gui.mgmc.quick_search.label": "Search Marker or Region (Ctrl+P)",
   "gui.mgmc.quick_search.results": "Found %d matches",
   "node.mgmc.on_mgrun.port.parameters": "Parameters",
   "node.mgmc.on_mgrun.port.trigger_uuid": "Trigger UUID",

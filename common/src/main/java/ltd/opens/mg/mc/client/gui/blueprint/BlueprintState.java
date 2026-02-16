@@ -4,7 +4,7 @@ import ltd.opens.mg.mc.client.gui.blueprint.manager.*;
 import ltd.opens.mg.mc.client.gui.blueprint.menu.*;
 import ltd.opens.mg.mc.client.gui.components.*;
 import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
-import ltd.opens.mg.mc.client.gui.blueprint.manager.MarkerSearchManager;
+import ltd.opens.mg.mc.client.gui.blueprint.manager.OnEditorSearchManager;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -70,7 +70,7 @@ public class BlueprintState {
     public boolean showMinimap = true;
     public boolean showQuickSearch = false;
     public EditBox quickSearchEditBox = null;
-    public final List<GuiNode> quickSearchMatches = new ArrayList<>();
+    public final List<Object> quickSearchMatches = new ArrayList<>();
     public int quickSearchSelectedIndex = -1;
     public int quickSearchScrollOffset = 0;
     public static final int MAX_QUICK_SEARCH_VISIBLE = 8;
@@ -85,7 +85,7 @@ public class BlueprintState {
     public int highlightTimer = 0;
 
     // Quick Search & History
-    public List<GuiNode> searchHistory = new ArrayList<>();
+    public List<Object> searchHistory = new ArrayList<>();
     public float searchConfirmProgress = 0f;
     public float buttonLongPressProgress = 0f;
     public String buttonLongPressTarget = null;
@@ -119,7 +119,7 @@ public class BlueprintState {
         }
     }
 
-    public void addToHistory(GuiNode node) {
+    public void addToHistory(Object node) {
         searchHistory.remove(node);
         searchHistory.add(0, node);
         if (searchHistory.size() > 5) {
@@ -188,7 +188,7 @@ public class BlueprintState {
                     searchConfirmProgress = 0f;
                     isEnterDown = false;
                     this.isMouseDown = false;
-                    jumpToNode(searchHistory.get(quickSearchSelectedIndex), screenWidth, screenHeight);
+                    jumpTo(searchHistory.get(quickSearchSelectedIndex), screenWidth, screenHeight);
                     showQuickSearch = false;
                 }
             } else {
@@ -221,8 +221,18 @@ public class BlueprintState {
         }
     }
 
-    public void jumpToNode(GuiNode node, int screenWidth, int screenHeight) {
-        viewManager.jumpToNode(node, screenWidth, screenHeight);
+    public void jumpTo(Object target, int screenWidth, int screenHeight) {
+        if (target instanceof GuiNode) {
+            viewManager.jumpToNode((GuiNode) target, screenWidth, screenHeight);
+        } else if (target instanceof GuiRegion) {
+            GuiRegion region = (GuiRegion) target;
+            float targetZoom = 1.0f;
+            viewManager.targetZoom = targetZoom;
+            viewManager.targetPanX = screenWidth / 2f - (region.x + region.width / 2f) * targetZoom;
+            viewManager.targetPanY = screenHeight / 2f - (region.y + region.height / 2f) * targetZoom;
+            isAnimatingView = true;
+            addToHistory(region);
+        }
     }
 
     private void openWebpage(String url) {
@@ -260,7 +270,7 @@ public class BlueprintState {
             return;
         }
 
-        quickSearchMatches.addAll(MarkerSearchManager.performSearch(nodes, query));
+        quickSearchMatches.addAll(OnEditorSearchManager.performSearch(nodes, regions, query));
         
         quickSearchScrollOffset = 0;
         if (!quickSearchMatches.isEmpty()) {

@@ -95,18 +95,32 @@ public class HistoryManager {
         state.contextMenu.hide();
         state.showQuickSearch = false;
 
-        List<String> historyIds = new ArrayList<>();
-        for (GuiNode node : state.searchHistory) {
-            historyIds.add(node.id);
+        List<String> historyNodeIds = new ArrayList<>();
+        List<String> historyRegionIds = new ArrayList<>();
+        
+        for (Object item : state.searchHistory) {
+            if (item instanceof GuiNode) {
+                historyNodeIds.add(((GuiNode) item).id);
+            } else if (item instanceof ltd.opens.mg.mc.client.gui.components.GuiRegion) {
+                historyRegionIds.add(((ltd.opens.mg.mc.client.gui.components.GuiRegion) item).id);
+            }
         }
         
         BlueprintIO.loadFromString(json, state.nodes, state.connections, state.regions, true);
 
         state.searchHistory.clear();
-        for (String id : historyIds) {
+        for (String id : historyNodeIds) {
             for (GuiNode node : state.nodes) {
                 if (node.id.equals(id)) {
                     state.searchHistory.add(node);
+                    break;
+                }
+            }
+        }
+        for (String id : historyRegionIds) {
+            for (ltd.opens.mg.mc.client.gui.components.GuiRegion region : state.regions) {
+                if (region.id.equals(id)) {
+                    state.searchHistory.add(region);
                     break;
                 }
             }

@@ -1,12 +1,13 @@
 package ltd.opens.mg.mc.client.gui.blueprint.manager;
 
 import ltd.opens.mg.mc.client.gui.components.GuiNode;
+import ltd.opens.mg.mc.client.gui.components.GuiRegion;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import dev.architectury.platform.Platform;
 
 import java.util.*;
 
-public class MarkerSearchManager {
+public class OnEditorSearchManager {
     private static boolean jechLoaded = false;
     private static boolean jechChecked = false;
 
@@ -32,23 +33,24 @@ public class MarkerSearchManager {
         return false;
     }
 
-    public static class MarkerSearchResult {
-        public final GuiNode node;
+    private static class SearchResult {
+        public final Object target;
         public int score;
 
-        public MarkerSearchResult(GuiNode node, int score) {
-            this.node = node;
+        public SearchResult(Object target, int score) {
+            this.target = target;
             this.score = score;
         }
     }
 
-    public static List<GuiNode> performSearch(List<GuiNode> allNodes, String query) {
+    public static List<Object> performSearch(List<GuiNode> allNodes, List<GuiRegion> allRegions, String query) {
         if (query == null || query.isEmpty()) return new ArrayList<>();
 
         String fullQuery = query.toLowerCase();
         String[] terms = fullQuery.split("\\s+");
-        List<MarkerSearchResult> results = new ArrayList<>();
+        List<SearchResult> results = new ArrayList<>();
 
+        // Search Markers
         for (GuiNode node : allNodes) {
             if (!node.definition.properties().containsKey("is_marker")) continue;
 
@@ -57,31 +59,42 @@ public class MarkerSearchManager {
             
             int score = calculateScore(terms, fullQuery, comment);
             if (score > 0) {
-                results.add(new MarkerSearchResult(node, score));
+                results.add(new SearchResult(node, score));
+            }
+        }
+
+        // Search Regions
+        if (allRegions != null) {
+            for (GuiRegion region : allRegions) {
+                int score = calculateScore(terms, fullQuery, region.title);
+                if (score > 0) {
+                    results.add(new SearchResult(region, score));
+                }
             }
         }
 
         // Sort by score descending
         results.sort((a, b) -> Integer.compare(b.score, a.score));
 
-        List<GuiNode> sortedNodes = new ArrayList<>();
-        for (MarkerSearchResult res : results) {
-            sortedNodes.add(res.node);
+        List<Object> sortedObjects = new ArrayList<>();
+        for (SearchResult res : results) {
+            sortedObjects.add(res.target);
         }
-        return sortedNodes;
+        return sortedObjects;
     }
 
-    private static int calculateScore(String[] terms, String fullQuery, String comment) {
+    private static int calculateScore(String[] terms, String fullQuery, String text) {
+        if (text == null) text = "";
         int totalScore = 0;
-        String lowerComment = comment.toLowerCase();
+        String lowerText = text.toLowerCase();
 
         for (String term : terms) {
             boolean termMatched = false;
 
-            if (matches(comment, term)) {
+            if (matches(text, term)) {
                 totalScore += 10;
                 // Bonus for exact start
-                if (lowerComment.startsWith(term)) totalScore += 5;
+                if (lowerText.startsWith(term)) totalScore += 5;
                 termMatched = true;
             }
 
@@ -89,9 +102,9 @@ public class MarkerSearchManager {
         }
 
         // Bonus for full query match
-        if (matches(comment, fullQuery)) {
+        if (matches(text, fullQuery)) {
             totalScore += 20;
-            if (lowerComment.equals(fullQuery)) totalScore += 50;
+            if (lowerText.equals(fullQuery)) totalScore += 50;
         }
 
         return totalScore;
