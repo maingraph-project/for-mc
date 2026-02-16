@@ -22,7 +22,7 @@ public class HistoryManager {
     }
 
     public void pushHistory() {
-        String currentState = BlueprintIO.serialize(state.nodes, state.connections);
+        String currentState = BlueprintIO.serialize(state.nodes, state.connections, state.regions);
         pushHistory(currentState);
     }
 
@@ -41,7 +41,7 @@ public class HistoryManager {
     public void undo() {
         if (undoStack.isEmpty()) return;
         
-        String currentState = BlueprintIO.serialize(state.nodes, state.connections);
+        String currentState = BlueprintIO.serialize(state.nodes, state.connections, state.regions);
         
         // Skip identical states at the top of the stack
         while (!undoStack.isEmpty() && undoStack.peek().equals(currentState)) {
@@ -62,7 +62,7 @@ public class HistoryManager {
     public void redo() {
         if (redoStack.isEmpty()) return;
         
-        String currentState = BlueprintIO.serialize(state.nodes, state.connections);
+        String currentState = BlueprintIO.serialize(state.nodes, state.connections, state.regions);
         
         // Skip identical states at the top of the stack
         while (!redoStack.isEmpty() && redoStack.peek().equals(currentState)) {
@@ -100,7 +100,7 @@ public class HistoryManager {
             historyIds.add(node.id);
         }
         
-        BlueprintIO.loadFromString(json, state.nodes, state.connections, true);
+        BlueprintIO.loadFromString(json, state.nodes, state.connections, state.regions, true);
 
         state.searchHistory.clear();
         for (String id : historyIds) {

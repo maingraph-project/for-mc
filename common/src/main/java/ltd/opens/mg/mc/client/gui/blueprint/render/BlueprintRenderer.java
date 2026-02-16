@@ -52,6 +52,30 @@ public class BlueprintRenderer {
         }
     }
 
+    public static void drawRegions(GuiGraphics guiGraphics, List<GuiRegion> regions, net.minecraft.client.gui.Font font, Viewport viewport) {
+        for (GuiRegion region : regions) {
+            int color = region.color;
+            int borderColor = region.isSelected ? 0xFFFFFFFF : (color & 0x00FFFFFF) | 0x88000000;
+            
+            // Background
+            guiGraphics.fill((int) region.x, (int) region.y, (int) (region.x + region.width), (int) (region.y + region.height), color);
+            
+            // Header
+            guiGraphics.fill((int) region.x, (int) region.y, (int) (region.x + region.width), (int) (region.y + 20), (color & 0x00FFFFFF) | 0xAA000000);
+            
+            // Border
+            guiGraphics.renderOutline((int) region.x, (int) region.y, (int) region.width, (int) region.height, borderColor);
+            
+            // Title
+            guiGraphics.drawString(font, region.title, (int) region.x + 5, (int) region.y + 6, 0xFFFFFFFF);
+            
+            // Resize handle (bottom-right)
+            if (region.isSelected) {
+                guiGraphics.fill((int) (region.x + region.width - 10), (int) (region.y + region.height - 10), (int) (region.x + region.width), (int) (region.y + region.height), 0x88FFFFFF);
+            }
+        }
+    }
+
     public static void drawConnections(GuiGraphics guiGraphics, List<GuiConnection> connections, int screenWidth, int screenHeight, Viewport viewport) {
         for (GuiConnection conn : connections) {
             float[] outPos = conn.from.getPortPositionByName(conn.fromPort, false);

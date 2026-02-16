@@ -115,7 +115,7 @@ public class BlueprintNodeHandler {
                 state.nodes.remove(i);
                 state.nodes.add(node);
 
-                state.historyPendingState = BlueprintIO.serialize(state.nodes, state.connections);
+                state.historyPendingState = BlueprintIO.serialize(state.nodes, state.connections, state.regions);
                 state.markDirty();
                 return true;
             }
@@ -392,7 +392,7 @@ public class BlueprintNodeHandler {
                         selectedConnections.add(conn);
                     }
                 }
-                BlueprintState.clipboardJson = BlueprintIO.serialize(state.selectedNodes, selectedConnections);
+                BlueprintState.clipboardJson = BlueprintIO.serialize(state.selectedNodes, selectedConnections, null);
                 state.showNotification(Component.translatable("gui.mgmc.notification.copied", state.selectedNodes.size()).getString());
             }
             return true;
@@ -404,7 +404,7 @@ public class BlueprintNodeHandler {
                 state.pushHistory();
                 List<GuiNode> pastedNodes = new ArrayList<>();
                 List<GuiConnection> pastedConnections = new ArrayList<>();
-                BlueprintIO.loadFromString(BlueprintState.clipboardJson, pastedNodes, pastedConnections, false);
+                BlueprintIO.loadFromString(BlueprintState.clipboardJson, pastedNodes, pastedConnections, null, false);
 
                 if (!pastedNodes.isEmpty()) {
                     // Offset pasted nodes and assign new IDs

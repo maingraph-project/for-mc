@@ -24,7 +24,11 @@ public class BlueprintState {
     public boolean isAnimatingLayout = false;
 
     public final List<GuiNode> nodes = new ArrayList<>();
+    public final List<GuiRegion> regions = new ArrayList<>();
     public final List<GuiConnection> connections = new ArrayList<>();
+
+    public GuiRegion draggingRegion = null;
+    public GuiRegion contextMenuRegion = null;
 
     public final HistoryManager historyManager = new HistoryManager(this);
     public final LayoutManager layoutManager = new LayoutManager(this);

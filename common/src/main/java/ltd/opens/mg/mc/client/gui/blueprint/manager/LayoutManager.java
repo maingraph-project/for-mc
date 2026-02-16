@@ -3,6 +3,8 @@ package ltd.opens.mg.mc.client.gui.blueprint.manager;
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 import ltd.opens.mg.mc.client.gui.components.GuiConnection;
 import ltd.opens.mg.mc.client.gui.components.GuiNode;
+import ltd.opens.mg.mc.client.gui.components.GuiRegion;
+import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
@@ -15,19 +17,202 @@ public class LayoutManager {
     }
 
     public void autoLayout() {
-        List<GuiNode> nodes = state.nodes;
-        List<GuiConnection> connections = state.connections;
-        
-        if (nodes.isEmpty()) return;
+        if (state.nodes.isEmpty()) return;
         state.historyManager.pushHistory();
 
         // 记录动画开始前的状态
-        for (GuiNode node : nodes) {
+        for (GuiNode node : state.nodes) {
             node.targetX = node.x;
             node.targetY = node.y;
             node.isAnimatingPos = true;
         }
         state.isAnimatingLayout = true;
+
+        // Prepare for layout
+        List<GuiNode> layoutNodes = new ArrayList<>();
+        List<GuiConnection> layoutConnections = new ArrayList<>();
+
+        // Map regions to proxy nodes
+        Map<GuiRegion, GuiNode> regionProxies = new HashMap<>();
+        Map<GuiNode, GuiRegion> nodeToRegion = new HashMap<>();
+        Map<GuiNode, GuiNode> nodeToProxy = new HashMap<>();
+
+        // 1. Identify nodes in regions
+        if (!state.regions.isEmpty()) {
+            for (GuiRegion region : state.regions) {
+                NodeDefinition dummyDef = new NodeDefinition.Builder("region_proxy_" + region.hashCode(), "Region Group").build();
+                GuiNode proxy = new GuiNode(dummyDef, region.x, region.y);
+                proxy.width = region.width;
+                proxy.height = region.height;
+                // Preserve original position for delta calculation later
+                proxy.targetX = region.x;
+                proxy.targetY = region.y;
+                
+                regionProxies.put(region, proxy);
+                layoutNodes.add(proxy);
+            }
+
+            for (GuiNode node : state.nodes) {
+                GuiRegion container = null;
+                float cx = node.x + node.width / 2;
+                float cy = node.y + node.height / 2;
+                
+                // Find containing region (top-most visual order, which is last in list usually, but here any matches)
+                // Reverse order to match click detection priority
+                for (int i = state.regions.size() - 1; i >= 0; i--) {
+                    GuiRegion r = state.regions.get(i);
+                    if (cx >= r.x && cx <= r.x + r.width && cy >= r.y && cy <= r.y + r.height) {
+                        container = r;
+                        break;
+                    }
+                }
+
+                if (container != null) {
+                    nodeToRegion.put(node, container);
+                    nodeToProxy.put(node, regionProxies.get(container));
+                } else {
+                    layoutNodes.add(node); // Independent node
+                }
+            }
+
+            // 2. Build connections for layout
+            for (GuiConnection conn : state.connections) {
+                GuiNode from = conn.from;
+                GuiNode to = conn.to;
+                
+                GuiNode sourceLayoutNode = nodeToProxy.getOrDefault(from, from);
+                GuiNode targetLayoutNode = nodeToProxy.getOrDefault(to, to);
+
+                if (sourceLayoutNode != targetLayoutNode) {
+                    // Avoid duplicate connections? 
+                    // Sugiyama can handle multiple edges, but might be better to distinct them?
+                    // For now, let's just add them.
+                    layoutConnections.add(new GuiConnection(sourceLayoutNode, "out", targetLayoutNode, "in"));
+                }
+            }
+        } else {
+            layoutNodes.addAll(state.nodes);
+            layoutConnections.addAll(state.connections);
+        }
+
+        // Execute Layout Algorithm
+        performSugiyamaLayout(layoutNodes, layoutConnections);
+
+        // Apply results back to regions and contained nodes
+        if (!state.regions.isEmpty()) {
+            for (Map.Entry<GuiRegion, GuiNode> entry : regionProxies.entrySet()) {
+                GuiRegion region = entry.getKey();
+                GuiNode proxy = entry.getValue();
+
+                float dx = proxy.targetX - region.x;
+                float dy = proxy.targetY - region.y;
+
+                if (dx != 0 || dy != 0) {
+                    region.x = proxy.targetX;
+                    region.y = proxy.targetY;
+                    
+                    // Move contained nodes
+                    for (Map.Entry<GuiNode, GuiRegion> mapping : nodeToRegion.entrySet()) {
+                        if (mapping.getValue() == region) {
+                            GuiNode node = mapping.getKey();
+                            node.targetX += dx;
+                            node.targetY += dy;
+                        }
+                    }
+                }
+            }
+        }
+
+        state.markDirty();
+        state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.layout_complete").getString());
+    }
+
+    public void autoLayoutRegion(GuiRegion region) {
+        if (state.nodes.isEmpty()) return;
+
+        List<GuiNode> nodesInRegion = new ArrayList<>();
+        // Identify nodes in region
+        for (GuiNode node : state.nodes) {
+            float cx = node.x + node.width / 2;
+            float cy = node.y + node.height / 2;
+            if (cx >= region.x && cx <= region.x + region.width && cy >= region.y && cy <= region.y + region.height) {
+                nodesInRegion.add(node);
+            }
+        }
+
+        if (nodesInRegion.isEmpty()) return;
+
+        state.historyManager.pushHistory();
+
+        // Record pre-animation state
+        for (GuiNode node : nodesInRegion) {
+            node.targetX = node.x;
+            node.targetY = node.y;
+            node.isAnimatingPos = true;
+        }
+        state.isAnimatingLayout = true;
+
+        // Find internal connections
+        List<GuiConnection> internalConnections = new ArrayList<>();
+        for (GuiConnection conn : state.connections) {
+            if (nodesInRegion.contains(conn.from) && nodesInRegion.contains(conn.to)) {
+                internalConnections.add(conn);
+            }
+        }
+
+        // Run Sugiyama on these nodes
+        performSugiyamaLayout(nodesInRegion, internalConnections);
+
+        // performSugiyamaLayout sets targetX/targetY centered around (0,0) roughly
+        // We need to move them to the region
+
+        // Calculate bounding box of the new layout
+        float minX = Float.MAX_VALUE;
+        float minY = Float.MAX_VALUE;
+        float maxX = -Float.MAX_VALUE;
+        float maxY = -Float.MAX_VALUE;
+
+        for (GuiNode node : nodesInRegion) {
+            minX = Math.min(minX, node.targetX);
+            minY = Math.min(minY, node.targetY);
+            maxX = Math.max(maxX, node.targetX + node.width);
+            maxY = Math.max(maxY, node.targetY + node.height);
+        }
+
+        float layoutWidth = maxX - minX;
+        float layoutHeight = maxY - minY;
+
+        // Resize region to fit comfortably if it's too small
+        float padding = 30;
+        float headerHeight = 30;
+
+        float requiredWidth = layoutWidth + padding * 2;
+        float requiredHeight = layoutHeight + padding * 2 + headerHeight;
+
+        if (region.width < requiredWidth) region.width = requiredWidth;
+        if (region.height < requiredHeight) region.height = requiredHeight;
+
+        // Desired position of minX, minY relative to region
+        // Center the layout in the region if region is larger
+        float availableWidth = region.width - padding * 2;
+        float availableHeight = region.height - headerHeight - padding * 2;
+        
+        float startX = region.x + padding + (availableWidth - layoutWidth) / 2;
+        float startY = region.y + headerHeight + padding + (availableHeight - layoutHeight) / 2;
+
+        float offsetX = startX - minX;
+        float offsetY = startY - minY;
+
+        for (GuiNode node : nodesInRegion) {
+            node.targetX += offsetX;
+            node.targetY += offsetY;
+        }
+
+        state.markDirty();
+    }
+
+    private void performSugiyamaLayout(List<GuiNode> nodes, List<GuiConnection> connections) {
+        if (nodes.isEmpty()) return;
 
         // 1. 分层 (Sugiyama 算法第一步：拓扑排序分配层级)
         Map<GuiNode, Integer> nodeToLayer = new HashMap<>();
@@ -167,9 +352,6 @@ public class LayoutManager {
             
             currentX += colWidth + horizontalPadding;
         }
-
-        state.markDirty();
-        state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.layout_complete").getString());
     }
 
     public void tick() {

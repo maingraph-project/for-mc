@@ -64,7 +64,9 @@
   "gui.mgmc.help.shortcuts.zoom": "Zoom View",
   "gui.mgmc.help.shortcuts.box_select": "Box Selection",
   "gui.mgmc.help.shortcuts.multi_select": "Multi-selection",
-  "node_category": "Categories",
+  "gui.mgmc.help.shortcuts.add_region": "Add Region",
+    "gui.mgmc.help.shortcuts.drag_region_only": "Move Region Only",
+    "node_category": "Categories",
   "node_category.mgmc": "MGMC",
   "gui.mgmc.blueprint_editor.instructions": "Right click to add. Drag ports to connect. DEL to delete. Box select supported.",
   "gui.mgmc.notification.copied": "Copied %d nodes",
@@ -108,6 +110,7 @@
   "gui.mgmc.blueprint_editor.context_menu.delete": "Delete Node",
   "gui.mgmc.blueprint_editor.context_menu.copy": "Copy Data",
   "gui.mgmc.blueprint_editor.context_menu.break_links": "Break All Links",
+  "gui.mgmc.blueprint_editor.context_menu.auto_layout": "Auto Layout Region Nodes",
   "node.mgmc.on_player_leave.name": "On Player Leave",
   "node.mgmc.on_left_click_block.name": "On Left Click Block",
   "node.mgmc.port.speed": "Speed",
@@ -344,5 +347,9 @@
   "gui.mgmc.version_warning.message": "This blueprint is version v%d, but the current editor is v%d. Opening it directly may cause some features to malfunction or corrupt the blueprint. It is recommended to copy and open it in the new version.",
   "gui.mgmc.version_warning.copy_and_open": "Copy and Open (Recommended)",
   "gui.mgmc.version_warning.exit": "Exit",
-  "gui.mgmc.version_warning.open_anyway": "Open Anyway"
+  "gui.mgmc.version_warning.open_anyway": "Open Anyway",
+  "gui.mgmc.blueprint_editor.context_menu.rename": "Rename",
+  "gui.mgmc.blueprint_editor.context_menu.color": "Change Color",
+  "gui.mgmc.blueprint_editor.region.rename_title": "Rename Region",
+  "gui.mgmc.blueprint_editor.region.color_select_title": "Select Region Color"
 }

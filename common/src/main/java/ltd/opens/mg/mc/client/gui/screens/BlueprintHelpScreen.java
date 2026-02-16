@@ -88,7 +88,9 @@ public class BlueprintHelpScreen extends Screen {
             {"右键/中键拖拽", Component.translatable("gui.mgmc.help.shortcuts.pan")},
             {"滚轮", Component.translatable("gui.mgmc.help.shortcuts.zoom")},
             {"左键框选", Component.translatable("gui.mgmc.help.shortcuts.box_select")},
-            {"Shift/Ctrl + 左键", Component.translatable("gui.mgmc.help.shortcuts.multi_select")}
+            {"Shift/Ctrl + 左键", Component.translatable("gui.mgmc.help.shortcuts.multi_select")},
+            {"Ctrl + 右键", Component.translatable("gui.mgmc.help.shortcuts.add_region")},
+            {"Ctrl + 拖拽区域", Component.translatable("gui.mgmc.help.shortcuts.drag_region_only")}
         };
 
         for (Object[] shortcut : shortcuts) {

@@ -3,13 +3,18 @@ package ltd.opens.mg.mc.client.gui.blueprint.menu;
 import ltd.opens.mg.mc.client.utils.BlueprintMathHelper;
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintState;
 
-import ltd.opens.mg.mc.client.gui.components.*;
+import ltd.opens.mg.mc.client.gui.components.GuiRegion;
+import ltd.opens.mg.mc.client.gui.components.GuiNode;
+import ltd.opens.mg.mc.client.gui.components.GuiConnection;
 import ltd.opens.mg.mc.client.gui.components.GuiContextMenu;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.Minecraft;
+import ltd.opens.mg.mc.client.gui.screens.InputModalScreen;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,6 +144,7 @@ public class BlueprintMenuHandler {
             double worldMouseX = state.viewport.toWorldX(mouseX);
             double worldMouseY = state.viewport.toWorldY(mouseY);
             
+            // 1. Check Nodes
             for (int i = state.nodes.size() - 1; i >= 0; i--) {
                 GuiNode node = state.nodes.get(i);
                 if (worldMouseX >= node.x && worldMouseX <= node.x + node.width && worldMouseY >= node.y && worldMouseY <= node.y + node.height) {
@@ -171,12 +177,142 @@ public class BlueprintMenuHandler {
                             }
                         }
                     ));
+
+                    // Check if node is in a region
+                    for (GuiRegion region : state.regions) {
+                        float cx = node.x + node.width / 2;
+                        float cy = node.y + node.height / 2;
+                        if (cx >= region.x && cx <= region.x + region.width && cy >= region.y && cy <= region.y + region.height) {
+                            items.add(new GuiContextMenu.MenuItem(
+                                Component.translatable("gui.mgmc.blueprint_editor.context_menu.auto_layout"),
+                                () -> {
+                                    state.layoutManager.autoLayoutRegion(region);
+                                }
+                            ));
+                            break; // Only one region per node usually
+                        }
+                    }
+
                     state.contextMenu.show(mouseX, mouseY, items);
                     return true;
                 }
             }
 
-            // Check if right-clicked a connection
+            // 2. Check Regions
+            for (int i = state.regions.size() - 1; i >= 0; i--) {
+                GuiRegion region = state.regions.get(i);
+                if (worldMouseX >= region.x && worldMouseX <= region.x + region.width && worldMouseY >= region.y && worldMouseY <= region.y + region.height) {
+                    state.contextMenuRegion = region;
+                    List<GuiContextMenu.MenuItem> items = new ArrayList<>();
+                    
+                    // Rename
+                    items.add(new GuiContextMenu.MenuItem(
+                        Component.translatable("gui.mgmc.blueprint_editor.context_menu.rename"),
+                        () -> {
+                            if (state.contextMenuRegion != null) {
+                                Minecraft.getInstance().setScreen(new InputModalScreen(
+                                    Minecraft.getInstance().screen,
+                                    Component.translatable("gui.mgmc.blueprint_editor.region.rename_title").getString(),
+                                    state.contextMenuRegion.title,
+                                    false,
+                                    (newName) -> {
+                                        state.pushHistory();
+                                        state.contextMenuRegion.title = newName;
+                                        state.markDirty();
+                                    }
+                                ));
+                            }
+                        }
+                    ));
+
+                    // Change Color
+                    items.add(new GuiContextMenu.MenuItem(
+                        Component.translatable("gui.mgmc.blueprint_editor.context_menu.color"),
+                        () -> {
+                            if (state.contextMenuRegion != null) {
+                                // Show preset colors + Custom
+                                String[] options = new String[] {
+                                    "Default (Gray)", "Red", "Green", "Blue", "Yellow", "Purple", "Cyan", "Custom..."
+                                };
+                                
+                                Minecraft.getInstance().setScreen(new InputModalScreen(
+                                    Minecraft.getInstance().screen,
+                                    Component.translatable("gui.mgmc.blueprint_editor.region.color_select_title").getString(),
+                                    "Default (Gray)", // Initial selection
+                                    false,
+                                    options,
+                                    InputModalScreen.Mode.SELECTION,
+                                    (selected) -> {
+                                        int newColorInt = 0;
+                                        boolean isCustom = false;
+                                        
+                                        if (selected.equals("Default (Gray)")) newColorInt = 0x44888888;
+                                        else if (selected.equals("Red")) newColorInt = 0x44FF0000;
+                                        else if (selected.equals("Green")) newColorInt = 0x4400FF00;
+                                        else if (selected.equals("Blue")) newColorInt = 0x440000FF;
+                                        else if (selected.equals("Yellow")) newColorInt = 0x44FFFF00;
+                                        else if (selected.equals("Purple")) newColorInt = 0x44800080;
+                                        else if (selected.equals("Cyan")) newColorInt = 0x4400FFFF;
+                                        else if (selected.equals("Custom...")) isCustom = true;
+                                        
+                                        if (isCustom) {
+                                            // Show Hex Input
+                                            Minecraft.getInstance().setScreen(new InputModalScreen(
+                                                Minecraft.getInstance().screen,
+                                                Component.translatable("gui.mgmc.blueprint_editor.region.color_title").getString(),
+                                                String.format("#%06X", (state.contextMenuRegion.color & 0xFFFFFF)),
+                                                false,
+                                                (hexColor) -> {
+                                                    try {
+                                                        String hex = hexColor.replace("#", "");
+                                                        int rgb = Integer.parseInt(hex, 16);
+                                                        state.pushHistory();
+                                                        state.contextMenuRegion.color = (0x44 << 24) | rgb;
+                                                        state.markDirty();
+                                                    } catch (NumberFormatException e) {}
+                                                }
+                                            ));
+                                        } else {
+                                            state.pushHistory();
+                                            state.contextMenuRegion.color = newColorInt;
+                                            state.markDirty();
+                                            // Return to blueprint screen (InputModalScreen handles this via onClose usually, but we are in callback)
+                                            Minecraft.getInstance().setScreen(Minecraft.getInstance().screen); // Close modal
+                                        }
+                                    }
+                                ));
+                            }
+                        }
+                    ));
+
+                    // Delete
+                    items.add(new GuiContextMenu.MenuItem(
+                        Component.translatable("gui.mgmc.blueprint_editor.context_menu.delete"),
+                        () -> {
+                            if (state.contextMenuRegion != null) {
+                                state.pushHistory();
+                                state.regions.remove(state.contextMenuRegion);
+                                state.markDirty();
+                            }
+                        }
+                    ));
+
+                    // Auto Layout Region
+                    items.add(new GuiContextMenu.MenuItem(
+                        Component.translatable("gui.mgmc.blueprint_editor.context_menu.auto_layout"),
+                        () -> {
+                            if (state.contextMenuRegion != null) {
+                                state.layoutManager.autoLayoutRegion(state.contextMenuRegion);
+                            }
+                        }
+                    ));
+                    
+                    state.contextMenu.show(mouseX, mouseY, items);
+                    return true;
+                }
+            }
+
+            // 3. Check Connections
             GuiConnection hoveredConn = BlueprintMathHelper.getHoveredConnection(worldMouseX, worldMouseY, state);
             if (hoveredConn != null) {
                 state.pushHistory();
@@ -185,17 +321,28 @@ public class BlueprintMenuHandler {
                 return true;
             }
             
-            state.showNodeMenu = true;
-            state.menuX = mouseX;
-            state.menuY = mouseY;
-            state.menu.reset(); // Reset search when opening
-            
-            // Clear pending connection context when opening menu normally via right-click
-            state.pendingConnectionSourceNode = null;
-            state.pendingConnectionSourcePort = null;
-            state.pendingConnectionSourceType = null;
-            
-            return true;
+            // 4. Empty Space - Show Add Node / Add Region menu
+            if (Screen.hasControlDown()) {
+                // Ctrl + Right Click -> Add Region Directly
+                state.pushHistory();
+                double rX = state.viewport.toWorldX(mouseX);
+                double rY = state.viewport.toWorldY(mouseY);
+                state.regions.add(new GuiRegion((float)rX, (float)rY, 300, 200));
+                state.markDirty();
+                return true;
+            } else {
+                // Right Click -> Add Node (Original behavior)
+                state.showNodeMenu = true;
+                state.menuX = mouseX;
+                state.menuY = mouseY;
+                state.menu.reset();
+                
+                // Clear pending connection context
+                state.pendingConnectionSourceNode = null;
+                state.pendingConnectionSourcePort = null;
+                state.pendingConnectionSourceType = null;
+                return true;
+            }
         }
         return false;
     }

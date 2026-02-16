@@ -23,6 +23,7 @@ public class BlueprintEventHandler {
     private final BlueprintMenuHandler menuHandler;
     private final BlueprintConnectionHandler connectionHandler;
     private final BlueprintNodeHandler nodeHandler;
+    private final BlueprintRegionHandler regionHandler;
 
     public BlueprintEventHandler(BlueprintState state) {
         this.state = state;
@@ -30,6 +31,7 @@ public class BlueprintEventHandler {
         this.menuHandler = new BlueprintMenuHandler(state);
         this.connectionHandler = new BlueprintConnectionHandler(state);
         this.nodeHandler = new BlueprintNodeHandler(state);
+        this.regionHandler = new BlueprintRegionHandler(state);
     }
 
     public boolean mouseClicked(MouseButtonEvent event, boolean isDouble, Font font, BlueprintScreen screen) {
@@ -124,6 +126,9 @@ public class BlueprintEventHandler {
 
                 // 4. Node interactions (input box or header drag start)
                 if (nodeHandler.mouseClicked(event, isDouble, font, screen)) return true;
+
+                // 5. Region interactions
+                if (regionHandler.mouseClicked(event)) return true;
             }
         }
 
@@ -143,10 +148,13 @@ public class BlueprintEventHandler {
         // 2. Menu interactions (open context menu on right click release)
         if (menuHandler.mouseReleased(event, screen.width, screen.height)) return true;
 
-        // 2. Connection interactions (link creation)
+        // 3. Region interactions (resize/drag end)
+        if (regionHandler.mouseReleased(event)) return true;
+
+        // 4. Connection interactions (link creation)
         if (connectionHandler.mouseReleased(event)) return true;
 
-        // 3. Node interactions (drag end)
+        // 5. Node interactions (drag end)
         if (nodeHandler.mouseReleased(event)) return true;
 
         return false;
@@ -158,7 +166,10 @@ public class BlueprintEventHandler {
 
         if (state.readOnly) return false;
 
-        // 2. Node interactions (node drag)
+        // 2. Region interactions (drag/resize)
+        if (regionHandler.mouseDragged(event, dragX, dragY)) return true;
+
+        // 3. Node interactions (node drag)
         if (nodeHandler.mouseDragged(event)) return true;
 
         return false;

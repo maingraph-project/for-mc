@@ -70,7 +70,9 @@
   "gui.mgmc.help.shortcuts.zoom": "缩放视角",
   "gui.mgmc.help.shortcuts.box_select": "批量选中节点",
   "gui.mgmc.help.shortcuts.multi_select": "多选节点",
-  "node_category": "节点分类",
+  "gui.mgmc.help.shortcuts.add_region": "添加区域",
+    "gui.mgmc.help.shortcuts.drag_region_only": "仅移动区域(不带节点)",
+    "node_category": "节点分类",
   "node_category.mgmc": "MGMC",
   "gui.mgmc.blueprint_editor.instructions": "右键点击添加节点。拖拽端口进行连接。按 DEL 键删除。支持框选、多选、复制粘贴。",
   "gui.mgmc.notification.copied": "已复制 %d 个节点",
@@ -115,6 +117,7 @@
   "gui.mgmc.blueprint_editor.context_menu.delete": "删除节点",
   "gui.mgmc.blueprint_editor.context_menu.copy": "复制数据",
   "gui.mgmc.blueprint_editor.context_menu.break_links": "断开所有连接",
+  "gui.mgmc.blueprint_editor.context_menu.auto_layout": "整理区域内节点",
   "node.mgmc.on_player_leave.name": "当玩家离开游戏时",
   "node.mgmc.on_left_click_block.name": "当玩家左键点击方块时",
   "node.mgmc.port.speed": "速度",
@@ -352,5 +355,9 @@
   "gui.mgmc.version_warning.message": "该蓝图的版本为 v%d，而当前编辑器版本为 v%d。直接打开可能会导致部分功能无法正常工作或蓝图损坏。建议复制后在新版本中打开。",
   "gui.mgmc.version_warning.copy_and_open": "复制后打开 (推荐)",
   "gui.mgmc.version_warning.exit": "退出",
-  "gui.mgmc.version_warning.open_anyway": "执意打开"
+  "gui.mgmc.version_warning.open_anyway": "执意打开",
+  "gui.mgmc.blueprint_editor.context_menu.rename": "重命名",
+  "gui.mgmc.blueprint_editor.context_menu.color": "修改颜色",
+  "gui.mgmc.blueprint_editor.region.rename_title": "重命名区域",
+  "gui.mgmc.blueprint_editor.region.color_select_title": "选择区域颜色"
 }

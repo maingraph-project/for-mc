@@ -12,7 +12,7 @@ import java.util.*;
 public class BlueprintIO {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static String serialize(List<GuiNode> nodes, List<GuiConnection> connections) {
+    public static String serialize(List<GuiNode> nodes, List<GuiConnection> connections, List<GuiRegion> regions) {
         try {
             JsonObject root = new JsonObject();
             
@@ -132,6 +132,23 @@ public class BlueprintIO {
                 connArray.add(connObj);
             }
             ui.add("connections", connArray);
+
+            if (regions != null) {
+                JsonArray regionArray = new JsonArray();
+                for (GuiRegion region : regions) {
+                    JsonObject regionObj = new JsonObject();
+                    regionObj.addProperty("id", region.id);
+                    regionObj.addProperty("title", region.title);
+                    regionObj.addProperty("x", region.x);
+                    regionObj.addProperty("y", region.y);
+                    regionObj.addProperty("width", region.width);
+                    regionObj.addProperty("height", region.height);
+                    regionObj.addProperty("color", region.color);
+                    regionArray.add(regionObj);
+                }
+                ui.add("regions", regionArray);
+            }
+
             root.add("ui", ui);
             root.addProperty("format_version", 5);
             if (!root.has("_version")) {
@@ -172,11 +189,11 @@ public class BlueprintIO {
         }
     }
 
-    public static void loadFromString(String json, List<GuiNode> nodes, List<GuiConnection> connections) {
-        loadFromString(json, nodes, connections, true);
+    public static void loadFromString(String json, List<GuiNode> nodes, List<GuiConnection> connections, List<GuiRegion> regions) {
+        loadFromString(json, nodes, connections, regions, true);
     }
 
-    public static void loadFromString(String json, List<GuiNode> nodes, List<GuiConnection> connections, boolean clear) {
+    public static void loadFromString(String json, List<GuiNode> nodes, List<GuiConnection> connections, List<GuiRegion> regions, boolean clear) {
         try {
             if (json == null || json.isEmpty()) return;
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
@@ -184,6 +201,7 @@ public class BlueprintIO {
             if (clear) {
                 nodes.clear();
                 connections.clear();
+                if (regions != null) regions.clear();
             }
             
             Map<String, GuiNode> nodeMap = new HashMap<>();
@@ -273,6 +291,21 @@ public class BlueprintIO {
                     if (from != null && to != null) {
                         connections.add(new GuiConnection(from, fromPort, to, toPort));
                     }
+                }
+            }
+
+            if (regions != null && ui.has("regions")) {
+                for (JsonElement e : ui.getAsJsonArray("regions")) {
+                    JsonObject obj = e.getAsJsonObject();
+                    float x = obj.get("x").getAsFloat();
+                    float y = obj.get("y").getAsFloat();
+                    float w = obj.get("width").getAsFloat();
+                    float h = obj.get("height").getAsFloat();
+                    GuiRegion region = new GuiRegion(x, y, w, h);
+                    if (obj.has("id")) region.id = obj.get("id").getAsString();
+                    if (obj.has("title")) region.title = obj.get("title").getAsString();
+                    if (obj.has("color")) region.color = obj.get("color").getAsInt();
+                    regions.add(region);
                 }
             }
         } catch (Exception e) {

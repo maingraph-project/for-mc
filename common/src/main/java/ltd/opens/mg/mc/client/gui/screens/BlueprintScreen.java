@@ -130,7 +130,7 @@ public class BlueprintScreen extends Screen {
             state.isAnimatingLayout = true;
             state.markDirty();
         } else {
-            BlueprintIO.loadFromString(json, state.nodes, state.connections);
+            BlueprintIO.loadFromString(json, state.nodes, state.connections, state.regions);
         }
         
         state.version = version;
@@ -197,6 +197,7 @@ public class BlueprintScreen extends Screen {
         guiGraphics.pose().translate(state.viewport.panX, state.viewport.panY, 0);
         guiGraphics.pose().scale(state.viewport.zoom, state.viewport.zoom, 1.0f);
 
+        BlueprintRenderer.drawRegions(guiGraphics, state.regions, this.font, state.viewport);
         BlueprintRenderer.drawConnections(guiGraphics, state.connections, this.width, this.height, state.viewport);
 
         for (GuiNode node : state.nodes) {
@@ -240,26 +241,26 @@ public class BlueprintScreen extends Screen {
         
         // Custom Buttons Rendering
         // Back Button
-        renderCustomButton(guiGraphics, mouseX, mouseY, 5, 3, 40, 20, "gui.mgmc.blueprint_editor.back", null);
+        renderCustomButton(guiGraphics, mouseX, mouseY, 5, 3, 40, 20, Component.translatable("gui.mgmc.blueprint_editor.back"), null);
         
         // Right side buttons
         int rightX = this.width - 5;
         // Reset View
         rightX -= 70;
-        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 70, 20, "gui.mgmc.blueprint_editor.reset_view", "reset_view");
+        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 70, 20, Component.translatable("gui.mgmc.blueprint_editor.reset_view"), "reset_view");
 
         // Help
         rightX -= 25;
-        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 20, 20, "?", "help");
+        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 20, 20, Component.literal("?"), "help");
         
         // Arrange
         rightX -= 45;
-        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 40, 20, "gui.mgmc.blueprint_editor.auto_layout", "auto_layout");
+        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 40, 20, Component.translatable("gui.mgmc.blueprint_editor.auto_layout"), "auto_layout");
         
         // Save
         rightX -= 55;
         if (!state.readOnly) {
-            renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 50, 20, "gui.mgmc.blueprint_editor.save", null);
+            renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 50, 20, Component.translatable("gui.mgmc.blueprint_editor.save"), "save");
         }
 
         // --- Bottom UI ---
@@ -339,7 +340,7 @@ public class BlueprintScreen extends Screen {
                             return;
                         }
 
-                        String json = BlueprintIO.serialize(state.nodes, state.connections);
+                        String json = BlueprintIO.serialize(state.nodes, state.connections, state.regions);
                         NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
                     }
                     state.isDirty = false;
@@ -351,12 +352,31 @@ public class BlueprintScreen extends Screen {
         }
     }
 
-    private void renderCustomButton(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int w, int h, String langKey, String buttonId) {
+    private void renderCustomButton(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int w, int h, Component label, String buttonId) {
         boolean hovered = isHovering(mouseX, mouseY, x, y, w, h);
         int bgColor = hovered ? 0xFF3D3D3D : 0x00000000; // Transparent background when not hovered
+        int borderColor = 0xFF555555;
+        int textColor = hovered ? 0xFFFFFFFF : 0xFFBBBBBB;
+
+        // Save button highlight logic
+        if ("save".equals(buttonId) && state.isDirty) {
+            float pulse = (float)(Math.sin(System.currentTimeMillis() / 200.0) + 1.0) * 0.5f; // 0.0 to 1.0
+            int alpha = 100 + (int)(pulse * 100); // 100 to 200
+            
+            // Greenish pulsing background
+            bgColor = (alpha << 24) | 0x00AA00;
+            if (hovered) {
+                bgColor = (Math.min(255, alpha + 30) << 24) | 0x00CC00;
+            }
+            
+            // Bright border
+            borderColor = 0xFF00FF00;
+            textColor = 0xFFFFFFFF;
+        }
+
         if (bgColor != 0) {
             guiGraphics.fill(x, y, x + w, y + h, bgColor);
-            guiGraphics.renderOutline(x, y, w, h, 0xFF555555);
+            guiGraphics.renderOutline(x, y, w, h, borderColor);
         }
         
         // Progress bar for long press
@@ -365,9 +385,9 @@ public class BlueprintScreen extends Screen {
             guiGraphics.fill(x, y + h - 2, x + progressW, y + h, 0xFF55FF55);
         }
 
-        Component text = Component.translatable(langKey);
+        Component text = label;
         int textW = font.width(text);
-        guiGraphics.drawString(font, text, x + (w - textW) / 2, y + (h - 9) / 2, hovered ? 0xFFFFFFFF : 0xFFBBBBBB, false);
+        guiGraphics.drawString(font, text, x + (w - textW) / 2, y + (h - 9) / 2, textColor, false);
 
         // Update long press state
         if (buttonId != null && buttonId.equals(state.buttonLongPressTarget)) {
@@ -394,7 +414,7 @@ public class BlueprintScreen extends Screen {
             return;
         }
 
-        String json = BlueprintIO.serialize(state.nodes, state.connections);
+        String json = BlueprintIO.serialize(state.nodes, state.connections, state.regions);
         if (json != null) {
             if (isGlobalMode) {
                 try {
