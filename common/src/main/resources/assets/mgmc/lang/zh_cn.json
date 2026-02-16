@@ -55,6 +55,8 @@
   "gui.mgmc.help.title": "蓝图编辑器帮助",
   "gui.mgmc.help.category.shortcuts": "快捷键",
   "gui.mgmc.help.shortcuts.title": "编辑器快捷键",
+  "gui.mgmc.help.shortcuts.save": "保存蓝图",
+  "gui.mgmc.help.shortcuts.select_all": "选择全部节点",
   "gui.mgmc.help.shortcuts.copy": "复制选中节点",
   "gui.mgmc.help.shortcuts.paste": "粘贴节点",
   "gui.mgmc.help.shortcuts.delete": "删除节点",

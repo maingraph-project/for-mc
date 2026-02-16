@@ -377,6 +377,39 @@ public class BlueprintScreen extends Screen {
         }
     }
 
+    private void saveBlueprint() {
+        if (state.readOnly) return;
+
+        // Check for unknown nodes
+        boolean hasUnknown = false;
+        for (GuiNode node : state.nodes) {
+            if (node.definition.properties().containsKey("is_unknown")) {
+                hasUnknown = true;
+                break;
+            }
+        }
+        
+        if (hasUnknown) {
+            state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.save_error.unknown_nodes").getString());
+            return;
+        }
+
+        String json = BlueprintIO.serialize(state.nodes, state.connections);
+        if (json != null) {
+            if (isGlobalMode) {
+                try {
+                    java.nio.file.Path path = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir().resolve(blueprintName);
+                    java.nio.file.Files.write(path, json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    state.showNotification(Component.translatable("gui.mgmc.notification.saved").getString());
+                } catch (java.io.IOException e) {
+                    MaingraphforMC.LOGGER.error("Failed to save global blueprint: " + blueprintName, e);
+                }
+            } else {
+                NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
+            }
+        }
+    }
+
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         state.buttonLongPressTarget = null;
@@ -394,6 +427,20 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (hasControlDown()) {
+            if (keyCode == GLFW.GLFW_KEY_S) {
+                saveBlueprint();
+                return true;
+            }
+            if (keyCode == GLFW.GLFW_KEY_A) {
+                state.selectedNodes.clear();
+                for (GuiNode node : state.nodes) {
+                    node.isSelected = true;
+                    state.selectedNodes.add(node);
+                }
+                return true;
+            }
+        }
         KeyEvent event = new KeyEvent(keyCode, scanCode, 1, modifiers);
         return eventHandler.keyPressed(event, this) || super.keyPressed(keyCode, scanCode, modifiers);
     }
@@ -465,34 +512,7 @@ public class BlueprintScreen extends Screen {
             // Save
             rightX -= 55;
             if (!state.readOnly && isHovering((int)mouseX, (int)mouseY, rightX, 3, 50, 20)) {
-                // Check for unknown nodes
-                boolean hasUnknown = false;
-                for (GuiNode node : state.nodes) {
-                    if (node.definition.properties().containsKey("is_unknown")) {
-                        hasUnknown = true;
-                        break;
-                    }
-                }
-                
-                if (hasUnknown) {
-                    state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.save_error.unknown_nodes").getString());
-                    return true;
-                }
-
-                String json = BlueprintIO.serialize(state.nodes, state.connections);
-                if (json != null) {
-                    if (isGlobalMode) {
-                        try {
-                            java.nio.file.Path path = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir().resolve(blueprintName);
-                            java.nio.file.Files.write(path, json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                            state.showNotification(Component.translatable("gui.mgmc.notification.saved").getString());
-                        } catch (java.io.IOException e) {
-                            MaingraphforMC.LOGGER.error("Failed to save global blueprint: " + blueprintName, e);
-                        }
-                    } else {
-                        NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
-                    }
-                }
+                saveBlueprint();
                 return true;
             }
             
