@@ -6,17 +6,17 @@
       "request": "launch",
       "name": "Client",
       "presentation": {
-        "group": "Mod Development - mgmc-neoforge-1.21.11",
+        "group": "Mod Development - for-mc",
         "order": 0
       },
-      "projectName": "mgmc-neoforge-1.21.11",
+      "projectName": "for-mc",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\build\\moddev\\clientRunProgramArgs.txt"
+        "@F:\\modmc\\bc\\for-mc\\build\\moddev\\clientRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\build\\moddev\\clientRunVmArgs.txt",
-        "-Dfml.modFolders\u003dmgmc%%F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\bin\\main"
+        "@F:\\modmc\\bc\\for-mc\\build\\moddev\\clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dmgmc%%F:\\modmc\\bc\\for-mc\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
       "env": {},
@@ -28,17 +28,17 @@
       "request": "launch",
       "name": "Data",
       "presentation": {
-        "group": "Mod Development - mgmc-neoforge-1.21.11",
+        "group": "Mod Development - for-mc",
         "order": 1
       },
-      "projectName": "mgmc-neoforge-1.21.11",
+      "projectName": "for-mc",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\build\\moddev\\dataRunProgramArgs.txt"
+        "@F:\\modmc\\bc\\for-mc\\build\\moddev\\dataRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\build\\moddev\\dataRunVmArgs.txt",
-        "-Dfml.modFolders\u003dmgmc%%F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\bin\\main"
+        "@F:\\modmc\\bc\\for-mc\\build\\moddev\\dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dmgmc%%F:\\modmc\\bc\\for-mc\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
       "env": {},
@@ -50,17 +50,17 @@
       "request": "launch",
       "name": "GameTestServer",
       "presentation": {
-        "group": "Mod Development - mgmc-neoforge-1.21.11",
+        "group": "Mod Development - for-mc",
         "order": 2
       },
-      "projectName": "mgmc-neoforge-1.21.11",
+      "projectName": "for-mc",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\build\\moddev\\gameTestServerRunProgramArgs.txt"
+        "@F:\\modmc\\bc\\for-mc\\build\\moddev\\gameTestServerRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\build\\moddev\\gameTestServerRunVmArgs.txt",
-        "-Dfml.modFolders\u003dmgmc%%F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\bin\\main"
+        "@F:\\modmc\\bc\\for-mc\\build\\moddev\\gameTestServerRunVmArgs.txt",
+        "-Dfml.modFolders\u003dmgmc%%F:\\modmc\\bc\\for-mc\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
       "env": {},
@@ -72,17 +72,17 @@
       "request": "launch",
       "name": "Server",
       "presentation": {
-        "group": "Mod Development - mgmc-neoforge-1.21.11",
+        "group": "Mod Development - for-mc",
         "order": 3
       },
-      "projectName": "mgmc-neoforge-1.21.11",
+      "projectName": "for-mc",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\build\\moddev\\serverRunProgramArgs.txt"
+        "@F:\\modmc\\bc\\for-mc\\build\\moddev\\serverRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\build\\moddev\\serverRunVmArgs.txt",
-        "-Dfml.modFolders\u003dmgmc%%F:\\modmc\\bc\\mgmc-neoforge-1.21.11\\bin\\main"
+        "@F:\\modmc\\bc\\for-mc\\build\\moddev\\serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dmgmc%%F:\\modmc\\bc\\for-mc\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
       "env": {},

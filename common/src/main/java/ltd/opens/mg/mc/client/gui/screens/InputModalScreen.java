@@ -114,6 +114,20 @@ public class InputModalScreen extends Screen {
     }
 
     @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        if (mode == Mode.INPUT && editBox != null) {
+            // Force focus to ensure input is captured
+            if (!editBox.isFocused()) {
+                editBox.setFocused(true);
+            }
+            if (editBox.charTyped(codePoint, modifiers)) {
+                return true;
+            }
+        }
+        return super.charTyped(codePoint, modifiers);
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             if (mode == Mode.INPUT && editBox != null) {
@@ -125,6 +139,15 @@ public class InputModalScreen extends Screen {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             this.minecraft.setScreen(parent);
             return true;
+        }
+        if (mode == Mode.INPUT && editBox != null) {
+            // Force focus to ensure input is captured
+            if (!editBox.isFocused()) {
+                editBox.setFocused(true);
+            }
+            if (editBox.keyPressed(keyCode, scanCode, modifiers)) {
+                return true;
+            }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
