@@ -22,6 +22,7 @@ public class NodeInitializer {
         EventNodes.register();
         ClientNodes.register();
         GetEntityInfoNode.register();
+        RaycastNode.register();
         InventoryNodes.register();
         SpecialNodes.register();
 

@@ -100,6 +100,17 @@ public class NodePorts {
     public static final String IS_PLAYER = "is_player";
     public static final String IS_ONLINE = "is_online";
     public static final String PERMISSION_LEVEL = "permission_level";
+
+    // 射线检测
+    public static final String DIRECTION = "direction";
+    public static final String MAX_DISTANCE = "max_distance";
+    public static final String STOP_ON_BLOCK = "stop_on_block";
+    public static final String STOP_ON_ENTITY = "stop_on_entity";
+    public static final String HIT_TYPE = "hit_type";
+    public static final String HIT_POS = "hit_pos";
+    public static final String HIT_ENTITY = "hit_entity";
+    public static final String HIT_BLOCK_POS = "hit_block_pos";
+    public static final String POINTS = "points";
     public static final String POS_X = "pos_x";
     public static final String POS_Y = "pos_y";
     public static final String POS_Z = "pos_z";
