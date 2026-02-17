@@ -22,6 +22,7 @@ public class NodeInitializer {
         EventNodes.register();
         ClientNodes.register();
         GetEntityInfoNode.register();
+        InventoryNodes.register();
         SpecialNodes.register();
 
         // 发布注册事件，通知外部模块 (如果有必要，使用 Architectury Event)

@@ -354,5 +354,15 @@
   "gui.mgmc.blueprint_editor.context_menu.rename": "Rename",
   "gui.mgmc.blueprint_editor.context_menu.color": "Change Color",
   "gui.mgmc.blueprint_editor.region.rename_title": "Rename Region",
-  "gui.mgmc.blueprint_editor.region.color_select_title": "Select Region Color"
+  "gui.mgmc.blueprint_editor.region.color_select_title": "Select Region Color",
+  "node_category.mgmc.action.inventory": "Inventory Action",
+  "node_category.mgmc.data.inventory": "Inventory Data",
+  "node.mgmc.give_item.name": "Give Item",
+  "node.mgmc.clear_item.name": "Clear Item",
+  "node.mgmc.get_item_count.name": "Get Item Count",
+  "node.mgmc.has_item.name": "Has Item",
+  "node.mgmc.port.player": "Player",
+  "node.mgmc.port.count": "Count",
+  "node.mgmc.port.nbt": "NBT Data",
+  "node.mgmc.port.result": "Result"
 }

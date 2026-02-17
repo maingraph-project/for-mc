@@ -362,5 +362,15 @@
   "gui.mgmc.blueprint_editor.context_menu.rename": "重命名",
   "gui.mgmc.blueprint_editor.context_menu.color": "修改颜色",
   "gui.mgmc.blueprint_editor.region.rename_title": "重命名区域",
-  "gui.mgmc.blueprint_editor.region.color_select_title": "选择区域颜色"
+  "gui.mgmc.blueprint_editor.region.color_select_title": "选择区域颜色",
+  "node_category.mgmc.action.inventory": "物品操作",
+  "node_category.mgmc.data.inventory": "物品数据",
+  "node.mgmc.give_item.name": "给予物品",
+  "node.mgmc.clear_item.name": "清除物品",
+  "node.mgmc.get_item_count.name": "获取物品数量",
+  "node.mgmc.has_item.name": "拥有物品",
+  "node.mgmc.port.player": "玩家",
+  "node.mgmc.port.count": "数量",
+  "node.mgmc.port.nbt": "NBT数据",
+  "node.mgmc.port.result": "结果"
 }
