@@ -4,6 +4,7 @@ package ltd.opens.mg.mc.client.gui.blueprint.manager;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeRegistry;
 import net.minecraft.network.chat.Component;
+import ltd.opens.mg.mc.MaingraphforMC;
 import dev.architectury.platform.Platform;
 
 import java.util.*;
@@ -30,7 +31,9 @@ public class BlueprintSearchManager {
                 Class<?> matchClass = Class.forName("me.towdium.jecharacters.utils.Match");
                 java.lang.reflect.Method containsMethod = matchClass.getMethod("contains", String.class, CharSequence.class);
                 return (boolean) containsMethod.invoke(null, text, query);
-            } catch (Throwable ignored) {}
+            } catch (Throwable t) {
+                MaingraphforMC.LOGGER.debug("JECH integration failed", t);
+            }
         }
         return false;
     }
@@ -203,7 +206,8 @@ public class BlueprintSearchManager {
                                 java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex, java.util.regex.Pattern.CASE_INSENSITIVE);
                                 matched = pattern.matcher(pId).find() || pattern.matcher(pName).find() ||
                                         pattern.matcher(pRawName).find() || pattern.matcher(pType).find();
-                            } catch (Exception ignored) {
+                            } catch (Exception e) {
+                                MaingraphforMC.LOGGER.debug("Invalid regex in port search: " + regex, e);
                             }
                         } else {
                             matched = pId.contains(portQuery) || matches(pName, portQuery) ||
@@ -238,7 +242,8 @@ public class BlueprintSearchManager {
                         totalScore += 8;
                         termMatched = true;
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    MaingraphforMC.LOGGER.debug("Invalid regex in node search: " + regex, e);
                 }
             } else {
                 // Normal matching

@@ -245,7 +245,9 @@ public class BlueprintNodeHandler {
                     try {
                         int idx = Integer.parseInt(port.id.substring(6));
                         if (idx > maxIndex) maxIndex = idx;
-                    } catch (NumberFormatException ignored) {}
+                    } catch (NumberFormatException ignored) {
+                        // Expected for non-numeric suffixes
+                    }
                 }
             }
             int nextIndex = maxIndex + 1;

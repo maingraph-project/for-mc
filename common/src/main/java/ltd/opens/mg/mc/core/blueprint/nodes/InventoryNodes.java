@@ -46,12 +46,14 @@ public class InventoryNodes {
                                 try {
                                     CompoundTag tag = TagParser.parseTag(nbtStr);
                                     stack.setTag(tag);
-                                } catch (Exception ignored) {}
+                                } catch (Exception e) {
+                                    MaingraphforMC.LOGGER.error("Error parsing NBT in give_item node: " + node.get("id"), e);
+                                }
                             }
                             player.getInventory().add(stack);
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        MaingraphforMC.LOGGER.error("Error in give_item node: " + node.get("id"), e);
                     }
                 }
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
@@ -87,7 +89,7 @@ public class InventoryNodes {
                              player.inventoryMenu.broadcastChanges();
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        MaingraphforMC.LOGGER.error("Error in clear_item node: " + node.get("id"), e);
                     }
                 }
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
@@ -112,7 +114,9 @@ public class InventoryNodes {
                         if (item != Items.AIR) {
                             return player.getInventory().clearOrCountMatchingItems(p -> p.getItem() == item, 0, player.inventoryMenu.getCraftSlots());
                         }
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                        MaingraphforMC.LOGGER.error("Error in get_item_count node: " + node.get("id"), e);
+                    }
                 }
                 return 0;
             });
@@ -136,7 +140,9 @@ public class InventoryNodes {
                         if (item != Items.AIR) {
                             return player.getInventory().contains(new ItemStack(item));
                         }
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                        MaingraphforMC.LOGGER.error("Error in has_item node: " + node.get("id"), e);
+                    }
                 }
                 return false;
             });

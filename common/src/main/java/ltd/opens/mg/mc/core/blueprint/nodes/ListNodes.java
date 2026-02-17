@@ -6,6 +6,7 @@ import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
+import ltd.opens.mg.mc.MaingraphforMC;
 
 
 import java.util.ArrayList;
@@ -35,7 +36,9 @@ public class ListNodes {
                     if (list != null && index >= 0 && index < list.size()) {
                         return list.get(index);
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    MaingraphforMC.LOGGER.error("Error in get_list_item node: " + node.get("id"), e);
+                }
                 return null;
             });
 
@@ -83,6 +86,7 @@ public class ListNodes {
                     List<Object> list = TypeConverter.toList(NodeLogicRegistry.evaluateInput(node, NodePorts.LIST, ctx));
                     return list != null ? list.size() : 0;
                 } catch (Exception e) {
+                    MaingraphforMC.LOGGER.error("Error in list_length node: " + node.get("id"), e);
                     return 0;
                 }
             });
@@ -139,6 +143,7 @@ public class ListNodes {
                     }
                     return list;
                 } catch (Exception e) {
+                    MaingraphforMC.LOGGER.error("Error in list_set_item node: " + node.get("id"), e);
                     return null;
                 }
             });

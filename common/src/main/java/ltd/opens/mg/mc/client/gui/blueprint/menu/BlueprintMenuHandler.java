@@ -14,6 +14,7 @@ import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import ltd.opens.mg.mc.client.gui.screens.InputModalScreen;
+import ltd.opens.mg.mc.MaingraphforMC;
 import net.minecraft.client.gui.screens.Screen;
 
 import java.util.ArrayList;
@@ -270,7 +271,9 @@ public class BlueprintMenuHandler {
                                                         state.pushHistory();
                                                         state.contextMenuRegion.color = (0x44 << 24) | rgb;
                                                         state.markDirty();
-                                                    } catch (NumberFormatException e) {}
+                                                    } catch (NumberFormatException e) {
+                                                        MaingraphforMC.LOGGER.warn("Invalid hex color input: " + hexColor, e);
+                                                    }
                                                 }
                                             ));
                                         } else {

@@ -3,6 +3,7 @@ package ltd.opens.mg.mc.client.gui.blueprint.manager;
 import ltd.opens.mg.mc.client.gui.components.GuiNode;
 import ltd.opens.mg.mc.client.gui.components.GuiRegion;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
+import ltd.opens.mg.mc.MaingraphforMC;
 import dev.architectury.platform.Platform;
 
 import java.util.*;
@@ -28,7 +29,9 @@ public class OnEditorSearchManager {
                 Class<?> matchClass = Class.forName("me.towdium.jecharacters.utils.Match");
                 java.lang.reflect.Method containsMethod = matchClass.getMethod("contains", String.class, CharSequence.class);
                 return (boolean) containsMethod.invoke(null, text, query);
-            } catch (Throwable ignored) {}
+            } catch (Throwable t) {
+                MaingraphforMC.LOGGER.debug("JECH integration failed", t);
+            }
         }
         return false;
     }

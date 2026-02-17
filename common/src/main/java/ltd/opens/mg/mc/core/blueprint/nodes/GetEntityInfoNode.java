@@ -4,6 +4,7 @@ import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeHelper;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
+import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
 import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
@@ -50,7 +51,9 @@ public class GetEntityInfoNode {
                     UUID uuid = UUID.fromString(uuidStr);
                     Entity entity = findEntity(uuid, ctx);
                     return getEntityInfo(entity, uuid, pinId, ctx);
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    MaingraphforMC.LOGGER.error("Error in get_entity_info_byuuid node: " + node.get("id"), e);
+                }
                 return getDefaultValue(pinId);
             });
 
@@ -91,7 +94,9 @@ public class GetEntityInfoNode {
                 if (uuidStr == null || uuidStr.isEmpty()) return null;
                 try {
                     return findEntity(UUID.fromString(uuidStr), ctx);
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    MaingraphforMC.LOGGER.error("Error in get_entity_by_uuid node: " + node.get("id"), e);
+                }
                 return null;
             });
 

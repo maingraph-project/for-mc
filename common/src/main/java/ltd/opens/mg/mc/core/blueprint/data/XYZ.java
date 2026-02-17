@@ -1,5 +1,6 @@
 package ltd.opens.mg.mc.core.blueprint.data;
 
+import ltd.opens.mg.mc.MaingraphforMC;
 
 /**
  * 代表一个三维向量或坐标，存储三个浮点数。
@@ -26,7 +27,9 @@ public record XYZ(double x, double y, double z) {
                     Double.parseDouble(parts[2].trim())
                 );
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            MaingraphforMC.LOGGER.error("Error parsing XYZ from string: " + s, e);
+        }
         return ZERO;
     }
 }

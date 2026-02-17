@@ -87,7 +87,9 @@ public class BlueprintEngine {
                 if (triggerExtraUuid != null && !triggerExtraUuid.isEmpty()) {
                     builder.triggerExtraEntity(serverLevel.getEntity(java.util.UUID.fromString(triggerExtraUuid)));
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                MaingraphforMC.LOGGER.warn("Invalid UUID format in trigger arguments", e);
+            }
         }
         
         execute(level, root, eventType, builder);

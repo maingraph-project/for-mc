@@ -160,7 +160,9 @@ public class ActionNodes {
                             }
                         }
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    MaingraphforMC.LOGGER.error("Error in play_effect node: " + node.get("id"), e);
+                }
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
             });
 
@@ -182,7 +184,9 @@ public class ActionNodes {
                     if (ctx.level != null) {
                         ctx.level.explode(null, pos.x(), pos.y(), pos.z(), radius, Level.ExplosionInteraction.TNT);
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    MaingraphforMC.LOGGER.error("Error in explosion node: " + node.get("id"), e);
+                }
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
             });
 
@@ -328,7 +332,9 @@ public class ActionNodes {
                         if (holder.isPresent()) {
                             entity.addEffect(new MobEffectInstance(holder.get(), duration, amplifier, false, showParticles));
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception e) {
+                        MaingraphforMC.LOGGER.error("Error in add_potion_effect node: " + node.get("id"), e);
+                    }
                 }
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
             });
