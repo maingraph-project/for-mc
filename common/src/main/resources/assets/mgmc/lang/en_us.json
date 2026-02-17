@@ -263,6 +263,7 @@
   "node.mgmc.port.hit_block_pos": "Hit Block Pos",
   "node.mgmc.port.points": "Ray Points",
   "node_category.mgmc.variable.world": "World",
+  "node_category.mgmc.variable.data": "Data",
   "node.mgmc.teleport_entity.name": "Teleport Entity",
   "node.mgmc.add_potion_effect.name": "Add Potion Effect",
   "node.mgmc.kill_entity.name": "Kill Entity",

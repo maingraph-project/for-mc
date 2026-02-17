@@ -287,6 +287,7 @@
   "node.mgmc.port.hit_block_pos": "命中方块坐标",
   "node.mgmc.port.points": "轨迹点列表",
   "node_category.mgmc.variable.world": "世界",
+  "node_category.mgmc.variable.data": "数据",
   "node.mgmc.teleport_entity.name": "传送实体",
   "node.mgmc.add_potion_effect.name": "添加药水效果",
   "node.mgmc.kill_entity.name": "杀死实体",
