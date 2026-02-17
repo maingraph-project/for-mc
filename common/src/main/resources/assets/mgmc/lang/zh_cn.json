@@ -269,6 +269,7 @@
   "node.mgmc.get_list_item.port.value": "值",
   "node.mgmc.get_entity_info.port.type": "类型",
   "node.mgmc.get_entity_info.port.registry_name": "注册名称",
+  "node.mgmc.get_entities_in_range.name": "获取范围内实体",
   "node.mgmc.get_entity_info.port.health": "生命值",
   "node.mgmc.get_entity_info.port.max_health": "最大生命值",
   "node.mgmc.get_entity_info.port.is_living": "是生物",

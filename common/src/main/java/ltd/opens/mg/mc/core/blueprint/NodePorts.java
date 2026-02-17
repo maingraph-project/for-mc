@@ -105,4 +105,5 @@ public class NodePorts {
     public static final String POS_Z = "pos_z";
     public static final String COUNT = "count";
     public static final String NBT = "nbt";
+    public static final String EXCLUDE_SELF = "exclude_self";
 }

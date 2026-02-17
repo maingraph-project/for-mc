@@ -245,6 +245,7 @@
   "node.mgmc.get_list_item.port.value": "Value",
   "node.mgmc.get_entity_info.port.type": "Type",
   "node.mgmc.get_entity_info.port.registry_name": "Registry Name",
+  "node.mgmc.get_entities_in_range.name": "Get Entities in Range",
   "node.mgmc.get_entity_info.port.health": "Health",
   "node.mgmc.get_entity_info.port.max_health": "Max Health",
   "node.mgmc.get_entity_info.port.is_living": "Is Living",

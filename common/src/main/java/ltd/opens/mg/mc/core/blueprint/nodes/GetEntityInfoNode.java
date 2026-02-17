@@ -15,7 +15,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -113,6 +116,42 @@ public class GetEntityInfoNode {
                 if (NodePorts.ENTITY.equals(pinId)) return self;
                 if (NodePorts.UUID.equals(pinId)) return self.getUUID().toString();
                 return null;
+            });
+
+        // 5. get_entities_in_range (获取范围内实体)
+        NodeHelper.setup("get_entities_in_range", "node.mgmc.get_entities_in_range.name")
+            .category("node_category.mgmc.variable.entity")
+            .color(NodeThemes.COLOR_NODE_ENTITY)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/entity/get_entities_in_range")
+            .input(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .input(NodePorts.RADIUS, "node.mgmc.port.radius", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT, "5.0")
+            .input(NodePorts.TYPE, "node.mgmc.get_entity_info.port.type", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
+            .output(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
+            .registerValue((node, pinId, ctx) -> {
+                if (ctx.level == null) return new ArrayList<>();
+                
+                XYZ origin = (XYZ) NodeLogicRegistry.evaluateInput(node, NodePorts.XYZ, ctx);
+                if (origin == null) origin = XYZ.ZERO;
+                
+                double radius = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.RADIUS, ctx));
+                if (radius <= 0) radius = 5.0;
+                
+                String typeFilterStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TYPE, ctx));
+                
+                AABB aabb = new AABB(origin.x() - radius, origin.y() - radius, origin.z() - radius, 
+                                     origin.x() + radius, origin.y() + radius, origin.z() + radius);
+                                     
+                List<Entity> entities = ctx.level.getEntities((Entity) null, aabb, entity -> {
+                    if (!typeFilterStr.isEmpty()) {
+                         String entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
+                         if (!entityId.equals(typeFilterStr) && !entityId.endsWith(":" + typeFilterStr)) {
+                             return false;
+                         }
+                    }
+                    return true;
+                });
+                
+                return entities;
             });
     }
 
