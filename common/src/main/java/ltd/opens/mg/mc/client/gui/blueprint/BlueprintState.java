@@ -280,6 +280,26 @@ public class BlueprintState {
         }
     }
 
+    // Snapping Guides
+    public boolean showSettings = false;
+    public float settingsAnimProgress = 0f;
+    public float settingsScrollY = 0f;
+    public float settingsContentHeight = 200f; // Example height
+    public List<SnapGuide> snapGuides = new ArrayList<>();
+
+    public static class SnapGuide {
+        public float x1, y1, x2, y2;
+        public boolean isVertical;
+
+        public SnapGuide(float x1, float y1, float x2, float y2, boolean isVertical) {
+            this.x1 = x1;
+            this.y1 = y1;
+            this.x2 = x2;
+            this.y2 = y2;
+            this.isVertical = isVertical;
+        }
+    }
+
     // Undo/Redo history
     public String historyPendingState = null;
 

@@ -462,6 +462,40 @@ public class BlueprintRenderer {
             guiGraphics.drawString(font, results, x + searchW - font.width(results) - 10, y + 8, 0xFF55FF55, false);
         }
     }
+
+    public static void drawSnapGuides(GuiGraphics guiGraphics, BlueprintState state) {
+        if (state.snapGuides.isEmpty()) return;
+        
+        float dashLen = 10.0f / state.viewport.zoom; 
+        float gapLen = 5.0f / state.viewport.zoom;
+        
+        for (BlueprintState.SnapGuide guide : state.snapGuides) {
+            drawDashedLine(guiGraphics, guide.x1, guide.y1, guide.x2, guide.y2, 0xFFFF0000, dashLen, gapLen);
+        }
+    }
+
+    public static void drawDashedLine(GuiGraphics guiGraphics, float x1, float y1, float x2, float y2, int color, float dashLength, float gapLength) {
+        float dx = x2 - x1;
+        float dy = y2 - y1;
+        float len = (float) Math.sqrt(dx * dx + dy * dy);
+        if (len <= 0) return;
+        
+        float normX = dx / len;
+        float normY = dy / len;
+        
+        float currentLen = 0;
+        while (currentLen < len) {
+            float nextLen = Math.min(currentLen + dashLength, len);
+            float startX = x1 + normX * currentLen;
+            float startY = y1 + normY * currentLen;
+            float endX = x1 + normX * nextLen;
+            float endY = y1 + normY * nextLen;
+            
+            drawLine(guiGraphics, startX, startY, endX, endY, color);
+            
+            currentLen += dashLength + gapLength;
+        }
+    }
 }
 
 

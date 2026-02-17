@@ -3,6 +3,7 @@ package ltd.opens.mg.mc.client.gui.screens;
 import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.gui.blueprint.*;
+import ltd.opens.mg.mc.client.gui.blueprint.BlueprintSettingsPanel;
 
 import ltd.opens.mg.mc.client.gui.blueprint.handler.*;
 import ltd.opens.mg.mc.client.gui.blueprint.io.*;
@@ -200,6 +201,8 @@ public class BlueprintScreen extends Screen {
         BlueprintRenderer.drawRegions(guiGraphics, state.regions, this.font, state.viewport);
         BlueprintRenderer.drawConnections(guiGraphics, state.connections, this.width, this.height, state.viewport);
 
+        BlueprintRenderer.drawSnapGuides(guiGraphics, state);
+
         for (GuiNode node : state.nodes) {
             if (!state.viewport.isVisible(node.x, node.y, node.width, node.height, this.width, this.height)) {
                 continue;
@@ -245,13 +248,18 @@ public class BlueprintScreen extends Screen {
         
         // Right side buttons
         int rightX = this.width - 5;
-        // Reset View
-        rightX -= 70;
-        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 70, 20, Component.translatable("gui.mgmc.blueprint_editor.reset_view"), "reset_view");
-
+        
         // Help
-        rightX -= 25;
+        rightX -= 20;
         renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 20, 20, Component.literal("?"), "help");
+        
+        // Settings
+        rightX -= 25;
+        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 20, 20, Component.literal("⚙"), "settings");
+
+        // Reset View
+        rightX -= 75;
+        renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 70, 20, Component.translatable("gui.mgmc.blueprint_editor.reset_view"), "reset_view");
         
         // Arrange
         rightX -= 45;
@@ -283,6 +291,7 @@ public class BlueprintScreen extends Screen {
 
         // --- Notification Popup ---
         if (state.notificationMessage != null && state.notificationTimer > 0) {
+            // ... (existing notification code)
             int msgW = font.width(state.notificationMessage);
             int popupW = msgW + 20;
             int popupH = 20;
@@ -308,6 +317,9 @@ public class BlueprintScreen extends Screen {
             int closeColor = (alphaInt << 24) | 0x888888;
             guiGraphics.drawString(font, "×", popupX + popupW - 12, popupY + (popupH - 9) / 2, closeColor, false);
         }
+
+        // --- Settings Menu ---
+        BlueprintSettingsPanel.render(guiGraphics, this, state, font, mouseX, mouseY);
     }
 
     @Override
@@ -489,6 +501,11 @@ public class BlueprintScreen extends Screen {
             }
         }
         
+        // Handle Settings Menu
+        if (BlueprintSettingsPanel.mouseClicked(this, state, mouseX, mouseY, button)) {
+            return true;
+        }
+
         // Handle Top Bar Buttons
         if (mouseY < 26) {
             // Back
@@ -498,22 +515,30 @@ public class BlueprintScreen extends Screen {
             }
             
             int rightX = this.width - 5;
+            
+            // Help
+            rightX -= 20;
+            if (isHovering((int)mouseX, (int)mouseY, rightX, 3, 20, 20)) {
+                if (button == 0) {
+                    Minecraft.getInstance().setScreen(new BlueprintHelpScreen(this));
+                }
+                return true;
+            }
+            
+            // Settings
+            rightX -= 25;
+            if (isHovering((int)mouseX, (int)mouseY, rightX, 3, 20, 20)) {
+                state.showSettings = !state.showSettings;
+                return true;
+            }
+
             // Reset View
-            rightX -= 70;
+            rightX -= 75;
             if (isHovering((int)mouseX, (int)mouseY, rightX, 3, 70, 20)) {
                 if (button == 0) {
                     state.buttonLongPressTarget = "reset_view";
                     state.buttonLongPressProgress = 0f;
                     state.isMouseDown = true;
-                }
-                return true;
-            }
-
-            // Help
-            rightX -= 25;
-            if (isHovering((int)mouseX, (int)mouseY, rightX, 3, 20, 20)) {
-                if (button == 0) {
-                    Minecraft.getInstance().setScreen(new BlueprintHelpScreen(this));
                 }
                 return true;
             }
@@ -553,6 +578,9 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollHorizontal, double scrollVertical) {
+        if (BlueprintSettingsPanel.mouseScrolled(this, state, mouseX, mouseY, scrollVertical)) {
+            return true;
+        }
         return eventHandler.mouseScrolled(mouseX, mouseY, scrollHorizontal, scrollVertical, this) || super.mouseScrolled(mouseX, mouseY, scrollHorizontal, scrollVertical);
     }
 }

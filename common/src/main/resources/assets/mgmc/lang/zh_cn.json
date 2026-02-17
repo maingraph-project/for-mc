@@ -1,4 +1,7 @@
 {
+  "gui.mgmc.settings.title": "编辑器设置",
+  "gui.mgmc.settings.snap_guides": "智能吸附辅助线",
+  "gui.mgmc.settings.snap_guides.desc": "当你拖拽单个节点时，如果其边缘或中心与其他节点对齐，会自动吸附并在视图中显示红色的虚线辅助线。",
   "key.mgmc.open_blueprint": "打开蓝图编辑器",
   "key.categories.mgmc.main": "Maingraph for MC",
   "gui.mgmc.blueprint_selection.title": "选择蓝图",

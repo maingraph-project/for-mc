@@ -21,6 +21,8 @@ import java.util.List;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 
+import ltd.opens.mg.mc.client.gui.blueprint.settings.SettingsRegistry;
+
 public class BlueprintNodeHandler {
     private final BlueprintState state;
 
@@ -328,6 +330,7 @@ public class BlueprintNodeHandler {
                 }
             }
             state.draggingNode = null;
+            state.snapGuides.clear();
             return true;
         }
         return false;
@@ -345,8 +348,69 @@ public class BlueprintNodeHandler {
             return true;
         }
         if (state.draggingNode != null) {
-            float dx = (float) (worldMouseX - state.dragOffsetX) - state.draggingNode.x;
-            float dy = (float) (worldMouseY - state.dragOffsetY) - state.draggingNode.y;
+            float targetX = (float) (worldMouseX - state.dragOffsetX);
+            float targetY = (float) (worldMouseY - state.dragOffsetY);
+            
+            float dx = targetX - state.draggingNode.x;
+            float dy = targetY - state.draggingNode.y;
+            
+            // Snapping Logic
+            state.snapGuides.clear();
+            
+            if (SettingsRegistry.getBoolean("snap_guides") && state.selectedNodes.size() <= 1) {
+                float snapThreshold = 10.0f / state.viewport.zoom; 
+                if (snapThreshold > 20) snapThreshold = 20;
+                
+                float snappedX = targetX;
+                float snappedY = targetY;
+                boolean snappedXFlag = false;
+                boolean snappedYFlag = false;
+
+                // Edges to check: Left, Right, CenterX, Top, Bottom, CenterY
+                float myL = targetX;
+                float myR = targetX + state.draggingNode.width;
+                float myCX = targetX + state.draggingNode.width / 2;
+                
+                float myT = targetY;
+                float myB = targetY + state.draggingNode.height;
+                float myCY = targetY + state.draggingNode.height / 2;
+
+                for (GuiNode other : state.nodes) {
+                    if (other == state.draggingNode || state.selectedNodes.contains(other)) continue;
+                    
+                    // Optimization: Skip nodes far away
+                    if (Math.abs(other.x - myL) > 1000 && Math.abs(other.y - myT) > 1000) continue;
+
+                    float otherL = other.x;
+                    float otherR = other.x + other.width;
+                    float otherCX = other.x + other.width / 2;
+                    
+                    float otherT = other.y;
+                    float otherB = other.y + other.height;
+                    float otherCY = other.y + other.height / 2;
+
+                    // X Snapping
+                    if (!snappedXFlag) {
+                        if (Math.abs(myL - otherL) < snapThreshold) { snappedX = otherL; snappedXFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(otherL, Math.min(myT, otherT) - 50, otherL, Math.max(myB, otherB) + 50, true)); }
+                        else if (Math.abs(myL - otherR) < snapThreshold) { snappedX = otherR; snappedXFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(otherR, Math.min(myT, otherT) - 50, otherR, Math.max(myB, otherB) + 50, true)); }
+                        else if (Math.abs(myR - otherL) < snapThreshold) { snappedX = otherL - state.draggingNode.width; snappedXFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(otherL, Math.min(myT, otherT) - 50, otherL, Math.max(myB, otherB) + 50, true)); }
+                        else if (Math.abs(myR - otherR) < snapThreshold) { snappedX = otherR - state.draggingNode.width; snappedXFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(otherR, Math.min(myT, otherT) - 50, otherR, Math.max(myB, otherB) + 50, true)); }
+                        else if (Math.abs(myCX - otherCX) < snapThreshold) { snappedX = otherCX - state.draggingNode.width / 2; snappedXFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(otherCX, Math.min(myT, otherT) - 50, otherCX, Math.max(myB, otherB) + 50, true)); }
+                    }
+
+                    // Y Snapping
+                    if (!snappedYFlag) {
+                        if (Math.abs(myT - otherT) < snapThreshold) { snappedY = otherT; snappedYFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(Math.min(myL, otherL) - 50, otherT, Math.max(myR, otherR) + 50, otherT, false)); }
+                        else if (Math.abs(myT - otherB) < snapThreshold) { snappedY = otherB; snappedYFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(Math.min(myL, otherL) - 50, otherB, Math.max(myR, otherR) + 50, otherB, false)); }
+                        else if (Math.abs(myB - otherT) < snapThreshold) { snappedY = otherT - state.draggingNode.height; snappedYFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(Math.min(myL, otherL) - 50, otherT, Math.max(myR, otherR) + 50, otherT, false)); }
+                        else if (Math.abs(myB - otherB) < snapThreshold) { snappedY = otherB - state.draggingNode.height; snappedYFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(Math.min(myL, otherL) - 50, otherB, Math.max(myR, otherR) + 50, otherB, false)); }
+                        else if (Math.abs(myCY - otherCY) < snapThreshold) { snappedY = otherCY - state.draggingNode.height / 2; snappedYFlag = true; state.snapGuides.add(new BlueprintState.SnapGuide(Math.min(myL, otherL) - 50, otherCY, Math.max(myR, otherR) + 50, otherCY, false)); }
+                    }
+                }
+                
+                if (snappedXFlag) dx = snappedX - state.draggingNode.x;
+                if (snappedYFlag) dy = snappedY - state.draggingNode.y;
+            }
             
             if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
                 // Move all selected nodes

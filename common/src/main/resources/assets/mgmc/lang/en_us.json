@@ -1,4 +1,7 @@
 {
+  "gui.mgmc.settings.title": "Editor Settings",
+  "gui.mgmc.settings.snap_guides": "Smart Snapping Guides",
+  "gui.mgmc.settings.snap_guides.desc": "When dragging a single node, if its edge or center aligns with other nodes, it will automatically snap and show red dashed guides in the view.",
   "key.mgmc.open_blueprint": "Open Blueprint Editor",
   "key.categories.mgmc.main": "Maingraph for MC",
   "gui.mgmc.blueprint_selection.title": "Select Blueprint",
