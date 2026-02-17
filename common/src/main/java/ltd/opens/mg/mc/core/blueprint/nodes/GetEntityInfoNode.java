@@ -153,6 +153,22 @@ public class GetEntityInfoNode {
                 
                 return entities;
             });
+
+        // 6. get_entity_look_direction (获取实体朝向)
+        NodeHelper.setup("get_entity_look_direction", "node.mgmc.get_entity_look_direction.name")
+            .category("node_category.mgmc.variable.entity")
+            .color(NodeThemes.COLOR_NODE_ENTITY)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/entity/get_entity_look_direction")
+            .input(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .output(NodePorts.XYZ, "node.mgmc.port.direction", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .registerValue((node, pinId, ctx) -> {
+                Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
+                if (entityObj instanceof Entity entity) {
+                    net.minecraft.world.phys.Vec3 look = entity.getLookAngle();
+                    return new XYZ(look.x, look.y, look.z);
+                }
+                return XYZ.ZERO;
+            });
     }
 
     private static Object getEntityInfo(Entity entity, UUID uuid, String pinId, NodeContext ctx) {

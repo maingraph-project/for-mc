@@ -276,6 +276,7 @@
   "node.mgmc.get_entity_info.port.is_player": "是玩家",
   "node.mgmc.get_entity_info.port.is_online": "是否在线",
   "node.mgmc.get_entity_info.port.permission_level": "权限等级",
+  "node.mgmc.get_entity_look_direction.name": "获取实体朝向",
   "node.mgmc.raycast.name": "射线检测",
   "node.mgmc.port.direction": "方向",
   "node.mgmc.port.max_distance": "最大距离",

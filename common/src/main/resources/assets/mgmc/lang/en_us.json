@@ -252,6 +252,7 @@
   "node.mgmc.get_entity_info.port.is_player": "Is Player",
   "node.mgmc.get_entity_info.port.is_online": "Is Online",
   "node.mgmc.get_entity_info.port.permission_level": "Permission Level",
+  "node.mgmc.get_entity_look_direction.name": "Get Entity Look Direction",
   "node.mgmc.raycast.name": "Raycast",
   "node.mgmc.port.direction": "Direction",
   "node.mgmc.port.max_distance": "Max Distance",
