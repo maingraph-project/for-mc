@@ -16,6 +16,19 @@ public class BlueprintEngine {
     // 缓存蓝图的索引信息，使用 WeakHashMap 防止内存泄漏
     private static final Map<JsonObject, Map<String, List<JsonObject>>> EVENT_INDEX_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<JsonObject, Map<String, JsonObject>> NODE_MAP_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
+    
+    // 缓存解析后的 JsonObject，避免重复解析
+    private static final Map<String, CachedBlueprint> BLUEPRINT_SOURCE_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static class CachedBlueprint {
+        final String content;
+        final JsonObject root;
+
+        CachedBlueprint(String content, JsonObject root) {
+            this.content = content;
+            this.root = root;
+        }
+    }
 
     public static void execute(Level level, String json, String blueprintName, String eventType, String name, String[] args, 
                                 String triggerUuid, String triggerName, double tx, double ty, double tz, double speed) {
@@ -26,7 +39,18 @@ public class BlueprintEngine {
                                 String triggerUuid, String triggerName, double tx, double ty, double tz, double speed,
                                 String triggerBlockId, String triggerItemId, double triggerValue, String triggerExtraUuid) {
         try {
-            JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+            JsonObject root;
+            CachedBlueprint cached = BLUEPRINT_SOURCE_CACHE.get(blueprintName);
+            
+            // 检查缓存是否存在且内容一致
+            if (cached != null && cached.content.equals(json)) {
+                root = cached.root;
+            } else {
+                // 缓存未命中或内容已变更，重新解析
+                root = JsonParser.parseString(json).getAsJsonObject();
+                BLUEPRINT_SOURCE_CACHE.put(blueprintName, new CachedBlueprint(json, root));
+            }
+            
             execute(level, root, blueprintName, eventType, name, args, triggerUuid, triggerName, tx, ty, tz, speed, triggerBlockId, triggerItemId, triggerValue, triggerExtraUuid);
         } catch (Exception e) {
             MaingraphforMC.LOGGER.error("Error parsing blueprint JSON", e);
@@ -72,6 +96,7 @@ public class BlueprintEngine {
     public static void clearCaches() {
         EVENT_INDEX_CACHE.clear();
         NODE_MAP_CACHE.clear();
+        BLUEPRINT_SOURCE_CACHE.clear();
     }
 
     public static void execute(Level level, JsonObject root, String eventType, NodeContext.Builder contextBuilder) {
