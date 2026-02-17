@@ -15,6 +15,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import ltd.opens.mg.mc.MaingraphforMC;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 
 public class InventoryNodes {
 
@@ -38,14 +41,14 @@ public class InventoryNodes {
 
                 if (entityObj instanceof ServerPlayer player) {
                     try {
-                        ResourceLocation rl = new ResourceLocation(itemId);
+                        ResourceLocation rl = ResourceLocation.parse(itemId);
                         Item item = BuiltInRegistries.ITEM.get(rl);
                         if (item != Items.AIR) {
                             ItemStack stack = new ItemStack(item, count);
                             if (nbtStr != null && !nbtStr.isEmpty() && !nbtStr.equals("{}")) {
                                 try {
                                     CompoundTag tag = TagParser.parseTag(nbtStr);
-                                    stack.setTag(tag);
+                                    stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
                                 } catch (Exception e) {
                                     MaingraphforMC.LOGGER.error("Error parsing NBT in give_item node: " + node.get("id"), e);
                                 }
@@ -76,7 +79,7 @@ public class InventoryNodes {
 
                 if (entityObj instanceof ServerPlayer player) {
                      try {
-                        ResourceLocation rl = new ResourceLocation(itemId);
+                        ResourceLocation rl = ResourceLocation.parse(itemId);
                         Item item = BuiltInRegistries.ITEM.get(rl);
                         if (item != Items.AIR) {
                              if (count <= 0) {
@@ -109,7 +112,7 @@ public class InventoryNodes {
                 
                 if (entityObj instanceof ServerPlayer player) {
                      try {
-                        ResourceLocation rl = new ResourceLocation(itemId);
+                        ResourceLocation rl = ResourceLocation.parse(itemId);
                         Item item = BuiltInRegistries.ITEM.get(rl);
                         if (item != Items.AIR) {
                             return player.getInventory().clearOrCountMatchingItems(p -> p.getItem() == item, 0, player.inventoryMenu.getCraftSlots());
@@ -135,7 +138,7 @@ public class InventoryNodes {
                 
                 if (entityObj instanceof ServerPlayer player) {
                      try {
-                        ResourceLocation rl = new ResourceLocation(itemId);
+                        ResourceLocation rl = ResourceLocation.parse(itemId);
                         Item item = BuiltInRegistries.ITEM.get(rl);
                         if (item != Items.AIR) {
                             return player.getInventory().contains(new ItemStack(item));
