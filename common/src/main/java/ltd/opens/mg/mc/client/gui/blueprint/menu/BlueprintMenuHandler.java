@@ -201,7 +201,8 @@ public class BlueprintMenuHandler {
             // 2. Check Regions
             for (int i = state.regions.size() - 1; i >= 0; i--) {
                 GuiRegion region = state.regions.get(i);
-                if (worldMouseX >= region.x && worldMouseX <= region.x + region.width && worldMouseY >= region.y && worldMouseY <= region.y + region.height) {
+                // Check if mouse is on the title bar (height 20)
+                if (worldMouseX >= region.x && worldMouseX <= region.x + region.width && worldMouseY >= region.y && worldMouseY <= region.y + 20) {
                     state.contextMenuRegion = region;
                     List<GuiContextMenu.MenuItem> items = new ArrayList<>();
                     
