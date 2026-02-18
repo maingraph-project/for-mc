@@ -53,8 +53,25 @@ public class RaycastNode {
                 double maxDist = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.MAX_DISTANCE, ctx));
                 if (maxDist <= 0) maxDist = 100.0;
                 
+                // Use default true if not provided or parsing fails, but check if user explicitly set to false?
+                // TypeConverter.toBoolean returns false for null/empty.
+                // But the input definition has default "true".
+                // If the user's blueprint has "value": false, evaluateInput returns false.
+                // If the user's blueprint does NOT have the input, evaluateInput uses default "true".
+                // The problem is the user's blueprint explicitly has false.
+                // But to be user friendly, if BOTH are false, maybe we should enable both or block?
+                // Or maybe the user really wants to scan nothing? Unlikely.
+                // Let's change the logic: if both are false, treat as both true (fallback)?
+                // Or just assume user made a mistake.
+                
                 boolean stopOnBlock = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.STOP_ON_BLOCK, ctx));
                 boolean stopOnEntity = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.STOP_ON_ENTITY, ctx));
+
+                // Auto-fix: If both are false, enable both by default to avoid confusion
+                if (!stopOnBlock && !stopOnEntity) {
+                    stopOnBlock = true;
+                    stopOnEntity = true;
+                }
 
                 // Calculation
                 Vec3 start = new Vec3(origin.x(), origin.y(), origin.z());
@@ -83,48 +100,16 @@ public class RaycastNode {
                         start,
                         end,
                         area,
-                        e -> !e.isSpectator() && e.isPickable(),
-                        (float) (currentDist * currentDist) // ProjectileUtil might expect squared distance or not?
-                        // Actually ProjectileUtil.getEntityHitResult signature varies by version.
-                        // Common: (Level, Entity shooter, Vec3 start, Vec3 end, AABB boundingBox, Predicate filter)
-                        // Or (Entity shooter, Vec3 start, Vec3 end, AABB boundingBox, Predicate filter, double inflate)
+                        e -> !e.isSpectator() && e.isPickable() && (ctx.triggerEntity == null || !e.is(ctx.triggerEntity))
                     );
                     
-                    // In older versions or NeoForge, it might be slightly different.
-                    // Let's use a safer approach or verify ProjectileUtil signature if possible.
-                    // Or implement manual entity check if unsure.
-                    // Let's assume standard mapped name.
-                    // If ProjectileUtil is not available or signature mismatch, I'll fix in compilation.
-                    // Let's try ProjectileUtil.getEntityHitResult(shooter, start, end, aabb, predicate, inflate)
-                    // Wait, standard ProjectileUtil often returns EntityHitResult.
-                    
-                    // Let's try to find entity manually if ProjectileUtil is complex.
-                    // But ProjectileUtil is standard.
-                    // I will check ProjectileUtil signature if I can search codebase.
-                }
-                
-                // Re-implementation of Entity Raycast to be safe:
-                if (stopOnEntity) {
-                     // We need to check entities along the ray.
-                     Vec3 finalStart = start;
-                     Vec3 finalEnd = end;
-                     double finalDist = currentDist;
-                     
-                     // Get entities in AABB
-                     List<Entity> entities = ctx.level.getEntities(ctx.triggerEntity, new AABB(start, end).inflate(1.0), e -> !e.isSpectator() && e.isPickable());
-                     
-                     for (Entity entity : entities) {
-                         AABB entityBb = entity.getBoundingBox().inflate(0.3); // Slightly larger
-                         Optional<Vec3> clip = entityBb.clip(start, end);
-                         if (clip.isPresent()) {
-                             double d = start.distanceTo(clip.get());
-                             if (d < finalDist) {
-                                 finalDist = d;
-                                 finalHit = new EntityHitResult(entity, clip.get());
-                                 end = clip.get(); // Shorten
-                             }
-                         }
-                     }
+                    if (entityHit != null) {
+                        double d = start.distanceTo(entityHit.getLocation());
+                        if (d < currentDist) {
+                            finalHit = entityHit;
+                            end = entityHit.getLocation();
+                        }
+                    }
                 }
 
                 // If no hit, we effectively missed or hit nothing within range
@@ -154,8 +139,8 @@ public class RaycastNode {
                 }
                 
                 if (NodePorts.HIT_BLOCK_POS.equals(pinId)) {
-                    if (finalHit instanceof BlockHitResult bhr) {
-                        BlockPos p = bhr.getBlockPos();
+                    if (finalHit != null) {
+                        BlockPos p = BlockPos.containing(finalHit.getLocation());
                         return new XYZ(p.getX(), p.getY(), p.getZ());
                     }
                     return XYZ.ZERO;

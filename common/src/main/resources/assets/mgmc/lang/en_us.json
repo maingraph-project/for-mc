@@ -410,6 +410,8 @@
   "node.mgmc.atan2.name": "Atan2",
   "node.mgmc.to_radians.name": "To Radians",
   "node.mgmc.to_degrees.name": "To Degrees",
+  "node.mgmc.get_look_vector.name": "Get Look Vector",
+  "node.mgmc.get_eye_position.name": "Get Eye Position",
   "node.mgmc.port.xyz": "XYZ Position",
   "gui.mgmc.version_warning.title": "Blueprint Version Warning",
   "gui.mgmc.version_warning.message": "This blueprint is version v%d, but the current editor is v%d. Opening it directly may cause some features to malfunction or corrupt the blueprint. It is recommended to copy and open it in the new version.",

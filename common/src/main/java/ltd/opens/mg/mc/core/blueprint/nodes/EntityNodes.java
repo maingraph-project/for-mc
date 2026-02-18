@@ -193,5 +193,37 @@ public class EntityNodes {
                 }
                 NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
             });
+
+        // 6. get_look_vector
+        NodeHelper.setup("get_look_vector", "node.mgmc.get_look_vector.name")
+            .category("node_category.mgmc.variable.entity")
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/entity/get_look_vector")
+            .input(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .registerValue((node, portId, ctx) -> {
+                Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
+                if (entityObj instanceof Entity entity) {
+                    net.minecraft.world.phys.Vec3 vec = entity.getLookAngle();
+                    return new XYZ(vec.x, vec.y, vec.z);
+                }
+                return XYZ.ZERO;
+            });
+
+        // 7. get_eye_position
+        NodeHelper.setup("get_eye_position", "node.mgmc.get_eye_position.name")
+            .category("node_category.mgmc.variable.entity")
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/entity/get_eye_position")
+            .input(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .registerValue((node, portId, ctx) -> {
+                Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
+                if (entityObj instanceof Entity entity) {
+                    net.minecraft.world.phys.Vec3 vec = entity.getEyePosition();
+                    return new XYZ(vec.x, vec.y, vec.z);
+                }
+                return XYZ.ZERO;
+            });
     }
 }

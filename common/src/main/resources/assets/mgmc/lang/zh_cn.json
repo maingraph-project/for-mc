@@ -436,5 +436,7 @@
   "node.mgmc.atan.name": "反正切 (Atan)",
   "node.mgmc.atan2.name": "反正切2 (Atan2)",
   "node.mgmc.to_radians.name": "转弧度",
-  "node.mgmc.to_degrees.name": "转角度"
+  "node.mgmc.to_degrees.name": "转角度",
+  "node.mgmc.get_look_vector.name": "获取视线向量",
+  "node.mgmc.get_eye_position.name": "获取眼部位置"
 }
