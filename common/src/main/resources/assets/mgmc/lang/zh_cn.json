@@ -257,6 +257,7 @@
   "node.mgmc.on_entity_spawn.name": "当生物在世界中生成时",
   "node.mgmc.port.block_id": "方块 ID",
   "node.mgmc.port.item_id": "物品 ID",
+  "node.mgmc.port.entity_id": "实体 ID",
   "node.mgmc.port.damage_amount": "伤害数值",
   "node.mgmc.port.attacker_uuid": "攻击者 UUID",
   "node.mgmc.port.victim_uuid": "受害者 UUID",

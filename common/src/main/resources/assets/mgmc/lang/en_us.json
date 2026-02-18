@@ -341,6 +341,7 @@
   "node.mgmc.on_entity_spawn.name": "On Entity Spawn",
   "node.mgmc.port.block_id": "Block ID",
   "node.mgmc.port.item_id": "Item ID",
+  "node.mgmc.port.entity_id": "Entity ID",
   "node.mgmc.port.damage_amount": "Damage Amount",
   "node.mgmc.port.attacker_uuid": "Attacker UUID",
   "node.mgmc.port.victim_uuid": "Victim UUID",
