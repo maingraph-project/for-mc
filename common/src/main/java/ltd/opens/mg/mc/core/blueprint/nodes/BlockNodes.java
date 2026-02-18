@@ -106,13 +106,11 @@ public class BlockNodes {
                         int endY = Math.max((int)min.y(), (int)max.y());
                         int endZ = Math.max((int)min.z(), (int)max.z());
                         
-                        // Limit loop to avoid crash
-                        if ((endX - startX) * (endY - startY) * (endZ - startZ) < 32768) {
-                             for (int x = startX; x <= endX; x++) {
-                                for (int y = startY; y <= endY; y++) {
-                                    for (int z = startZ; z <= endZ; z++) {
-                                        ctx.level.setBlock(new BlockPos(x, y, z), state, 2);
-                                    }
+                        // No limit
+                        for (int x = startX; x <= endX; x++) {
+                            for (int y = startY; y <= endY; y++) {
+                                for (int z = startZ; z <= endZ; z++) {
+                                    ctx.level.setBlock(new BlockPos(x, y, z), state, 2);
                                 }
                             }
                         }
