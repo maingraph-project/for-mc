@@ -25,6 +25,11 @@ public class NodeInitializer {
         RaycastNode.register();
         InventoryNodes.register();
         SpecialNodes.register();
+        BlockNodes.register();
+        WorldNodes.register();
+        EntityNodes.register();
+        VectorNodes.register();
+        TrigNodes.register();
 
         // 发布注册事件，通知外部模块 (如果有必要，使用 Architectury Event)
         // 目前简化为直接注册

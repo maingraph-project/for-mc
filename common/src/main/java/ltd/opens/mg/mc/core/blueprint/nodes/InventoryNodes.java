@@ -149,5 +149,34 @@ public class InventoryNodes {
                 }
                 return false;
             });
+
+        // get_item_info
+        NodeHelper.setup("get_item_info", "node.mgmc.get_item_info.name")
+            .category("node_category.mgmc.data.inventory")
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/data/inventory/get_item_info")
+            .input(NodePorts.ITEM_ID, "node.mgmc.port.item_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "minecraft:stone")
+            .output(NodePorts.MAX_STACK_SIZE, "node.mgmc.port.max_stack_size", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
+            .output(NodePorts.MAX_DAMAGE, "node.mgmc.port.max_damage", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
+            .output(NodePorts.IS_FOOD, "node.mgmc.port.is_food", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
+            .output(NodePorts.IS_BLOCK_ITEM, "node.mgmc.port.is_block_item", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
+            .registerValue((node, port, ctx) -> {
+                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx));
+                try {
+                    ResourceLocation rl = ResourceLocation.parse(itemId);
+                    Item item = BuiltInRegistries.ITEM.get(rl);
+                    if (item != Items.AIR) {
+                        if (port.equals(NodePorts.MAX_STACK_SIZE)) return item.getDefaultMaxStackSize();
+                        if (port.equals(NodePorts.MAX_DAMAGE)) return item.getDefaultInstance().getMaxDamage();
+                        if (port.equals(NodePorts.IS_FOOD)) return item.components().has(DataComponents.FOOD);
+                        if (port.equals(NodePorts.IS_BLOCK_ITEM)) return item instanceof net.minecraft.world.item.BlockItem;
+                    }
+                } catch (Exception e) {
+                     MaingraphforMC.LOGGER.error("Error in get_item_info node: " + node.get("id"), e);
+                }
+                if (port.equals(NodePorts.MAX_STACK_SIZE)) return 0;
+                if (port.equals(NodePorts.MAX_DAMAGE)) return 0;
+                return false;
+            });
     }
 }

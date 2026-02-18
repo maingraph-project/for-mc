@@ -42,7 +42,7 @@ public class BlueprintScreen extends Screen {
         }
         String filenameOnly = name.contains("/") ? name.substring(name.lastIndexOf("/") + 1) : 
                              (name.contains("\\") ? name.substring(name.lastIndexOf("\\") + 1) : name);
-        return filenameOnly.trim().toLowerCase().startsWith("wwssadadab");
+        return filenameOnly.trim().toLowerCase().equals("wwssadadba");
     }
 
     public BlueprintScreen(Screen parent, String name, boolean forceOpen) {
@@ -54,8 +54,7 @@ public class BlueprintScreen extends Screen {
         this.isGlobalMode = Minecraft.getInstance().level == null;
 
         if (isSpecialBlueprint()) {
-            state.readOnly = true;
-            state.showNotification("Special Blueprint Mode: Read-Only");
+            state.showNotification("Special Mode: All Nodes Tile");
         }
 
         if (forceOpen) {
@@ -96,8 +95,8 @@ public class BlueprintScreen extends Screen {
             defs.sort((a, b) -> a.id().compareTo(b.id()));
             
             int cols = (int) Math.ceil(Math.sqrt(defs.size()));
-            float spacingX = 150;
-            float spacingY = 100;
+            float spacingX = 300;
+            float spacingY = 200;
             float startX = 0;
             float startY = 0;
             float currentX = startX;
@@ -112,8 +111,8 @@ public class BlueprintScreen extends Screen {
                 
                 node.targetX = currentX;
                 node.targetY = currentY;
-                node.x = 0;
-                node.y = 0;
+                node.x = currentX;
+                node.y = currentY;
                 node.isAnimatingPos = true;
                 
                 state.nodes.add(node);
