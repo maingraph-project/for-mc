@@ -44,6 +44,12 @@ public class TypeConverter {
         return (int) Math.round(toDouble(value));
     }
 
+    public static long toLong(Object value) {
+        if (value == null) return 0L;
+        if (value instanceof Number) return ((Number) value).longValue();
+        return Math.round(toDouble(value));
+    }
+
     public static XYZ toXYZ(Object value) {
         if (value == null) return XYZ.ZERO;
         if (value instanceof XYZ xyz) return xyz;

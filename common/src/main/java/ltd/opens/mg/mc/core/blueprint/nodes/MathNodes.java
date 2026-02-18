@@ -7,6 +7,8 @@ import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
+import net.minecraft.util.Mth;
 
 import java.util.Random;
 

@@ -117,4 +117,24 @@ public class NodePorts {
     public static final String COUNT = "count";
     public static final String NBT = "nbt";
     public static final String EXCLUDE_SELF = "exclude_self";
+    
+    // 方块/世界/环境
+    public static final String VOLUME = "volume";
+    public static final String PITCH = "pitch";
+    public static final String TIME = "time";
+    public static final String WEATHER = "weather";
+    public static final String DROP = "drop";
+    public static final String SOUND = "sound";
+    public static final String RAIN_LEVEL = "rain_level";
+    public static final String THUNDER_LEVEL = "thunder_level";
+    public static final String SLOT = "slot";
+    public static final String EQUIPMENT_SLOT = "equipment_slot";
+    public static final String MOUNT = "mount";
+    public static final String RIDER = "rider";
+    
+    // 物品信息
+    public static final String MAX_STACK_SIZE = "max_stack_size";
+    public static final String MAX_DAMAGE = "max_damage";
+    public static final String IS_FOOD = "is_food";
+    public static final String IS_BLOCK_ITEM = "is_block_item";
 }
