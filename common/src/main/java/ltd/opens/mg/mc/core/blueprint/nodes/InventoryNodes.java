@@ -178,5 +178,41 @@ public class InventoryNodes {
                 if (port.equals(NodePorts.MAX_DAMAGE)) return 0;
                 return false;
             });
+
+        // get_inventory_item
+        NodeHelper.setup("get_inventory_item", "node.mgmc.get_inventory_item.name")
+            .category("node_category.mgmc.data.inventory")
+            .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/data/inventory/get_inventory_item")
+            .input(NodePorts.PLAYER, "node.mgmc.port.player", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .input(NodePorts.INDEX, "node.mgmc.port.index", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 0)
+            .output(NodePorts.ITEM_ID, "node.mgmc.port.item_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.COUNT, "node.mgmc.port.count", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
+            .output(NodePorts.NBT, "node.mgmc.port.nbt", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .registerValue((node, port, ctx) -> {
+                Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.PLAYER, ctx);
+                int index = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.INDEX, ctx));
+                
+                if (entityObj instanceof ServerPlayer player) {
+                     try {
+                        if (index >= 0 && index < player.getInventory().getContainerSize()) {
+                            ItemStack stack = player.getInventory().getItem(index);
+                            if (port.equals(NodePorts.ITEM_ID)) return BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+                            if (port.equals(NodePorts.COUNT)) return stack.getCount();
+                            if (port.equals(NodePorts.NBT)) {
+                                 CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+                                 return data != null ? data.getUnsafe().toString() : "{}";
+                            }
+                        }
+                    } catch (Exception e) {
+                        MaingraphforMC.LOGGER.error("Error in get_inventory_item node: " + node.get("id"), e);
+                    }
+                }
+                
+                if (port.equals(NodePorts.ITEM_ID)) return "minecraft:air";
+                if (port.equals(NodePorts.COUNT)) return 0;
+                if (port.equals(NodePorts.NBT)) return "{}";
+                return null;
+            });
     }
 }

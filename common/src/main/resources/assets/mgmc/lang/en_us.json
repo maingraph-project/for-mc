@@ -391,6 +391,7 @@
   "node.mgmc.port.max_damage": "Max Damage",
   "node.mgmc.port.is_food": "Is Food",
   "node.mgmc.port.is_block_item": "Is Block Item",
+  "node.mgmc.get_inventory_item.name": "Get Inventory Item",
   "node_category.mgmc.logic.vector": "Vector",
   "node.mgmc.vector_add.name": "Vector Add",
   "node.mgmc.vector_sub.name": "Vector Sub",
