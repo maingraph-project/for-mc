@@ -418,6 +418,7 @@
   "node.mgmc.port.max_damage": "最大耐久",
   "node.mgmc.port.is_food": "是食物",
   "node.mgmc.port.is_block_item": "是方块物品",
+  "node.mgmc.get_inventory_item.name": "获取物品栏物品",
   "node_category.mgmc.logic.vector": "向量",
   "node.mgmc.vector_add.name": "向量加法",
   "node.mgmc.vector_sub.name": "向量减法",
