@@ -412,7 +412,7 @@ public class BlueprintSelectionScreen extends Screen {
                         BlueprintSelectionScreen.this,
                         Component.translatable("gui.mgmc.blueprint_selection.rename").getString(),
                         this.displayName,
-                        true,
+                        false,
                         null,
                         InputModalScreen.Mode.INPUT,
                         newName -> {
@@ -440,7 +440,7 @@ public class BlueprintSelectionScreen extends Screen {
                         BlueprintSelectionScreen.this,
                         Component.translatable("gui.mgmc.blueprint_selection.duplicate").getString(),
                         defaultName,
-                        true,
+                        false,
                         null,
                         InputModalScreen.Mode.INPUT,
                         newName -> {
