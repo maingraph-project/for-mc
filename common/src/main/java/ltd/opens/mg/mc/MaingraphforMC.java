@@ -19,6 +19,7 @@ import net.minecraft.server.MinecraftServer;
 
 import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.event.events.common.LevelEvent;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.utils.EnvExecutor;
 import dev.architectury.utils.Env;
@@ -48,9 +49,14 @@ public class MaingraphforMC {
         LifecycleEvent.SERVER_STARTING.register(MaingraphforMC::onServerStarting);
         LifecycleEvent.SERVER_STOPPING.register(MaingraphforMC::onServerStopping);
         CommandRegistrationEvent.EVENT.register(MaingraphforMC::onRegisterCommands);
+        LevelEvent.UNLOAD.register(level -> {
+            if (!level.isClientSide()) {
+                ltd.opens.mg.mc.core.blueprint.engine.TickScheduler.clear(level);
+            }
+        });
         
-        TickEvent.SERVER_LEVEL_POST.register(level -> {
-             ltd.opens.mg.mc.core.blueprint.engine.TickScheduler.tick(level);
+        TickEvent.SERVER_POST.register(server -> {
+            ltd.opens.mg.mc.core.blueprint.engine.TickScheduler.tick();
         });
 
         EnvExecutor.runInEnv(Env.CLIENT, () -> () -> {
@@ -75,6 +81,7 @@ public class MaingraphforMC {
     }
 
     public static void onServerStopping(MinecraftServer server) {
+        ltd.opens.mg.mc.core.blueprint.engine.TickScheduler.clear();
         if (serverManager != null) {
             serverManager.clearCaches();
         }
