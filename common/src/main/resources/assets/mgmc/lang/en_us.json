@@ -18,6 +18,7 @@
   "gui.mgmc.blueprint_selection.refresh": "Refresh",
   "gui.mgmc.blueprint_selection.rename": "Rename",
   "gui.mgmc.blueprint_selection.duplicate": "Duplicate",
+  "gui.mgmc.blueprint_selection.duplicate_exists": "Blueprint '%s' already exists.",
   "gui.mgmc.blueprint_selection.no_blueprints": "No blueprints found.",
   "gui.mgmc.blueprint_selection.delete": "Delete",
   "gui.mgmc.blueprint_selection.delete_confirm.title": "Confirm Deletion",

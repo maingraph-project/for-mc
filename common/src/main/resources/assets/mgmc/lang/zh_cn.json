@@ -18,6 +18,7 @@
   "gui.mgmc.blueprint_selection.refresh": "刷新",
   "gui.mgmc.blueprint_selection.rename": "重命名",
   "gui.mgmc.blueprint_selection.duplicate": "复制",
+  "gui.mgmc.blueprint_selection.duplicate_exists": "蓝图 '%s' 已存在。",
   "gui.mgmc.blueprint_selection.export": "导出为 .mgmcbp",
   "gui.mgmc.blueprint_selection.import": "导入 .mgmcbp",
   "gui.mgmc.blueprint_selection.export_success": "成功导出到: %s",

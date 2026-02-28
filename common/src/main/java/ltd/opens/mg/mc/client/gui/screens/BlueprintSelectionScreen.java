@@ -434,6 +434,55 @@ public class BlueprintSelectionScreen extends Screen {
                     ));
                 }));
 
+                menuItems.add(new GuiContextMenu.MenuItem(Component.translatable("gui.mgmc.blueprint_selection.duplicate"), () -> {
+                    String defaultName = this.displayName + "_copy";
+                    Minecraft.getInstance().setScreen(new InputModalScreen(
+                        BlueprintSelectionScreen.this,
+                        Component.translatable("gui.mgmc.blueprint_selection.duplicate").getString(),
+                        defaultName,
+                        true,
+                        null,
+                        InputModalScreen.Mode.INPUT,
+                        newName -> {
+                            if (newName == null || newName.trim().isEmpty()) return;
+                            String targetName = newName.trim();
+                            if (!targetName.endsWith(".json")) targetName += ".json";
+
+                            if (targetName.equals(this.fullName) || blueprintExists(targetName)) {
+                                if (Minecraft.getInstance().player != null) {
+                                    Minecraft.getInstance().player.displayClientMessage(
+                                        Component.translatable("gui.mgmc.blueprint_selection.duplicate_exists", targetName),
+                                        false
+                                    );
+                                }
+                                return;
+                            }
+
+                            if (isGlobalMode) {
+                                try {
+                                    java.nio.file.Path src = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir().resolve(this.fullName);
+                                    java.nio.file.Path dst = ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir().resolve(targetName);
+                                    if (java.nio.file.Files.exists(dst)) {
+                                        if (Minecraft.getInstance().player != null) {
+                                            Minecraft.getInstance().player.displayClientMessage(
+                                                Component.translatable("gui.mgmc.blueprint_selection.duplicate_exists", targetName),
+                                                false
+                                            );
+                                        }
+                                        return;
+                                    }
+                                    java.nio.file.Files.copy(src, dst);
+                                    refreshFileList();
+                                } catch (java.io.IOException e) {
+                                    MaingraphforMC.LOGGER.error("Failed to duplicate global blueprint", e);
+                                }
+                            } else {
+                                NetworkService.getInstance().duplicateBlueprint(this.fullName, targetName);
+                            }
+                        }
+                    ));
+                }));
+
                 menuItems.add(new GuiContextMenu.MenuItem(Component.translatable("gui.mgmc.blueprint_selection.delete"), () -> {
                     Minecraft.getInstance().setScreen(new InputModalScreen(
                         BlueprintSelectionScreen.this,
@@ -505,5 +554,13 @@ public class BlueprintSelectionScreen extends Screen {
             }
             return true;
         }
+    }
+
+    private boolean blueprintExists(String fileName) {
+        if (this.list == null) return false;
+        for (BlueprintEntry entry : this.list.children()) {
+            if (entry.fullName.equals(fileName)) return true;
+        }
+        return false;
     }
 }
