@@ -6,9 +6,11 @@ import ltd.opens.mg.mc.MaingraphforMC;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 public class TickScheduler {
 
@@ -31,7 +33,13 @@ public class TickScheduler {
         }
     }
 
-    public static void tick() {
+    public static void tick(net.minecraft.server.MinecraftServer server) {
+        if (server == null) return;
+        Set<net.minecraft.world.level.Level> liveLevels = new HashSet<>();
+        for (var level : server.getAllLevels()) {
+            liveLevels.add(level);
+        }
+
         List<SuspendedTask> toFire = new ArrayList<>();
         
         synchronized (TASKS) {
@@ -42,7 +50,7 @@ public class TickScheduler {
                 var entry = levelIterator.next();
                 var level = entry.getKey();
                 var queue = entry.getValue();
-                if (level == null || level.isClientSide) {
+                if (level == null || level.isClientSide || !liveLevels.contains(level)) {
                     levelIterator.remove();
                     continue;
                 }
