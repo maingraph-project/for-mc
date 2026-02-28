@@ -49,6 +49,7 @@ public class BlueprintMenuHandler {
                 state.pendingConnectionSourceNode = null;
                 state.pendingConnectionSourcePort = null;
                 state.pendingConnectionSourceType = null;
+                state.pendingConnectionSourceCustomTypeId = null;
             }
             return true;
         }
@@ -71,7 +72,7 @@ public class BlueprintMenuHandler {
                 if (state.pendingConnectionFromInput) {
                     // Dragged from input, need output on new node
                     for (GuiNode.NodePort targetPort : node.outputs) {
-                        if (canConnect(sourcePort.type, targetPort.type)) {
+                        if (canConnect(sourcePort.type, sourcePort.customTypeId, targetPort.type, targetPort.customTypeId)) {
                             state.connections.add(new GuiConnection(node, targetPort.id, state.pendingConnectionSourceNode, state.pendingConnectionSourcePort));
                             break;
                         }
@@ -79,7 +80,7 @@ public class BlueprintMenuHandler {
                 } else {
                     // Dragged from output, need input on new node
                     for (GuiNode.NodePort targetPort : node.inputs) {
-                        if (canConnect(sourcePort.type, targetPort.type)) {
+                        if (canConnect(sourcePort.type, sourcePort.customTypeId, targetPort.type, targetPort.customTypeId)) {
                             state.connections.add(new GuiConnection(state.pendingConnectionSourceNode, state.pendingConnectionSourcePort, node, targetPort.id));
                             break;
                         }
@@ -90,6 +91,7 @@ public class BlueprintMenuHandler {
             state.pendingConnectionSourceNode = null;
             state.pendingConnectionSourcePort = null;
             state.pendingConnectionSourceType = null;
+            state.pendingConnectionSourceCustomTypeId = null;
         }
 
         state.markDirty();
@@ -97,9 +99,17 @@ public class BlueprintMenuHandler {
         state.menu.reset();
     }
 
-    private boolean canConnect(ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType type1, ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType type2) {
+    private boolean canConnect(ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType type1, String customTypeId1, ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType type2, String customTypeId2) {
         if (type1 == ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType.EXEC || type2 == ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType.EXEC) {
             return type1 == type2;
+        }
+        boolean hasCustom1 = customTypeId1 != null && !customTypeId1.isEmpty();
+        boolean hasCustom2 = customTypeId2 != null && !customTypeId2.isEmpty();
+        if (hasCustom1 || hasCustom2) {
+            if (hasCustom1 && hasCustom2) {
+                return customTypeId1.equals(customTypeId2);
+            }
+            return (hasCustom1 && type2 == ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType.ANY) || (hasCustom2 && type1 == ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType.ANY);
         }
         if (type1 == ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType.ANY || type2 == ltd.opens.mg.mc.core.blueprint.NodeDefinition.PortType.ANY) {
             return true;
@@ -345,6 +355,7 @@ public class BlueprintMenuHandler {
                 state.pendingConnectionSourceNode = null;
                 state.pendingConnectionSourcePort = null;
                 state.pendingConnectionSourceType = null;
+                state.pendingConnectionSourceCustomTypeId = null;
                 return true;
             }
         }

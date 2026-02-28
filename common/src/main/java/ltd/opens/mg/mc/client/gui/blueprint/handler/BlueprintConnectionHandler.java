@@ -52,9 +52,17 @@ public class BlueprintConnectionHandler {
         return false;
     }
 
-    private boolean canConnect(NodeDefinition.PortType type1, NodeDefinition.PortType type2) {
+    private boolean canConnect(NodeDefinition.PortType type1, String customTypeId1, NodeDefinition.PortType type2, String customTypeId2) {
         if (type1 == NodeDefinition.PortType.EXEC || type2 == NodeDefinition.PortType.EXEC) {
             return type1 == type2;
+        }
+        boolean hasCustom1 = customTypeId1 != null && !customTypeId1.isEmpty();
+        boolean hasCustom2 = customTypeId2 != null && !customTypeId2.isEmpty();
+        if (hasCustom1 || hasCustom2) {
+            if (hasCustom1 && hasCustom2) {
+                return customTypeId1.equals(customTypeId2);
+            }
+            return (hasCustom1 && type2 == NodeDefinition.PortType.ANY) || (hasCustom2 && type1 == NodeDefinition.PortType.ANY);
         }
         if (type1 == NodeDefinition.PortType.ANY || type2 == NodeDefinition.PortType.ANY) {
             return true;
@@ -77,7 +85,7 @@ public class BlueprintConnectionHandler {
                         GuiNode.NodePort targetPort = node.inputs.get(i);
                         float[] pos = node.getPortPosition(i, true);
                         if (Math.abs(worldMouseX - pos[0]) < 10 && Math.abs(worldMouseY - pos[1]) < 10) {
-                            if (startPort != null && canConnect(startPort.type, targetPort.type)) {
+                            if (startPort != null && canConnect(startPort.type, startPort.customTypeId, targetPort.type, targetPort.customTypeId)) {
                                 state.pushHistory();
                                 // Remove existing connections to this input if it's not EXEC
                                 if (targetPort.type != NodeDefinition.PortType.EXEC) {
@@ -101,7 +109,7 @@ public class BlueprintConnectionHandler {
                         GuiNode.NodePort targetPort = node.outputs.get(i);
                         float[] pos = node.getPortPosition(i, false);
                         if (Math.abs(worldMouseX - pos[0]) < 10 && Math.abs(worldMouseY - pos[1]) < 10) {
-                            if (startPort != null && canConnect(startPort.type, targetPort.type)) {
+                            if (startPort != null && canConnect(startPort.type, startPort.customTypeId, targetPort.type, targetPort.customTypeId)) {
                                 state.pushHistory();
                                 // Remove existing connections to the start input if it's not EXEC
                                 if (startPort.type != NodeDefinition.PortType.EXEC) {
@@ -131,11 +139,12 @@ public class BlueprintConnectionHandler {
                 GuiNode.NodePort port = state.connectionStartNode.getPortByName(state.connectionStartPort, state.isConnectionFromInput);
                 if (port != null) {
                     state.pendingConnectionSourceType = port.type;
+                    state.pendingConnectionSourceCustomTypeId = port.customTypeId;
                     state.showNodeMenu = true;
                     state.menuX = state.viewport.toScreenX((float)worldMouseX);
                     state.menuY = state.viewport.toScreenY((float)worldMouseY);
                     state.menu.reset();
-                    state.menu.setFilter(port.type, !state.isConnectionFromInput);
+                    state.menu.setFilter(port.type, port.customTypeId, !state.isConnectionFromInput);
                 }
             }
 

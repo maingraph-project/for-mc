@@ -102,6 +102,7 @@ public class BlueprintState {
     public String pendingConnectionSourcePort = null;
     public boolean pendingConnectionFromInput = false;
     public NodeDefinition.PortType pendingConnectionSourceType = null;
+    public String pendingConnectionSourceCustomTypeId = null;
 
     public void showNotification(String message) {
         this.notificationMessage = message;

@@ -162,9 +162,9 @@ public class BlueprintMenuInputHandler {
             if (menu.getHoveredCategory() != null) {
                 List<NodeDefinition> catNodes = BlueprintCategoryManager.getNodesInCategory(menu.getHoveredCategory());
                 // Filter catNodes for submenu too
-                if (menu.getFilterType() != null) {
+                if (menu.getFilterType() != null || menu.getFilterCustomTypeId() != null) {
                     catNodes = catNodes.stream()
-                        .filter(def -> isNodeCompatible(def, menu.getFilterType(), menu.isLookingForInput()))
+                        .filter(def -> isNodeCompatible(def, menu.getFilterType(), menu.getFilterCustomTypeId(), menu.isLookingForInput()))
                         .collect(java.util.stream.Collectors.toList());
                 }
                 
@@ -184,19 +184,27 @@ public class BlueprintMenuInputHandler {
         return null;
     }
 
-    private static boolean isNodeCompatible(NodeDefinition def, NodeDefinition.PortType filterType, boolean lookingForInput) {
+    private static boolean isNodeCompatible(NodeDefinition def, NodeDefinition.PortType filterType, String filterCustomTypeId, boolean lookingForInput) {
         List<NodeDefinition.PortDefinition> ports = lookingForInput ? def.inputs() : def.outputs();
         for (NodeDefinition.PortDefinition port : ports) {
-            if (canConnect(filterType, port.type())) {
+            if (canConnect(filterType, filterCustomTypeId, port.type(), port.customTypeId())) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean canConnect(NodeDefinition.PortType type1, NodeDefinition.PortType type2) {
+    private static boolean canConnect(NodeDefinition.PortType type1, String customTypeId1, NodeDefinition.PortType type2, String customTypeId2) {
         if (type1 == NodeDefinition.PortType.EXEC || type2 == NodeDefinition.PortType.EXEC) {
             return type1 == type2;
+        }
+        boolean hasCustom1 = customTypeId1 != null && !customTypeId1.isEmpty();
+        boolean hasCustom2 = customTypeId2 != null && !customTypeId2.isEmpty();
+        if (hasCustom1 || hasCustom2) {
+            if (hasCustom1 && hasCustom2) {
+                return customTypeId1.equals(customTypeId2);
+            }
+            return (hasCustom1 && type2 == NodeDefinition.PortType.ANY) || (hasCustom2 && type1 == NodeDefinition.PortType.ANY);
         }
         if (type1 == NodeDefinition.PortType.ANY || type2 == NodeDefinition.PortType.ANY) {
             return true;

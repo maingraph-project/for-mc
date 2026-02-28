@@ -232,7 +232,7 @@ public class BlueprintNodeHandler {
                      if (newText != null && !newText.isEmpty()) {
                          if (node.getPortByName(newText, false) == null) {
                              state.pushHistory();
-                             node.addOutput(newText, newText, NodeDefinition.PortType.EXEC, 0xFFFFFFFF);
+                             node.addOutput(newText, newText, NodeDefinition.PortType.EXEC, 0xFFFFFFFF, null);
                              state.markDirty();
                          }
                      }
@@ -252,7 +252,7 @@ public class BlueprintNodeHandler {
             }
             int nextIndex = maxIndex + 1;
             state.pushHistory();
-            node.addInput("input_" + nextIndex, "input " + nextIndex, NodeDefinition.PortType.STRING, 0xFFBBBBBB, true, "", null);
+            node.addInput("input_" + nextIndex, "input " + nextIndex, NodeDefinition.PortType.STRING, 0xFFBBBBBB, true, "", null, null);
             state.markDirty();
         }
     }

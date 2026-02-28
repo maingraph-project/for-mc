@@ -65,11 +65,11 @@ public class BlueprintSearchManager {
     }
 
     public static List<SearchResult> performSearch(String searchQuery) {
-        return performSearch(searchQuery, null, false);
+        return performSearch(searchQuery, null, null, false);
     }
 
-    public static List<SearchResult> performSearch(String searchQuery, NodeDefinition.PortType filterType, boolean lookingForInput) {
-        if (searchQuery.isEmpty() && filterType == null) {
+    public static List<SearchResult> performSearch(String searchQuery, NodeDefinition.PortType filterType, String filterCustomTypeId, boolean lookingForInput) {
+        if (searchQuery.isEmpty() && filterType == null && filterCustomTypeId == null) {
             return new ArrayList<>();
         }
 
@@ -80,11 +80,11 @@ public class BlueprintSearchManager {
         // 1. Process Nodes
         for (NodeDefinition def : NodeRegistry.getAllDefinitions()) {
             // Filter by port compatibility if filterType is provided
-            if (filterType != null) {
+            if (filterType != null || filterCustomTypeId != null) {
                 boolean hasCompatiblePort = false;
                 List<NodeDefinition.PortDefinition> ports = lookingForInput ? def.inputs() : def.outputs();
                 for (NodeDefinition.PortDefinition port : ports) {
-                    if (canConnect(filterType, port.type())) {
+                    if (canConnect(filterType, filterCustomTypeId, port.type(), port.customTypeId())) {
                         hasCompatiblePort = true;
                         break;
                     }
@@ -104,7 +104,7 @@ public class BlueprintSearchManager {
             int score = calculateScore(terms, fullQuery, localizedName, rawName, localizedCat, rawCat, locPath, rawPath, false, res, def);
             
             // If query is empty but we have a filter, everything that passed the filter gets a base score
-            if (searchQuery.isEmpty() && filterType != null) {
+            if (searchQuery.isEmpty() && (filterType != null || filterCustomTypeId != null)) {
                 score = 1;
             }
 
@@ -115,7 +115,7 @@ public class BlueprintSearchManager {
         }
 
         // 2. Process Categories (Only if not filtering by port type)
-        if (filterType == null) {
+        if (filterType == null && filterCustomTypeId == null) {
             Set<String> categories = new HashSet<>();
             for (NodeDefinition def : NodeRegistry.getAllDefinitions()) {
                 String cat = def.category();
@@ -156,9 +156,17 @@ public class BlueprintSearchManager {
         return results;
     }
 
-    private static boolean canConnect(NodeDefinition.PortType type1, NodeDefinition.PortType type2) {
+    private static boolean canConnect(NodeDefinition.PortType type1, String customTypeId1, NodeDefinition.PortType type2, String customTypeId2) {
         if (type1 == NodeDefinition.PortType.EXEC || type2 == NodeDefinition.PortType.EXEC) {
             return type1 == type2;
+        }
+        boolean hasCustom1 = customTypeId1 != null && !customTypeId1.isEmpty();
+        boolean hasCustom2 = customTypeId2 != null && !customTypeId2.isEmpty();
+        if (hasCustom1 || hasCustom2) {
+            if (hasCustom1 && hasCustom2) {
+                return customTypeId1.equals(customTypeId2);
+            }
+            return (hasCustom1 && type2 == NodeDefinition.PortType.ANY) || (hasCustom2 && type1 == NodeDefinition.PortType.ANY);
         }
         if (type1 == NodeDefinition.PortType.ANY || type2 == NodeDefinition.PortType.ANY) {
             return true;

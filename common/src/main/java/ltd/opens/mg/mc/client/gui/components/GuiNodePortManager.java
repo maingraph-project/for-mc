@@ -5,13 +5,13 @@ import java.util.List;
 
 public class GuiNodePortManager {
 
-    public static void addInput(GuiNode node, String id, String displayName, NodeDefinition.PortType type, int color, boolean hasInput, Object defaultValue, String[] options) {
-        node.inputs.add(new GuiNode.NodePort(id, displayName, type, color, true, hasInput, defaultValue, options));
+    public static void addInput(GuiNode node, String id, String displayName, NodeDefinition.PortType type, int color, boolean hasInput, Object defaultValue, String[] options, String customTypeId) {
+        node.inputs.add(new GuiNode.NodePort(id, displayName, type, color, true, hasInput, defaultValue, options, customTypeId));
         node.markSizeDirty();
     }
 
-    public static void addOutput(GuiNode node, String id, String displayName, NodeDefinition.PortType type, int color) {
-        node.outputs.add(new GuiNode.NodePort(id, displayName, type, color, false, false, null, null));
+    public static void addOutput(GuiNode node, String id, String displayName, NodeDefinition.PortType type, int color, String customTypeId) {
+        node.outputs.add(new GuiNode.NodePort(id, displayName, type, color, false, false, null, null, customTypeId));
         node.markSizeDirty();
     }
 

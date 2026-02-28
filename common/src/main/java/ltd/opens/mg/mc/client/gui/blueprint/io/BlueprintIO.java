@@ -88,6 +88,9 @@ public class BlueprintIO {
                         pObj.addProperty("id", port.id);
                         pObj.addProperty("name", port.displayName);
                         pObj.addProperty("type", port.type.name());
+                        if (port.customTypeId != null && !port.customTypeId.isEmpty()) {
+                            pObj.addProperty("customTypeId", port.customTypeId);
+                        }
                         dynamicOutputs.add(pObj);
                     }
                 }
@@ -111,6 +114,9 @@ public class BlueprintIO {
                         pObj.addProperty("name", port.displayName);
                         pObj.addProperty("type", port.type.name());
                         pObj.addProperty("hasInput", port.hasInput);
+                        if (port.customTypeId != null && !port.customTypeId.isEmpty()) {
+                            pObj.addProperty("customTypeId", port.customTypeId);
+                        }
                         dynamicInputs.add(pObj);
                     }
                 }
@@ -227,13 +233,23 @@ public class BlueprintIO {
                         if (obj.has("dynamicOutputs")) {
                             for (JsonElement p : obj.getAsJsonArray("dynamicOutputs")) {
                                 JsonObject pObj = p.getAsJsonObject();
-                                builder.addOutput(pObj.get("id").getAsString(), pObj.get("name").getAsString(), safeParsePortType(pObj.get("type").getAsString()), 0xFFFFFFFF);
+                                String customTypeId = pObj.has("customTypeId") ? pObj.get("customTypeId").getAsString() : null;
+                                if (customTypeId != null && !customTypeId.isEmpty()) {
+                                    builder.addCustomOutput(pObj.get("id").getAsString(), pObj.get("name").getAsString(), customTypeId, 0xFFFFFFFF);
+                                } else {
+                                    builder.addOutput(pObj.get("id").getAsString(), pObj.get("name").getAsString(), safeParsePortType(pObj.get("type").getAsString()), 0xFFFFFFFF);
+                                }
                             }
                         }
                         if (obj.has("dynamicInputs")) {
                             for (JsonElement p : obj.getAsJsonArray("dynamicInputs")) {
                                 JsonObject pObj = p.getAsJsonObject();
-                                builder.addInput(pObj.get("id").getAsString(), pObj.get("name").getAsString(), safeParsePortType(pObj.get("type").getAsString()), 0xFFFFFFFF);
+                                String customTypeId = pObj.has("customTypeId") ? pObj.get("customTypeId").getAsString() : null;
+                                if (customTypeId != null && !customTypeId.isEmpty()) {
+                                    builder.addCustomInput(pObj.get("id").getAsString(), pObj.get("name").getAsString(), customTypeId, 0xFFFFFFFF, true, "");
+                                } else {
+                                    builder.addInput(pObj.get("id").getAsString(), pObj.get("name").getAsString(), safeParsePortType(pObj.get("type").getAsString()), 0xFFFFFFFF);
+                                }
                             }
                         }
                         def = builder.build();
@@ -253,7 +269,8 @@ public class BlueprintIO {
                                     pObj.get("id").getAsString(),
                                     pObj.get("name").getAsString(),
                                     portType,
-                                    getPortColor(portType)
+                                    getPortColor(portType),
+                                    pObj.has("customTypeId") ? pObj.get("customTypeId").getAsString() : null
                                 );
                             }
                         }
@@ -268,7 +285,8 @@ public class BlueprintIO {
                                     getPortColor(portType),
                                     pObj.has("hasInput") && pObj.get("hasInput").getAsBoolean(),
                                     "",
-                                    null
+                                    null,
+                                    pObj.has("customTypeId") ? pObj.get("customTypeId").getAsString() : null
                                 );
                             }
                         }
@@ -327,5 +345,3 @@ public class BlueprintIO {
         }
     }
 }
-
-

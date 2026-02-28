@@ -52,7 +52,7 @@ public record NodeDefinition(
         }
 
         public Builder addInput(String id, String displayName, PortType type, int color) {
-            inputs.add(new PortDefinition(id, displayName, type, color, false, null, null));
+            inputs.add(new PortDefinition(id, displayName, type, color, false, null, null, null));
             return this;
         }
 
@@ -61,7 +61,7 @@ public record NodeDefinition(
         }
 
         public Builder addInput(String id, String displayName, PortType type, int color, boolean hasInput, Object defaultValue) {
-            inputs.add(new PortDefinition(id, displayName, type, color, hasInput, defaultValue, null));
+            inputs.add(new PortDefinition(id, displayName, type, color, hasInput, defaultValue, null, null));
             return this;
         }
 
@@ -70,7 +70,7 @@ public record NodeDefinition(
         }
 
         public Builder addInput(String id, String displayName, PortType type, int color, boolean hasInput, Object defaultValue, String[] options) {
-            inputs.add(new PortDefinition(id, displayName, type, color, hasInput, defaultValue, options));
+            inputs.add(new PortDefinition(id, displayName, type, color, hasInput, defaultValue, options, null));
             return this;
         }
 
@@ -79,7 +79,17 @@ public record NodeDefinition(
         }
 
         public Builder addOutput(String id, String displayName, PortType type, int color) {
-            outputs.add(new PortDefinition(id, displayName, type, color, false, null, null));
+            outputs.add(new PortDefinition(id, displayName, type, color, false, null, null, null));
+            return this;
+        }
+
+        public Builder addCustomInput(String id, String displayName, String customTypeId, int color, boolean hasInput, Object defaultValue) {
+            inputs.add(new PortDefinition(id, displayName, PortType.ANY, color, hasInput, defaultValue, null, customTypeId));
+            return this;
+        }
+
+        public Builder addCustomOutput(String id, String displayName, String customTypeId, int color) {
+            outputs.add(new PortDefinition(id, displayName, PortType.ANY, color, false, null, null, customTypeId));
             return this;
         }
 
@@ -100,7 +110,7 @@ public record NodeDefinition(
         }
     }
 
-    public record PortDefinition(String id, String displayName, PortType type, int color, boolean hasInput, Object defaultValue, String[] options) {}
+    public record PortDefinition(String id, String displayName, PortType type, int color, boolean hasInput, Object defaultValue, String[] options, String customTypeId) {}
 
     public enum PortType {
         EXEC, STRING, FLOAT, INT, BOOLEAN, OBJECT, LIST, UUID, ENUM, ANY, XYZ, ENTITY

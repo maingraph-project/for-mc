@@ -41,19 +41,19 @@ public class GuiNode {
         this.color = def.color();
         
         for (NodeDefinition.PortDefinition p : def.inputs()) {
-            addInput(p.id(), p.displayName(), p.type(), p.color(), p.hasInput(), p.defaultValue(), p.options());
+            addInput(p.id(), p.displayName(), p.type(), p.color(), p.hasInput(), p.defaultValue(), p.options(), p.customTypeId());
         }
         for (NodeDefinition.PortDefinition p : def.outputs()) {
-            addOutput(p.id(), p.displayName(), p.type(), p.color());
+            addOutput(p.id(), p.displayName(), p.type(), p.color(), p.customTypeId());
         }
     }
 
-    public void addInput(String id, String displayName, NodeDefinition.PortType type, int color, boolean hasInput, Object defaultValue, String[] options) {
-        GuiNodePortManager.addInput(this, id, displayName, type, color, hasInput, defaultValue, options);
+    public void addInput(String id, String displayName, NodeDefinition.PortType type, int color, boolean hasInput, Object defaultValue, String[] options, String customTypeId) {
+        GuiNodePortManager.addInput(this, id, displayName, type, color, hasInput, defaultValue, options, customTypeId);
     }
 
-    public void addOutput(String id, String displayName, NodeDefinition.PortType type, int color) {
-        GuiNodePortManager.addOutput(this, id, displayName, type, color);
+    public void addOutput(String id, String displayName, NodeDefinition.PortType type, int color, String customTypeId) {
+        GuiNodePortManager.addOutput(this, id, displayName, type, color, customTypeId);
     }
 
     public void markSizeDirty() {
@@ -108,17 +108,19 @@ public class GuiNode {
         public String displayName;
         public NodeDefinition.PortType type;
         public int color;
+        public String customTypeId;
         public boolean isInput;
         public boolean hasInput;
         public Object defaultValue;
         public String[] options;
         public boolean isConnected = false;
 
-        public NodePort(String id, String displayName, NodeDefinition.PortType type, int color, boolean isInput, boolean hasInput, Object defaultValue, String[] options) {
+        public NodePort(String id, String displayName, NodeDefinition.PortType type, int color, boolean isInput, boolean hasInput, Object defaultValue, String[] options, String customTypeId) {
             this.id = id;
             this.displayName = displayName;
             this.type = type;
             this.color = color;
+            this.customTypeId = customTypeId;
             this.isInput = isInput;
             this.hasInput = hasInput;
             this.defaultValue = defaultValue;

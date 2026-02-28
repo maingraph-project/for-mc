@@ -115,6 +115,26 @@ public class NodeHelper {
     }
 
     /**
+     * 添加自定义类型输入端口（端口类型仍为 ANY，但带 customTypeId）
+     */
+    public NodeHelper customInput(String id, String displayNameKey, String customTypeId, int color, boolean hasInput, Object defaultValue) {
+        builder.addCustomInput(id, displayNameKey, customTypeId, color, hasInput, defaultValue);
+        return this;
+    }
+
+    public NodeHelper customInput(String id, String displayNameKey, String customTypeId, int color, Object defaultValue) {
+        return customInput(id, displayNameKey, customTypeId, color, true, defaultValue);
+    }
+
+    /**
+     * 添加自定义类型输出端口（端口类型仍为 ANY，但带 customTypeId）
+     */
+    public NodeHelper customOutput(String id, String displayNameKey, String customTypeId, int color) {
+        builder.addCustomOutput(id, displayNameKey, customTypeId, color);
+        return this;
+    }
+
+    /**
      * 添加执行输入端口 (默认 ID 为 "exec")
      */
     public NodeHelper execIn() {

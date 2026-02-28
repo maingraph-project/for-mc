@@ -30,13 +30,15 @@ public class BlueprintMenu {
     private String hoveredCategory = null;
     private String currentPath = BlueprintCategoryManager.ROOT_PATH;
     private NodeDefinition.PortType filterType = null;
+    private String filterCustomTypeId = null;
     private boolean lookingForInput = false;
 
     private List<String> filteredSubCategories = new ArrayList<>();
     private List<NodeDefinition> filteredDirectNodes = new ArrayList<>();
 
-    public void setFilter(NodeDefinition.PortType type, boolean lookingForInput) {
+    public void setFilter(NodeDefinition.PortType type, String customTypeId, boolean lookingForInput) {
         this.filterType = type;
+        this.filterCustomTypeId = (customTypeId != null && !customTypeId.isEmpty()) ? customTypeId : null;
         this.lookingForInput = lookingForInput;
         updateSearch();
     }
@@ -76,6 +78,7 @@ public class BlueprintMenu {
         updateSearch();
     }
     public NodeDefinition.PortType getFilterType() { return filterType; }
+    public String getFilterCustomTypeId() { return filterCustomTypeId; }
     public boolean isLookingForInput() { return lookingForInput; }
 
      public void init(Font font) {
@@ -105,6 +108,7 @@ public class BlueprintMenu {
         hoveredCategory = null;
         currentPath = BlueprintCategoryManager.ROOT_PATH;
         filterType = null;
+        filterCustomTypeId = null;
         lookingForInput = false;
         
         // Ensure data is refreshed from registry
@@ -113,7 +117,7 @@ public class BlueprintMenu {
 
     public void updateSearch() {
         if (!getSearchQuery().isEmpty()) {
-            filteredResults = BlueprintSearchManager.performSearch(getSearchQuery(), filterType, lookingForInput);
+            filteredResults = BlueprintSearchManager.performSearch(getSearchQuery(), filterType, filterCustomTypeId, lookingForInput);
             if (!filteredResults.isEmpty()) {
                 selectedIndex = 0;
             } else {
@@ -121,7 +125,7 @@ public class BlueprintMenu {
             }
         } else {
             BlueprintCategoryManager.CategoryData rawData = BlueprintCategoryManager.getCategoryData(currentPath);
-            if (filterType != null) {
+            if (filterType != null || filterCustomTypeId != null) {
                 filteredDirectNodes = rawData.directNodes.stream()
                     .filter(this::isNodeCompatible)
                     .collect(java.util.stream.Collectors.toList());
@@ -254,7 +258,7 @@ public class BlueprintMenu {
         int height = displayCount * itemHeight + 6;
         
         // Add extra height for the "Filter Bar" if active
-        int filterBarHeight = (filterType != null) ? 14 : 0;
+        int filterBarHeight = (filterType != null || filterCustomTypeId != null) ? 14 : 0;
         
         if (contentY + height + pathBarHeight + filterBarHeight > screenHeight) {
             contentY -= (height + pathBarHeight + filterBarHeight + 27);
@@ -262,8 +266,9 @@ public class BlueprintMenu {
         
         BlueprintMenuRenderer.renderBackground(guiGraphics, x, contentY, width, height + pathBarHeight + filterBarHeight);
 
-        if (filterType != null) {
-            String filterText = "Filtering: " + filterType.name() + (lookingForInput ? " Input" : " Output");
+        if (filterType != null || filterCustomTypeId != null) {
+            String filterLabel = (filterCustomTypeId != null) ? filterCustomTypeId : filterType.name();
+            String filterText = "Filtering: " + filterLabel + (lookingForInput ? " Input" : " Output");
             guiGraphics.fill(x + 1, contentY + 1, x + width - 1, contentY + 13, 0x4400FF00);
             guiGraphics.drawString(font, filterText, x + 6, contentY + 3, 0xFF55FF55, false);
             contentY += 13;
@@ -331,10 +336,10 @@ public class BlueprintMenu {
     }
 
     private boolean isNodeCompatible(NodeDefinition def) {
-        if (filterType == null) return true;
+        if (filterType == null && filterCustomTypeId == null) return true;
         List<NodeDefinition.PortDefinition> ports = lookingForInput ? def.inputs() : def.outputs();
         for (NodeDefinition.PortDefinition port : ports) {
-            if (canConnect(filterType, port.type())) {
+            if (canConnect(filterType, filterCustomTypeId, port.type(), port.customTypeId())) {
                 return true;
             }
         }
@@ -342,7 +347,7 @@ public class BlueprintMenu {
     }
 
     private boolean categoryHasCompatibleNodes(String categoryPath) {
-        if (filterType == null) return true;
+        if (filterType == null && filterCustomTypeId == null) return true;
         List<NodeDefinition> allNodesInCat = BlueprintCategoryManager.getNodesInCategory(categoryPath);
         for (NodeDefinition def : allNodesInCat) {
             if (isNodeCompatible(def)) return true;
@@ -350,9 +355,17 @@ public class BlueprintMenu {
         return false;
     }
 
-    private boolean canConnect(NodeDefinition.PortType type1, NodeDefinition.PortType type2) {
+    private boolean canConnect(NodeDefinition.PortType type1, String customTypeId1, NodeDefinition.PortType type2, String customTypeId2) {
         if (type1 == NodeDefinition.PortType.EXEC || type2 == NodeDefinition.PortType.EXEC) {
             return type1 == type2;
+        }
+        boolean hasCustom1 = customTypeId1 != null && !customTypeId1.isEmpty();
+        boolean hasCustom2 = customTypeId2 != null && !customTypeId2.isEmpty();
+        if (hasCustom1 || hasCustom2) {
+            if (hasCustom1 && hasCustom2) {
+                return customTypeId1.equals(customTypeId2);
+            }
+            return (hasCustom1 && type2 == NodeDefinition.PortType.ANY) || (hasCustom2 && type1 == NodeDefinition.PortType.ANY);
         }
         if (type1 == NodeDefinition.PortType.ANY || type2 == NodeDefinition.PortType.ANY) {
             return true;
@@ -372,7 +385,7 @@ public class BlueprintMenu {
                 hoveredCategory = null;
             } else {
                 List<NodeDefinition> catNodes = BlueprintCategoryManager.getNodesInCategory(hoveredCategory);
-                if (filterType != null) {
+                if (filterType != null || filterCustomTypeId != null) {
                     catNodes = catNodes.stream()
                         .filter(this::isNodeCompatible)
                         .collect(java.util.stream.Collectors.toList());
@@ -398,7 +411,7 @@ public class BlueprintMenu {
 
     private void renderSubmenu(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, int x, int width, int contentY, int itemHeight, int maxVisibleItems, int screenWidth, int screenHeight) {
         List<NodeDefinition> catNodes = BlueprintCategoryManager.getNodesInCategory(hoveredCategory);
-        if (filterType != null) {
+        if (filterType != null || filterCustomTypeId != null) {
             catNodes = catNodes.stream()
                 .filter(this::isNodeCompatible)
                 .collect(java.util.stream.Collectors.toList());
