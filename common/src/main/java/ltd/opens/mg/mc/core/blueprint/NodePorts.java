@@ -25,6 +25,7 @@ public class NodePorts {
     public static final String RESULT = "result";
     public static final String IGNORE_TYPE = "ignore_type";
     public static final String STRICT_TYPE = "strict_type";
+    public static final String LOOSE_TYPE = "loose_type";
     public static final String VALUE = "value";
     public static final String CONDITION = "condition";
     

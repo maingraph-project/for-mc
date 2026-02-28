@@ -186,6 +186,7 @@
   "node.mgmc.compare_any.name": "Equal (Any)",
   "node.mgmc.compare_any.port.ignore_type": "Equal (Ignore Type)",
   "node.mgmc.compare_any.port.strict_type": "Equal (Strict)",
+  "node.mgmc.compare_any.port.loose_type": "Equal (Loose)",
   "node.mgmc.compare_gt.name": "Greater Than (>)",
   "node.mgmc.compare_gte.name": "Greater Equal (>=)",
   "node.mgmc.compare_lt.name": "Less Than (<)",

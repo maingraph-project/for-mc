@@ -193,6 +193,7 @@
   "node.mgmc.compare_any.name": "相等 (任意类型)",
   "node.mgmc.compare_any.port.ignore_type": "相等（忽略类型）",
   "node.mgmc.compare_any.port.strict_type": "相等（严格类型）",
+  "node.mgmc.compare_any.port.loose_type": "相等（最宽松）",
   "node.mgmc.compare_gt.name": "大于 (>)",
   "node.mgmc.compare_gte.name": "大于等于 (>=)",
   "node.mgmc.compare_lt.name": "小于 (<)",
