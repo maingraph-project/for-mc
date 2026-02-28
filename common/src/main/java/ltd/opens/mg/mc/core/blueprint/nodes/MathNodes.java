@@ -60,6 +60,22 @@ public class MathNodes {
             .mathInputs(1.0, 2.0)
             .registerMathOp(Math::pow);
 
+        NodeHelper.setup("eval_expr", "node.mgmc.eval_expr.name")
+            .category("node_category.mgmc.logic.math")
+            .color(NodeThemes.COLOR_NODE_MATH)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/math/eval_expr")
+            .input(NodePorts.STRING, "node.mgmc.eval_expr.port.expression", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
+            .output(NodePorts.RESULT, "node.mgmc.port.output", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .registerValue((node, portId, ctx) -> {
+                String expr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx), ctx);
+                try {
+                    return evalExpression(expr);
+                } catch (IllegalArgumentException e) {
+                    ltd.opens.mg.mc.MaingraphforMC.LOGGER.warn("Invalid expression '{}': {}", expr, e.getMessage());
+                    return 0.0;
+                }
+            });
+
         NodeHelper.setup("abs_float", "node.mgmc.abs_float.name")
             .category("node_category.mgmc.logic.math")
             .color(NodeThemes.COLOR_NODE_MATH)
@@ -149,5 +165,138 @@ public class MathNodes {
                 double chance = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.CHANCE, ctx));
                 return RANDOM.nextDouble() < chance;
             });
+    }
+
+    private static double evalExpression(String expr) {
+        if (expr == null || expr.trim().isEmpty()) return 0.0;
+        List<String> output = new java.util.ArrayList<>();
+        java.util.ArrayDeque<String> ops = new java.util.ArrayDeque<>();
+
+        int i = 0;
+        boolean expectOperand = true;
+        while (i < expr.length()) {
+            char c = expr.charAt(i);
+            if (Character.isWhitespace(c)) {
+                i++;
+                continue;
+            }
+            if (c == '(') {
+                ops.push("(");
+                i++;
+                expectOperand = true;
+                continue;
+            }
+            if (c == ')') {
+                while (!ops.isEmpty() && !"(".equals(ops.peek())) {
+                    output.add(ops.pop());
+                }
+                if (ops.isEmpty()) throw new IllegalArgumentException("Mismatched parentheses");
+                ops.pop();
+                i++;
+                expectOperand = false;
+                continue;
+            }
+
+            if (isOperatorChar(c)) {
+                String op = String.valueOf(c);
+                if ((c == '+' || c == '-') && expectOperand) {
+                    if (c == '-') {
+                        output.add("0");
+                        op = "-";
+                    } else {
+                        i++;
+                        continue;
+                    }
+                }
+                while (!ops.isEmpty() && isOperator(ops.peek())) {
+                    String top = ops.peek();
+                    if ((isRightAssociative(op) && precedence(op) < precedence(top))
+                        || (!isRightAssociative(op) && precedence(op) <= precedence(top))) {
+                        output.add(ops.pop());
+                    } else {
+                        break;
+                    }
+                }
+                ops.push(op);
+                i++;
+                expectOperand = true;
+                continue;
+            }
+
+            if (Character.isDigit(c) || c == '.') {
+                int start = i;
+                i++;
+                while (i < expr.length()) {
+                    char ch = expr.charAt(i);
+                    if (Character.isDigit(ch) || ch == '.') {
+                        i++;
+                        continue;
+                    }
+                    break;
+                }
+                output.add(expr.substring(start, i));
+                expectOperand = false;
+                continue;
+            }
+
+            throw new IllegalArgumentException("Unexpected character: " + c);
+        }
+
+        while (!ops.isEmpty()) {
+            String op = ops.pop();
+            if ("(".equals(op) || ")".equals(op)) throw new IllegalArgumentException("Mismatched parentheses");
+            output.add(op);
+        }
+
+        java.util.ArrayDeque<Double> stack = new java.util.ArrayDeque<>();
+        for (String token : output) {
+            if (isOperator(token)) {
+                if (stack.size() < 2) throw new IllegalArgumentException("Invalid expression");
+                double b = stack.pop();
+                double a = stack.pop();
+                stack.push(applyOperator(token, a, b));
+            } else {
+                try {
+                    stack.push(Double.parseDouble(token));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid number: " + token);
+                }
+            }
+        }
+        if (stack.size() != 1) throw new IllegalArgumentException("Invalid expression");
+        return stack.pop();
+    }
+
+    private static boolean isOperatorChar(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '^';
+    }
+
+    private static boolean isOperator(String s) {
+        return "+".equals(s) || "-".equals(s) || "*".equals(s) || "/".equals(s) || "%".equals(s) || "^".equals(s);
+    }
+
+    private static int precedence(String op) {
+        return switch (op) {
+            case "^" -> 4;
+            case "*", "/", "%" -> 3;
+            case "+", "-" -> 2;
+            default -> 0;
+        };
+    }
+
+    private static boolean isRightAssociative(String op) {
+        return "^".equals(op);
+    }
+
+    private static double applyOperator(String op, double a, double b) {
+        return switch (op) {
+            case "+" -> a + b;
+            case "-" -> a - b;
+            case "*" -> a * b;
+            case "/" -> b != 0 ? a / b : 0.0;
+            case "%" -> b != 0 ? a % b : 0.0;
+            case "^" -> Math.pow(a, b);
+            default -> 0.0;
+        };
     }
 }
