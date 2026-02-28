@@ -23,6 +23,8 @@ public class NodePorts {
     public static final String INPUT = "input";
     public static final String OUTPUT = "output";
     public static final String RESULT = "result";
+    public static final String IGNORE_TYPE = "ignore_type";
+    public static final String STRICT_TYPE = "strict_type";
     public static final String VALUE = "value";
     public static final String CONDITION = "condition";
     

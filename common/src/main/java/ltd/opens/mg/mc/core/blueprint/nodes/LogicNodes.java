@@ -7,6 +7,8 @@ import ltd.opens.mg.mc.core.blueprint.engine.TypeConverter;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 
+import java.util.Objects;
+
 /**
  * 比较与布尔逻辑运算节点注册
  */
@@ -38,6 +40,23 @@ public class LogicNodes {
                 double a = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
                 double b = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
                 return a != b;
+            });
+
+        NodeHelper.setup("compare_any", "node.mgmc.compare_any.name")
+            .category("node_category.mgmc.logic.comparison")
+            .color(NodeThemes.COLOR_NODE_LOGIC)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/comparison/compare_any")
+            .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
+            .input(NodePorts.B, "node.mgmc.port.b", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
+            .output(NodePorts.IGNORE_TYPE, "node.mgmc.compare_any.port.ignore_type", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
+            .output(NodePorts.STRICT_TYPE, "node.mgmc.compare_any.port.strict_type", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
+            .registerValue((node, portId, ctx) -> {
+                Object a = NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx);
+                Object b = NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx);
+                if (NodePorts.STRICT_TYPE.equals(portId)) {
+                    return strictEquals(a, b);
+                }
+                return looseEquals(a, b);
             });
 
         NodeHelper.setup("compare_gt", "node.mgmc.compare_gt.name")
@@ -139,5 +158,19 @@ public class LogicNodes {
                 boolean b = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
                 return a ^ b;
             });
+    }
+
+    private static boolean looseEquals(Object a, Object b) {
+        if (a instanceof Number && b instanceof Number) {
+            return Double.compare(((Number) a).doubleValue(), ((Number) b).doubleValue()) == 0;
+        }
+        return Objects.equals(TypeConverter.toString(a), TypeConverter.toString(b));
+    }
+
+    private static boolean strictEquals(Object a, Object b) {
+        if (a instanceof Number && b instanceof Number) {
+            if (!a.getClass().equals(b.getClass())) return false;
+        }
+        return Objects.equals(a, b);
     }
 }

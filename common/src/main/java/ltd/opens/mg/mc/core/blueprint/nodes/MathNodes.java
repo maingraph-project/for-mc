@@ -53,6 +53,13 @@ public class MathNodes {
             .mathInputs(1.0, 1.0)
             .registerMathOp((a, b) -> b != 0 ? a % b : 0.0);
 
+        NodeHelper.setup("pow_float", "node.mgmc.pow_float.name")
+            .category("node_category.mgmc.logic.math")
+            .color(NodeThemes.COLOR_NODE_MATH)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/math/pow_float")
+            .mathInputs(1.0, 2.0)
+            .registerMathOp(Math::pow);
+
         NodeHelper.setup("abs_float", "node.mgmc.abs_float.name")
             .category("node_category.mgmc.logic.math")
             .color(NodeThemes.COLOR_NODE_MATH)
