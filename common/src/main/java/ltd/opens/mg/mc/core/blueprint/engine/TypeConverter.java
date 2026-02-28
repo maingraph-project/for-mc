@@ -2,6 +2,7 @@ package ltd.opens.mg.mc.core.blueprint.engine;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,12 @@ public class TypeConverter {
     public static String toString(Object value) {
         if (value == null) return "";
         return String.valueOf(value);
+    }
+
+    public static String toString(Object value, NodeContext ctx) {
+        String raw = toString(value);
+        if (ctx == null || raw.isEmpty()) return raw;
+        return resolveInterpolations(raw, ctx);
     }
 
     public static double toDouble(Object value) {
@@ -160,5 +167,106 @@ public class TypeConverter {
             default:
                 return value;
         }
+    }
+
+    private static String resolveInterpolations(String input, NodeContext ctx) {
+        StringBuilder out = new StringBuilder(input.length());
+        int i = 0;
+        while (i < input.length()) {
+            char c = input.charAt(i);
+            if (c == '\\') {
+                if (i + 1 < input.length()) {
+                    char next = input.charAt(i + 1);
+                    if (next == 'n') {
+                        out.append('\n');
+                        i += 2;
+                        continue;
+                    }
+                    if (next == '$' || next == '\\' || next == '\'') {
+                        out.append(next);
+                        i += 2;
+                        continue;
+                    }
+                }
+                out.append(c);
+                i++;
+                continue;
+            }
+            if (c != '$') {
+                out.append(c);
+                i++;
+                continue;
+            }
+
+            boolean isBp = input.startsWith("bp", i + 1);
+            boolean isG = !isBp && i + 1 < input.length() && input.charAt(i + 1) == 'g';
+            if (!isBp && !isG) {
+                out.append(c);
+                i++;
+                continue;
+            }
+
+            int j = i + 1 + (isBp ? 2 : 1);
+            while (j < input.length() && Character.isWhitespace(input.charAt(j))) j++;
+            if (j >= input.length() || input.charAt(j) != '(') {
+                out.append(c);
+                i++;
+                continue;
+            }
+            j++;
+            while (j < input.length() && Character.isWhitespace(input.charAt(j))) j++;
+            if (j >= input.length() || input.charAt(j) != '\'') {
+                out.append(c);
+                i++;
+                continue;
+            }
+            j++;
+
+            StringBuilder name = new StringBuilder();
+            while (j < input.length()) {
+                char ch = input.charAt(j);
+                if (ch == '\\' && j + 1 < input.length()) {
+                    char next = input.charAt(j + 1);
+                    if (next == '\'' || next == '\\') {
+                        name.append(next);
+                        j += 2;
+                        continue;
+                    }
+                }
+                if (ch == '\'') {
+                    j++;
+                    break;
+                }
+                name.append(ch);
+                j++;
+            }
+
+            if (j > input.length()) {
+                out.append(c);
+                i++;
+                continue;
+            }
+            while (j < input.length() && Character.isWhitespace(input.charAt(j))) j++;
+            if (j >= input.length() || input.charAt(j) != ')') {
+                out.append(c);
+                i++;
+                continue;
+            }
+            j++;
+
+            String key = name.toString().trim();
+            String replacement = "";
+            if (isBp) {
+                Object val = ctx.variables.get(key);
+                replacement = toString(val);
+            } else {
+                var manager = MaingraphforMC.getGlobalVariableManager();
+                Object val = manager != null ? manager.get(key) : null;
+                replacement = toString(val);
+            }
+            out.append(replacement);
+            i = j;
+        }
+        return out.toString();
     }
 }

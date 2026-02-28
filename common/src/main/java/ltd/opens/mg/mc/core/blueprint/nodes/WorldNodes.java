@@ -31,7 +31,7 @@ public class WorldNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object xyzObj = NodeLogicRegistry.evaluateInput(node, NodePorts.XYZ, ctx);
-                String soundId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.SOUND, ctx));
+                String soundId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.SOUND, ctx), ctx);
                 float volume = (float)TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.VOLUME, ctx));
                 float pitch = (float)TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.PITCH, ctx));
                 
@@ -98,7 +98,7 @@ public class WorldNodes {
             .input(NodePorts.DURATION, "node.mgmc.port.duration", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, 6000)
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
-                String weather = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.WEATHER, ctx));
+                String weather = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.WEATHER, ctx), ctx);
                 int duration = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.DURATION, ctx));
                 
                 if (ctx.level instanceof ServerLevel serverLevel) {

@@ -43,8 +43,8 @@ public class EntityNodes {
                 @Override
                 public void execute(com.google.gson.JsonObject node, ltd.opens.mg.mc.core.blueprint.engine.NodeContext ctx) {
                     Object xyzObj = NodeLogicRegistry.evaluateInput(node, NodePorts.XYZ, ctx);
-                    String entityId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY_UUID, ctx)); // Reuse ENTITY_UUID as ID input
-                    String nbtStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NBT, ctx));
+                    String entityId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY_UUID, ctx), ctx); // Reuse ENTITY_UUID as ID input
+                    String nbtStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NBT, ctx), ctx);
                     
                     Entity spawnedEntity = null;
                     if (xyzObj instanceof XYZ xyz && ctx.level instanceof ServerLevel serverLevel) {
@@ -95,7 +95,7 @@ public class EntityNodes {
             .output(NodePorts.NBT, "node.mgmc.port.nbt", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
-                String slotName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EQUIPMENT_SLOT, ctx));
+                String slotName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EQUIPMENT_SLOT, ctx), ctx);
                 
                 if (entityObj instanceof LivingEntity entity) {
                     EquipmentSlot slot = EquipmentSlot.byName(slotName);
@@ -129,10 +129,10 @@ public class EntityNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
-                String slotName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EQUIPMENT_SLOT, ctx));
-                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx));
+                String slotName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EQUIPMENT_SLOT, ctx), ctx);
+                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx), ctx);
                 int count = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.COUNT, ctx));
-                String nbtStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NBT, ctx));
+                String nbtStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NBT, ctx), ctx);
                 
                 if (entityObj instanceof LivingEntity entity) {
                     try {

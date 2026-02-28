@@ -46,7 +46,7 @@ public class BlockNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object xyzObj = NodeLogicRegistry.evaluateInput(node, NodePorts.XYZ, ctx);
-                String blockId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.BLOCK_ID, ctx));
+                String blockId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.BLOCK_ID, ctx), ctx);
                 
                 if (xyzObj instanceof XYZ xyz && ctx.level != null) {
                     BlockPos pos = new BlockPos((int)xyz.x(), (int)xyz.y(), (int)xyz.z());
@@ -92,7 +92,7 @@ public class BlockNodes {
             .registerExec((node, ctx) -> {
                 Object minObj = NodeLogicRegistry.evaluateInput(node, NodePorts.MIN, ctx);
                 Object maxObj = NodeLogicRegistry.evaluateInput(node, NodePorts.MAX, ctx);
-                String blockId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.BLOCK_ID, ctx));
+                String blockId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.BLOCK_ID, ctx), ctx);
                 
                 if (minObj instanceof XYZ min && maxObj instanceof XYZ max && ctx.level != null) {
                     ResourceLocation rl = ResourceLocation.parse(blockId);

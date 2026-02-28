@@ -25,8 +25,8 @@ public class ClientNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerClientAction("show_toast", (node, ctx) -> {
                 JsonObject params = new JsonObject();
-                params.addProperty("title", TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TITLE, ctx)));
-                params.addProperty("message", TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MESSAGE, ctx)));
+                params.addProperty("title", TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TITLE, ctx), ctx));
+                params.addProperty("message", TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MESSAGE, ctx), ctx));
                 return params;
             }, () -> (params, ctx) -> {
                 String title = params.has("title") ? params.get("title").getAsString() : "Maingraph";
@@ -52,7 +52,7 @@ public class ClientNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerClientAction("open_url", (node, ctx) -> {
                 JsonObject params = new JsonObject();
-                params.addProperty("url", TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.URL, ctx)));
+                params.addProperty("url", TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.URL, ctx), ctx));
                 return params;
             }, () -> (params, ctx) -> {
                 String url = params.has("url") ? params.get("url").getAsString() : "";

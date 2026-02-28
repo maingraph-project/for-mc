@@ -61,7 +61,7 @@ public class VariableNodes {
             .input(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .output(NodePorts.VALUE, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
-                return TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx));
+                return TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx), ctx);
             });
 
         // --- 变量操作 ---
@@ -72,7 +72,7 @@ public class VariableNodes {
             .input(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .output(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
             .registerValue((node, portId, ctx) -> {
-                String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx));
+                String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx), ctx);
                 if (name == null || name.trim().isEmpty()) return null;
                 return ctx.variables.get(name.trim());
             });
@@ -89,7 +89,7 @@ public class VariableNodes {
             .register(new NodeHelper.NodeHandlerAdapter() {
                 @Override
                 public void execute(JsonObject node, NodeContext ctx) {
-                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx));
+                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx), ctx);
                     Object value = NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx);
                     if (name != null && !name.trim().isEmpty()) {
                         ctx.variables.put(name.trim(), value);
@@ -111,7 +111,7 @@ public class VariableNodes {
             .input(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .output(NodePorts.VALUE, "node.mgmc.port.value", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
             .registerValue((node, portId, ctx) -> {
-                String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx));
+                String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx), ctx);
                 if (name == null || name.trim().isEmpty()) return null;
                 GlobalVariableManager manager = MaingraphforMC.getGlobalVariableManager();
                 return manager != null ? manager.get(name.trim()) : null;
@@ -129,7 +129,7 @@ public class VariableNodes {
             .register(new NodeHelper.NodeHandlerAdapter() {
                 @Override
                 public void execute(JsonObject node, NodeContext ctx) {
-                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx));
+                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx), ctx);
                     Object value = NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx);
                     if (name != null && !name.trim().isEmpty()) {
                         GlobalVariableManager manager = MaingraphforMC.getGlobalVariableManager();
@@ -163,7 +163,7 @@ public class VariableNodes {
                     uuid = TypeConverter.toString(entityObj);
                 }
                 
-                String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx));
+                String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx), ctx);
                 if (uuid.isEmpty() || name == null || name.trim().isEmpty()) return null;
                 
                 EntityVariableManager manager = MaingraphforMC.getEntityVariableManager();
@@ -191,7 +191,7 @@ public class VariableNodes {
                         uuid = TypeConverter.toString(entityObj);
                     }
                     
-                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx));
+                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NAME, ctx), ctx);
                     Object value = NodeLogicRegistry.evaluateInput(node, NodePorts.VALUE, ctx);
                     
                     if (!uuid.isEmpty() && name != null && !name.trim().isEmpty()) {

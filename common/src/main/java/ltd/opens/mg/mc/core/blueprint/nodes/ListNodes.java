@@ -158,7 +158,7 @@ public class ListNodes {
             .output(NodePorts.STRING, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
                 List<Object> list = TypeConverter.toList(NodeLogicRegistry.evaluateInput(node, NodePorts.LIST, ctx));
-                String delim = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.DELIMITER, ctx));
+                String delim = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.DELIMITER, ctx), ctx);
                 if (list == null) return "";
                 if (delim == null) delim = "";
                 

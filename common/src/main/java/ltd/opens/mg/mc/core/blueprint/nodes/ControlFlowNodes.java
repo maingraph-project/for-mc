@@ -47,7 +47,7 @@ public class ControlFlowNodes {
             .input(NodePorts.CONTROL, "node.mgmc.switch.port.control", NodeDefinition.PortType.ANY, NodeThemes.COLOR_PORT_ANY)
             .output(NodePorts.DEFAULT, "node.mgmc.switch.port.default", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
-                String controlValue = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.CONTROL, ctx));
+                String controlValue = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.CONTROL, ctx), ctx);
                 if (node.has("outputs")) {
                     var outputs = node.getAsJsonObject("outputs");
                     for (String key : outputs.keySet()) {
@@ -165,7 +165,7 @@ public class ControlFlowNodes {
             .register(new NodeHelper.NodeHandlerAdapter() {
                 @Override
                 public void execute(JsonObject node, NodeContext ctx) {
-                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.BLUEPRINT, ctx));
+                    String name = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.BLUEPRINT, ctx), ctx);
                     Object argsObj = NodeLogicRegistry.evaluateInput(node, NodePorts.LIST, ctx);
                     List<Object> argsList = TypeConverter.toList(argsObj);
                     

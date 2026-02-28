@@ -26,8 +26,8 @@ public class StringNodes {
             .input(NodePorts.B, "node.mgmc.string_concat.port.b", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
-                String a = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx));
-                String b = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx));
+                String a = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.A, ctx), ctx);
+                String b = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.B, ctx), ctx);
                 return (a == null ? "" : a) + (b == null ? "" : b);
             });
 
@@ -57,7 +57,7 @@ public class StringNodes {
 
                     for (String key : keys) {
                         if (key.equals(NodePorts.EXEC)) continue;
-                        String val = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, key, ctx));
+                        String val = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, key, ctx), ctx);
                         if (val != null) sb.append(val);
                     }
                 }
@@ -72,7 +72,7 @@ public class StringNodes {
             .input(NodePorts.STRING, "node.mgmc.port.input", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .output(NodePorts.LENGTH, "node.mgmc.port.length", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
             .registerValue((node, portId, ctx) -> {
-                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
+                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx), ctx);
                 return s == null ? 0 : s.length();
             });
 
@@ -85,8 +85,8 @@ public class StringNodes {
             .input(NodePorts.SUBSTRING, "node.mgmc.string_contains.port.substring", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .output(NodePorts.RESULT, "node.mgmc.port.condition", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, portId, ctx) -> {
-                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
-                String sub = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.SUBSTRING, ctx));
+                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx), ctx);
+                String sub = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.SUBSTRING, ctx), ctx);
                 return s != null && sub != null && s.contains(sub);
             });
 
@@ -100,9 +100,9 @@ public class StringNodes {
             .input(NodePorts.NEW, "node.mgmc.string_replace.port.new", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
-                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
-                String oldS = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.OLD, ctx));
-                String newS = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NEW, ctx));
+                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx), ctx);
+                String oldS = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.OLD, ctx), ctx);
+                String newS = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NEW, ctx), ctx);
                 if (s == null || oldS == null || newS == null) return s;
                 return s.replace(oldS, newS);
             });
@@ -117,7 +117,7 @@ public class StringNodes {
             .input(NodePorts.END, "node.mgmc.string_substring.port.end", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT, true, 5)
             .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
-                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
+                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx), ctx);
                 int start = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.START, ctx));
                 int end = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.END, ctx));
                 if (s == null) return "";
@@ -136,8 +136,8 @@ public class StringNodes {
                 new String[]{"UPPER", "LOWER", "TRIM"})
             .output(NodePorts.OUTPUT, "node.mgmc.port.output", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
             .registerValue((node, portId, ctx) -> {
-                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
-                String mode = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MODE, ctx));
+                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx), ctx);
+                String mode = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MODE, ctx), ctx);
                 if (s == null) return "";
                 return switch (mode != null ? mode : "UPPER") {
                     case "LOWER" -> s.toLowerCase();
@@ -155,8 +155,8 @@ public class StringNodes {
             .input(NodePorts.DELIMITER, "node.mgmc.port.delimiter", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, true, ",")
             .output(NodePorts.LIST, "node.mgmc.port.list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
             .registerValue((node, portId, ctx) -> {
-                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx));
-                String delim = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.DELIMITER, ctx));
+                String s = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.STRING, ctx), ctx);
+                String delim = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.DELIMITER, ctx), ctx);
                 if (s == null) return List.of();
                 if (delim == null || delim.isEmpty()) return List.of(s);
                 return List.of(s.split(java.util.regex.Pattern.quote(delim)));

@@ -44,7 +44,7 @@ public class ActionNodes {
             .input(NodePorts.MESSAGE, "node.mgmc.port.message", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
-                String message = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MESSAGE, ctx));
+                String message = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MESSAGE, ctx), ctx);
                 if (ctx.level != null && !ctx.level.isClientSide()) {
                     if (ctx.triggerEntity instanceof ServerPlayer player) {
                         player.sendSystemMessage(Component.literal(message));
@@ -64,7 +64,7 @@ public class ActionNodes {
             .input(NodePorts.MESSAGE, "node.mgmc.port.message", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
-                String message = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MESSAGE, ctx));
+                String message = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.MESSAGE, ctx), ctx);
                 String logMsg = String.format("[MGMC Log] [%s] %s", ctx.currentBlueprintName, message);
                 
                 // 1. 输出到系统控制台 (最直接的反馈)
@@ -94,7 +94,7 @@ public class ActionNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
-                String command = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.COMMAND, ctx));
+                String command = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.COMMAND, ctx), ctx);
 
                 if (ctx.level != null && !ctx.level.isClientSide() && ctx.level.getServer() != null) {
                     ServerPlayer player = null;
@@ -123,7 +123,7 @@ public class ActionNodes {
             .input(NodePorts.COMMAND, "node.mgmc.port.command", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
-                String command = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.COMMAND, ctx));
+                String command = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.COMMAND, ctx), ctx);
 
                 if (ctx.level != null && !ctx.level.isClientSide() && ctx.level.getServer() != null) {
                     if (command != null && !command.isEmpty()) {
@@ -146,7 +146,7 @@ public class ActionNodes {
             .input(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
-                String effectName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EFFECT, ctx));
+                String effectName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EFFECT, ctx), ctx);
                 XYZ pos = TypeConverter.toXYZ(NodeLogicRegistry.evaluateInput(node, NodePorts.XYZ, ctx));
 
                 try {
@@ -317,7 +317,7 @@ public class ActionNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.ENTITY, ctx);
-                String effectName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EFFECT, ctx));
+                String effectName = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.EFFECT, ctx), ctx);
                 int duration = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.DURATION, ctx)) * 20;
                 int amplifier = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.AMPLIFIER, ctx));
                 boolean showParticles = TypeConverter.toBoolean(NodeLogicRegistry.evaluateInput(node, NodePorts.SHOW_PARTICLES, ctx));

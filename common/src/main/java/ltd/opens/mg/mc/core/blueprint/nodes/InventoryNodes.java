@@ -35,9 +35,9 @@ public class InventoryNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.PLAYER, ctx);
-                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx));
+                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx), ctx);
                 int count = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.COUNT, ctx));
-                String nbtStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NBT, ctx));
+                String nbtStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.NBT, ctx), ctx);
 
                 if (entityObj instanceof ServerPlayer player) {
                     try {
@@ -74,7 +74,7 @@ public class InventoryNodes {
             .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
             .registerExec((node, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.PLAYER, ctx);
-                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx));
+                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx), ctx);
                 int count = TypeConverter.toInt(NodeLogicRegistry.evaluateInput(node, NodePorts.COUNT, ctx));
 
                 if (entityObj instanceof ServerPlayer player) {
@@ -108,7 +108,7 @@ public class InventoryNodes {
             .output(NodePorts.COUNT, "node.mgmc.port.count", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
             .registerValue((node, port, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.PLAYER, ctx);
-                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx));
+                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx), ctx);
                 
                 if (entityObj instanceof ServerPlayer player) {
                      try {
@@ -134,7 +134,7 @@ public class InventoryNodes {
             .output(NodePorts.RESULT, "node.mgmc.port.result", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, port, ctx) -> {
                 Object entityObj = NodeLogicRegistry.evaluateInput(node, NodePorts.PLAYER, ctx);
-                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx));
+                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx), ctx);
                 
                 if (entityObj instanceof ServerPlayer player) {
                      try {
@@ -161,7 +161,7 @@ public class InventoryNodes {
             .output(NodePorts.IS_FOOD, "node.mgmc.port.is_food", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .output(NodePorts.IS_BLOCK_ITEM, "node.mgmc.port.is_block_item", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .registerValue((node, port, ctx) -> {
-                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx));
+                String itemId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.ITEM_ID, ctx), ctx);
                 try {
                     ResourceLocation rl = ResourceLocation.parse(itemId);
                     Item item = BuiltInRegistries.ITEM.get(rl);

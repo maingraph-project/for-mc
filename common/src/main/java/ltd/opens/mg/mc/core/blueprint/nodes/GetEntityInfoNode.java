@@ -47,7 +47,7 @@ public class GetEntityInfoNode {
             .output(NodePorts.IS_ONLINE, "node.mgmc.get_entity_info.port.is_online", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
             .output(NodePorts.PERMISSION_LEVEL, "node.mgmc.get_entity_info.port.permission_level", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
             .registerValue((node, pinId, ctx) -> {
-                String uuidStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.UUID, ctx));
+                String uuidStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.UUID, ctx), ctx);
                 if (uuidStr == null || uuidStr.isEmpty()) return getDefaultValue(pinId);
 
                 try {
@@ -93,7 +93,7 @@ public class GetEntityInfoNode {
             .input(NodePorts.UUID, "node.mgmc.port.uuid", NodeDefinition.PortType.UUID, NodeThemes.COLOR_PORT_UUID, "")
             .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
             .registerValue((node, pinId, ctx) -> {
-                String uuidStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.UUID, ctx));
+                String uuidStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.UUID, ctx), ctx);
                 if (uuidStr == null || uuidStr.isEmpty()) return null;
                 try {
                     return findEntity(UUID.fromString(uuidStr), ctx);
@@ -136,7 +136,7 @@ public class GetEntityInfoNode {
                 double radius = TypeConverter.toDouble(NodeLogicRegistry.evaluateInput(node, NodePorts.RADIUS, ctx));
                 if (radius <= 0) radius = 5.0;
                 
-                String typeFilterStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TYPE, ctx));
+                String typeFilterStr = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TYPE, ctx), ctx);
                 
                 AABB aabb = new AABB(origin.x() - radius, origin.y() - radius, origin.z() - radius, 
                                      origin.x() + radius, origin.y() + radius, origin.z() + radius);
