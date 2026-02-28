@@ -49,8 +49,8 @@ public class MaingraphforMC {
         LifecycleEvent.SERVER_STOPPING.register(MaingraphforMC::onServerStopping);
         CommandRegistrationEvent.EVENT.register(MaingraphforMC::onRegisterCommands);
         
-        TickEvent.SERVER_LEVEL_POST.register(level -> {
-             ltd.opens.mg.mc.core.blueprint.engine.TickScheduler.tick(level);
+        TickEvent.SERVER_POST.register(server -> {
+            ltd.opens.mg.mc.core.blueprint.engine.TickScheduler.tick();
         });
 
         EnvExecutor.runInEnv(Env.CLIENT, () -> () -> {

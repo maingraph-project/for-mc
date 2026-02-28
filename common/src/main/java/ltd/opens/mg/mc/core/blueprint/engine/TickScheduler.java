@@ -20,9 +20,7 @@ public class TickScheduler {
         }
     }
 
-    public static void tick(net.minecraft.world.level.Level level) {
-        if (level.isClientSide) return;
-        
+    public static void tick() {
         List<SuspendedTask> toFire = new ArrayList<>();
         
         synchronized (TASKS) {
@@ -31,8 +29,12 @@ public class TickScheduler {
             Iterator<SuspendedTask> iterator = TASKS.iterator();
             while (iterator.hasNext()) {
                 SuspendedTask task = iterator.next();
-                task.remainingTicks--;
-                if (task.remainingTicks <= 0) {
+                if (task.level == null || task.level.isClientSide) {
+                    iterator.remove();
+                    continue;
+                }
+
+                if (task.level.getGameTime() >= task.targetGameTime) {
                     toFire.add(task);
                     iterator.remove();
                 }
@@ -54,13 +56,16 @@ public class TickScheduler {
         final NodeContext context;
         final JsonObject node;
         final String pinId;
-        int remainingTicks;
+        final net.minecraft.world.level.Level level;
+        final long targetGameTime;
 
         SuspendedTask(NodeContext context, JsonObject node, String pinId, int ticks) {
             this.context = context;
             this.node = node;
             this.pinId = pinId;
-            this.remainingTicks = ticks;
+            this.level = context.level;
+            long baseTime = (this.level != null) ? this.level.getGameTime() : 0L;
+            this.targetGameTime = baseTime + Math.max(0, ticks);
         }
     }
 }
