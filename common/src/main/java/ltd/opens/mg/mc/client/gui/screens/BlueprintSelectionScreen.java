@@ -55,6 +55,15 @@ public class BlueprintSelectionScreen extends Screen {
             String name = this.newBlueprintName.getValue().trim();
             if (!name.isEmpty()) {
                 if (!name.endsWith(".json")) name += ".json";
+                if (blueprintExists(name) || (isGlobalMode && java.nio.file.Files.exists(ltd.opens.mg.mc.core.blueprint.BlueprintManager.getGlobalBlueprintsDir().resolve(name)))) {
+                    if (Minecraft.getInstance().player != null) {
+                        Minecraft.getInstance().player.displayClientMessage(
+                            Component.translatable("gui.mgmc.blueprint_selection.duplicate_exists", name),
+                            false
+                        );
+                    }
+                    return;
+                }
                 
                 this.setFocused(null);
                 if (isGlobalMode) {
