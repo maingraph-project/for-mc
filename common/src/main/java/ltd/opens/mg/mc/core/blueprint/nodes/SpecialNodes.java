@@ -15,6 +15,7 @@ public class SpecialNodes {
         // 标记节点没有逻辑执行，仅用于在编辑器中做标注和快速跳转
         NodeHelper.setup("marker", "node.mgmc.marker.name")
             .category("node_category.mgmc.special")
+            .description("node.mgmc.marker.desc")
             .color(NodeThemes.COLOR_NODE_COMMENT)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/special/marker")
             .input(NodePorts.COMMENT, "node.mgmc.port.comment", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "")

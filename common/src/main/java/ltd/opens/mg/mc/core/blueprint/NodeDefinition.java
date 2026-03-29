@@ -9,6 +9,7 @@ public record NodeDefinition(
     String id,
     String name,
     String category,
+    String description,
     int color,
     List<PortDefinition> inputs,
     List<PortDefinition> outputs,
@@ -19,6 +20,7 @@ public record NodeDefinition(
         private final String id;
         private final String name;
         private String category = "General";
+        private String description = "";
         private int color = 0xFF444444;
         private final List<PortDefinition> inputs = new ArrayList<>();
         private final List<PortDefinition> outputs = new ArrayList<>();
@@ -29,6 +31,11 @@ public record NodeDefinition(
             this.id = id;
             this.name = name;
             // Removed NeoForge specific ModLoadingContext
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
         }
 
         public Builder registeredBy(String modid) {
@@ -106,7 +113,7 @@ public record NodeDefinition(
         }
 
         public NodeDefinition build() {
-            return new NodeDefinition(id, name, category, color, List.copyOf(inputs), List.copyOf(outputs), Map.copyOf(properties), registeredBy);
+            return new NodeDefinition(id, name, category, description, color, List.copyOf(inputs), List.copyOf(outputs), Map.copyOf(properties), registeredBy);
         }
     }
 

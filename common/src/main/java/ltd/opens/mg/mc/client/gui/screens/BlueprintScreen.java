@@ -352,7 +352,69 @@ public class BlueprintScreen extends Screen {
         BlueprintSettingsPanel.render(guiGraphics, this, state, font, mouseX, mouseY);
         guiGraphics.pose().popPose();
 
+        // --- Marker Tooltip (ALT + Hover) ---
+        if (hasAltDown()) {
+            for (GuiNode node : state.nodes) {
+                double worldMouseX = state.viewport.toWorldX(mouseX);
+                double worldMouseY = state.viewport.toWorldY(mouseY);
+                
+                if (worldMouseX >= node.x && worldMouseX <= node.x + node.width && 
+                    worldMouseY >= node.y && worldMouseY <= node.y + node.height) {
+                    
+                    if (node.definition.properties().containsKey("is_marker")) {
+                        renderMarkerTooltip(guiGraphics, node, mouseX, mouseY);
+                        break;
+                    }
+                }
+            }
+        }
+
         guiGraphics.pose().popPose(); // End of UI Z-offset
+    }
+
+    private void renderMarkerTooltip(GuiGraphics guiGraphics, GuiNode node, int mouseX, int mouseY) {
+        String descKey = node.definition.description();
+        if (descKey == null || descKey.isEmpty()) return;
+
+        Component desc = Component.translatable(descKey);
+        Component ponder = Component.translatable("gui.mgmc.tooltip.ponder");
+        
+        int maxWidth = 200;
+        java.util.List<net.minecraft.util.FormattedCharSequence> lines = font.split(desc, maxWidth);
+        
+        int width = 0;
+        for (net.minecraft.util.FormattedCharSequence line : lines) {
+            width = Math.max(width, font.width(line));
+        }
+        width = Math.max(width, font.width(ponder));
+        width += 20;
+        
+        int height = lines.size() * 10 + 25;
+        
+        int tx = mouseX + 10;
+        int ty = mouseY + 10;
+        
+        // Keep inside screen
+        if (tx + width > this.width) tx = mouseX - width - 10;
+        if (ty + height > this.height) ty = mouseY - height - 10;
+        
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 500); // Very top
+        
+        // Background
+        guiGraphics.fill(tx, ty, tx + width, ty + height, 0xF01A1A1A);
+        guiGraphics.renderOutline(tx, ty, width, height, 0xFF555555);
+        
+        // Description
+        for (int i = 0; i < lines.size(); i++) {
+            guiGraphics.drawString(font, lines.get(i), tx + 10, ty + 8 + i * 10, 0xFFCCCCCC, false);
+        }
+        
+        // Ponder Text (Bottom)
+        guiGraphics.fill(tx + 5, ty + height - 15, tx + width - 5, ty + height - 14, 0x44FFFFFF);
+        guiGraphics.drawString(font, ponder, tx + 10, ty + height - 12, 0xFFAAAAAA, false);
+        
+        guiGraphics.pose().popPose();
     }
 
     @Override
@@ -370,23 +432,8 @@ public class BlueprintScreen extends Screen {
                 InputModalScreen.Mode.SELECTION,
                 (selected) -> {
                     if (selected.equals(Component.translatable("gui.mgmc.blueprint_editor.save_confirm.save").getString())) {
-                        // Check for unknown nodes
-                        boolean hasUnknown = false;
-                        for (GuiNode node : state.nodes) {
-                            if (node.definition.properties().containsKey("is_unknown")) {
-                                hasUnknown = true;
-                                break;
-                            }
-                        }
-                        
-                        if (hasUnknown) {
-                            state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.save_error.unknown_nodes").getString());
-                            // Keep the screen open if they tried to save with unknown nodes
-                            return;
-                        }
-
-                        String json = BlueprintIO.serialize(state.nodes, state.connections, state.regions);
-                        NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
+                        saveBlueprint();
+                        if (state.isDirty) return; // Saving failed or cancelled
                     }
                     state.isDirty = false;
                     Minecraft.getInstance().setScreen(new BlueprintSelectionScreen());
@@ -472,6 +519,7 @@ public class BlueprintScreen extends Screen {
             } else {
                 NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
             }
+            state.isDirty = false;
         }
     }
 

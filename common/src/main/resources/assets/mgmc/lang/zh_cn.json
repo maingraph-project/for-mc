@@ -166,6 +166,8 @@
     "node.mgmc.get_entity_info_byentity.name": "通过实体获取实体信息",
     "node.mgmc.get_entity_by_uuid.name": "通过 UUID 获取实体",
     "node.mgmc.marker.name": "标记",
+    "node.mgmc.marker.desc": "标记节点，用于在蓝图中标记区域并快速跳转。它不执行任何逻辑。",
+    "gui.mgmc.tooltip.ponder": "选中并长按 [W] 思索",
     "node.mgmc.port.entity": "实体",
     "node.mgmc.port.comment": "备注",
   "node.mgmc.branch.name": "分支",
