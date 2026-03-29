@@ -93,6 +93,10 @@ public class NodePorts {
     public static final String VELOCITY = "velocity";
     public static final String URL = "url";
     public static final String TITLE = "title";
+    public static final String TIMER_ID = "timer_id";
+    public static final String ELAPSED_TICKS = "elapsed_ticks";
+    public static final String ELAPSED_SECONDS = "elapsed_seconds";
+    public static final String RUNNING = "running";
     
     // 实体属性
     public static final String TYPE = "type";

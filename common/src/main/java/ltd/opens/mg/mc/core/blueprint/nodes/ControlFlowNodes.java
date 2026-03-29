@@ -12,13 +12,36 @@ import ltd.opens.mg.mc.core.blueprint.engine.TickScheduler;
 import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.core.blueprint.engine.BlueprintEngine;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * 控制流相关节点
  */
 public class ControlFlowNodes {
+    private static final String TIMER_STORE_KEY = "mgmc:timer_store";
+
+    @SuppressWarnings("unchecked")
+    private static TimerState getTimerState(NodeContext ctx, String timerId) {
+        Map<String, TimerState> store = (Map<String, TimerState>) ctx.properties.computeIfAbsent(
+            TIMER_STORE_KEY, k -> new HashMap<String, TimerState>()
+        );
+        return store.computeIfAbsent(timerId, k -> new TimerState());
+    }
+
+    private static long getGameTime(NodeContext ctx) {
+        Level level = ctx.level;
+        return level != null ? level.getGameTime() : 0L;
+    }
+
+    private static class TimerState {
+        long startTick = 0L;
+        long elapsedTicks = 0L;
+        boolean running = false;
+    }
 
     @SuppressWarnings("unchecked")
     public static void register() {
@@ -139,6 +162,87 @@ public class ControlFlowNodes {
                 } else {
                     TickScheduler.schedule(ctx, node, NodePorts.EXEC, ticks);
                 }
+            });
+
+        // 计时器开始 (Timer Start)
+        NodeHelper.setup("timer_start", "node.mgmc.timer_start.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/timer_start")
+            .execIn()
+            .input(NodePorts.TIMER_ID, "node.mgmc.port.timer_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "default")
+            .execOut()
+            .registerExec((node, ctx) -> {
+                String timerId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TIMER_ID, ctx), ctx);
+                if (timerId == null || timerId.isEmpty()) timerId = "default";
+                TimerState state = getTimerState(ctx, timerId);
+                if (!state.running) {
+                    state.startTick = getGameTime(ctx);
+                    state.running = true;
+                }
+                NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+            });
+
+        // 计时器停止 (Timer Stop)
+        NodeHelper.setup("timer_stop", "node.mgmc.timer_stop.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/timer_stop")
+            .execIn()
+            .input(NodePorts.TIMER_ID, "node.mgmc.port.timer_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "default")
+            .execOut()
+            .registerExec((node, ctx) -> {
+                String timerId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TIMER_ID, ctx), ctx);
+                if (timerId == null || timerId.isEmpty()) timerId = "default";
+                TimerState state = getTimerState(ctx, timerId);
+                if (state.running) {
+                    long now = getGameTime(ctx);
+                    state.elapsedTicks += Math.max(0, now - state.startTick);
+                    state.running = false;
+                }
+                NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+            });
+
+        // 计时器重置 (Timer Reset)
+        NodeHelper.setup("timer_reset", "node.mgmc.timer_reset.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/timer_reset")
+            .execIn()
+            .input(NodePorts.TIMER_ID, "node.mgmc.port.timer_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "default")
+            .execOut()
+            .registerExec((node, ctx) -> {
+                String timerId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TIMER_ID, ctx), ctx);
+                if (timerId == null || timerId.isEmpty()) timerId = "default";
+                TimerState state = getTimerState(ctx, timerId);
+                state.elapsedTicks = 0L;
+                state.running = false;
+                state.startTick = 0L;
+                NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+            });
+
+        // 获取计时器 (Timer Get)
+        NodeHelper.setup("timer_get", "node.mgmc.timer_get.name")
+            .category("node_category.mgmc.logic.control")
+            .color(NodeThemes.COLOR_NODE_CONTROL)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/control/timer_get")
+            .input(NodePorts.TIMER_ID, "node.mgmc.port.timer_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING, "default")
+            .output(NodePorts.ELAPSED_TICKS, "node.mgmc.port.elapsed_ticks", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
+            .output(NodePorts.ELAPSED_SECONDS, "node.mgmc.port.elapsed_seconds", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.RUNNING, "node.mgmc.port.running", NodeDefinition.PortType.BOOLEAN, NodeThemes.COLOR_PORT_BOOLEAN)
+            .registerValue((node, portId, ctx) -> {
+                String timerId = TypeConverter.toString(NodeLogicRegistry.evaluateInput(node, NodePorts.TIMER_ID, ctx), ctx);
+                if (timerId == null || timerId.isEmpty()) timerId = "default";
+                TimerState state = getTimerState(ctx, timerId);
+                long elapsed = state.elapsedTicks;
+                if (state.running) {
+                    long now = getGameTime(ctx);
+                    elapsed += Math.max(0, now - state.startTick);
+                }
+                if (NodePorts.ELAPSED_TICKS.equals(portId)) return (int) Math.min(Integer.MAX_VALUE, elapsed);
+                if (NodePorts.ELAPSED_SECONDS.equals(portId)) return elapsed / 20.0;
+                if (NodePorts.RUNNING.equals(portId)) return state.running;
+                return null;
             });
 
         // 中断节点 (Break Loop)
