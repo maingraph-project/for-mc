@@ -224,6 +224,11 @@ public class BlueprintScreen extends Screen {
 
         guiGraphics.pose().popPose();
 
+        // --- Screen Space UI (Rendered on top of nodes/regions) ---
+        // Apply a base Z-offset for all UI elements to ensure they are above nodes and regions
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 100);
+
         // Selection Box (Screen Space)
         BlueprintRenderer.drawSelectionBox(guiGraphics, state);
         
@@ -231,12 +236,22 @@ public class BlueprintScreen extends Screen {
         BlueprintRenderer.drawMinimap(guiGraphics, state, this.width, this.height);
         
         // Quick Search
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 150);
         BlueprintRenderer.drawQuickSearch(guiGraphics, state, this.width, this.height, this.font);
+        guiGraphics.pose().popPose();
         
         // Marker Editing
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 150);
         BlueprintRenderer.drawMarkerEditing(guiGraphics, state, this.font);
+        guiGraphics.pose().popPose();
         
         // --- Modern Top Bar (Narrower) ---
+        // Use a higher Z-offset for the Top Bar to ensure it stays on top
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 100);
+        
         int barHeight = 26;
         guiGraphics.fill(0, 0, this.width, barHeight, 0xF0121212); 
         guiGraphics.fill(0, barHeight, this.width, barHeight + 1, 0xFF2D2D2D); 
@@ -269,6 +284,8 @@ public class BlueprintScreen extends Screen {
         if (!state.readOnly) {
             renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 50, 20, Component.translatable("gui.mgmc.blueprint_editor.save"), "save");
         }
+        
+        guiGraphics.pose().popPose(); // End of Top Bar Z-offset
 
         // --- Bottom UI ---
         // Stats (Bottom Left)
@@ -283,14 +300,23 @@ public class BlueprintScreen extends Screen {
         guiGraphics.drawString(font, titleText, this.width - titleW - 8, height - 15, 0xFFFFFFFF, false);
 
         if (state.showNodeMenu) {
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(0, 0, 250);
             state.menu.renderNodeMenu(guiGraphics, font, mouseX, mouseY, state.menuX, state.menuY, this.width, this.height);
+            guiGraphics.pose().popPose();
         }
         
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 250);
         state.contextMenu.render(guiGraphics, font, mouseX, mouseY, this.width, this.height);
+        guiGraphics.pose().popPose();
 
         // --- Notification Popup ---
         if (state.notificationMessage != null && state.notificationTimer > 0) {
-            // ... (existing notification code)
+            // Use a high Z-offset for notifications
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(0, 0, 300);
+            
             int msgW = font.width(state.notificationMessage);
             int popupW = msgW + 20;
             int popupH = 20;
@@ -315,10 +341,18 @@ public class BlueprintScreen extends Screen {
             // Draw close "X" indicator
             int closeColor = (alphaInt << 24) | 0x888888;
             guiGraphics.drawString(font, "×", popupX + popupW - 12, popupY + (popupH - 9) / 2, closeColor, false);
+            
+            guiGraphics.pose().popPose();
         }
 
         // --- Settings Menu ---
+        // Ensure settings panel is on the very top
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 400);
         BlueprintSettingsPanel.render(guiGraphics, this, state, font, mouseX, mouseY);
+        guiGraphics.pose().popPose();
+
+        guiGraphics.pose().popPose(); // End of UI Z-offset
     }
 
     @Override
