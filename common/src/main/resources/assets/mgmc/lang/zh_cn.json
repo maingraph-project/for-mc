@@ -168,6 +168,7 @@
     "node.mgmc.marker.name": "标记",
     "node.mgmc.marker.desc": "标记节点，用于在蓝图中标记区域并快速跳转。它不执行任何逻辑。",
     "gui.mgmc.tooltip.ponder": "选中并长按 [W] 思索",
+  "gui.mgmc.tooltip.mod": "%s",
     "node.mgmc.port.entity": "实体",
     "node.mgmc.port.comment": "备注",
   "node.mgmc.branch.name": "分支",

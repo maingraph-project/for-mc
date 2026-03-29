@@ -161,6 +161,7 @@
   "node.mgmc.marker.name": "Marker",
   "node.mgmc.marker.desc": "A marker node that can be used to label sections of your blueprint and quickly jump to them. It does not execute any logic.",
   "gui.mgmc.tooltip.ponder": "Select and hold [W] to ponder",
+  "gui.mgmc.tooltip.mod": "%s",
     "node.mgmc.port.entity": "Entity",
   "node.mgmc.port.comment": "Remark",
   "node.mgmc.branch.name": "Branch",

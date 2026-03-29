@@ -14,7 +14,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.List;
 
 public class BlueprintScreen extends Screen {
     private final Screen parent;
@@ -352,7 +355,7 @@ public class BlueprintScreen extends Screen {
         BlueprintSettingsPanel.render(guiGraphics, this, state, font, mouseX, mouseY);
         guiGraphics.pose().popPose();
 
-        // --- Marker Tooltip (ALT + Hover) ---
+        // --- Node Tooltip (ALT + Hover) ---
         if (hasAltDown()) {
             for (GuiNode node : state.nodes) {
                 double worldMouseX = state.viewport.toWorldX(mouseX);
@@ -361,10 +364,8 @@ public class BlueprintScreen extends Screen {
                 if (worldMouseX >= node.x && worldMouseX <= node.x + node.width && 
                     worldMouseY >= node.y && worldMouseY <= node.y + node.height) {
                     
-                    if (node.definition.properties().containsKey("is_marker")) {
-                        renderMarkerTooltip(guiGraphics, node, mouseX, mouseY);
-                        break;
-                    }
+                    renderNodeTooltip(guiGraphics, node, mouseX, mouseY);
+                    break;
                 }
             }
         }
@@ -372,47 +373,94 @@ public class BlueprintScreen extends Screen {
         guiGraphics.pose().popPose(); // End of UI Z-offset
     }
 
-    private void renderMarkerTooltip(GuiGraphics guiGraphics, GuiNode node, int mouseX, int mouseY) {
+    private void renderNodeTooltip(GuiGraphics guiGraphics, GuiNode node, int mouseX, int mouseY) {
         String descKey = node.definition.description();
-        if (descKey == null || descKey.isEmpty()) return;
+        boolean hasDesc = descKey != null && !descKey.isEmpty();
 
-        Component desc = Component.translatable(descKey);
+        Component title = Component.translatable(node.title);
+        Component category = Component.translatable(node.definition.category());
         Component ponder = Component.translatable("gui.mgmc.tooltip.ponder");
+        String modId = node.definition.registeredBy();
         
-        int maxWidth = 200;
-        java.util.List<net.minecraft.util.FormattedCharSequence> lines = font.split(desc, maxWidth);
+        int maxWidth = 220;
+        List<FormattedCharSequence> descLines = hasDesc ? font.split(Component.translatable(descKey), maxWidth - 20) : java.util.Collections.emptyList();
         
-        int width = 0;
-        for (net.minecraft.util.FormattedCharSequence line : lines) {
-            width = Math.max(width, font.width(line));
-        }
-        width = Math.max(width, font.width(ponder));
-        width += 20;
+        // Calculate dimensions
+        int width = maxWidth;
+        int headerHeight = 28;
+        int footerHeight = 20;
+        int contentHeight = hasDesc ? (descLines.size() * 10) + 12 : 4;
+        int height = headerHeight + contentHeight + footerHeight;
         
-        int height = lines.size() * 10 + 25;
-        
-        int tx = mouseX + 10;
-        int ty = mouseY + 10;
+        int tx = mouseX + 12;
+        int ty = mouseY + 12;
         
         // Keep inside screen
-        if (tx + width > this.width) tx = mouseX - width - 10;
-        if (ty + height > this.height) ty = mouseY - height - 10;
+        if (tx + width > this.width) tx = mouseX - width - 12;
+        if (ty + height > this.height) ty = mouseY - height - 12;
         
         guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 500); // Very top
+        guiGraphics.pose().translate(0, 0, 600); // Higher than everything
         
-        // Background
-        guiGraphics.fill(tx, ty, tx + width, ty + height, 0xF01A1A1A);
-        guiGraphics.renderOutline(tx, ty, width, height, 0xFF555555);
+        // --- 1. Background & Border (Modern Glass Style) ---
+        // Main shadow
+        guiGraphics.fill(tx + 2, ty + 2, tx + width + 2, ty + height + 2, 0x44000000);
+        // Main body (Dark semi-transparent)
+        guiGraphics.fill(tx, ty, tx + width, ty + height, 0xF5121212);
+        // Subtle gradient border
+        guiGraphics.renderOutline(tx, ty, width, height, 0x44FFFFFF);
         
-        // Description
-        for (int i = 0; i < lines.size(); i++) {
-            guiGraphics.drawString(font, lines.get(i), tx + 10, ty + 8 + i * 10, 0xFFCCCCCC, false);
+        // --- 2. Header (Title & Category) ---
+        // Title accent bar
+        guiGraphics.fill(tx, ty, tx + 3, ty + headerHeight, node.color);
+        
+        // Title
+        guiGraphics.drawString(font, title, tx + 10, ty + 6, 0xFFFFFFFF, false);
+        
+        // Category & ModID (Secondary info)
+        String modName = modId;
+        if ("mgmc".equals(modId)) {
+            modName = "Maingraph for MC";
+        } else {
+            // Try to use Architectury to get the mod name
+            var mod = dev.architectury.platform.Platform.getOptionalMod(modId);
+            if (mod.isPresent()) {
+                modName = mod.get().getName();
+            } else if (modName.length() > 0) {
+                // Capitalize if it's just an ID
+                modName = modName.substring(0, 1).toUpperCase() + modName.substring(1);
+            }
         }
         
-        // Ponder Text (Bottom)
-        guiGraphics.fill(tx + 5, ty + height - 15, tx + width - 5, ty + height - 14, 0x44FFFFFF);
-        guiGraphics.drawString(font, ponder, tx + 10, ty + height - 12, 0xFFAAAAAA, false);
+        Component modInfo = Component.translatable("gui.mgmc.tooltip.mod", modName);
+        String subInfo = category.getString() + " · " + modInfo.getString();
+        guiGraphics.drawString(font, subInfo, tx + 10, ty + 16, 0xFF888888, false);
+        
+        // Separator (Only if has description)
+        if (hasDesc) {
+            guiGraphics.fill(tx + 8, ty + headerHeight - 2, tx + width - 8, ty + headerHeight - 1, 0x22FFFFFF);
+            
+            // --- 3. Content (Description) ---
+            for (int i = 0; i < descLines.size(); i++) {
+                guiGraphics.drawString(font, descLines.get(i), tx + 10, ty + headerHeight + 6 + i * 10, 0xFFBBBBBB, false);
+            }
+        }
+
+        // --- 4. Footer (Ponder Hint) ---
+        int footerY = ty + height - footerHeight;
+        // Subtle background for footer
+        guiGraphics.fill(tx + 1, footerY, tx + width - 1, ty + height - 1, 0x22FFFFFF);
+        
+        // W Icon Placeholder (A simple box)
+        int iconSize = 10;
+        int iconX = tx + 10;
+        int iconY = footerY + (footerHeight - iconSize) / 2;
+        guiGraphics.fill(iconX, iconY, iconX + iconSize, iconY + iconSize, 0xFF444444);
+        guiGraphics.renderOutline(iconX, iconY, iconSize, iconSize, 0xFF888888);
+        guiGraphics.drawString(font, "W", iconX + 2, iconY + 1, 0xFFFFFFFF, false);
+        
+        // Ponder text
+        guiGraphics.drawString(font, ponder, iconX + iconSize + 6, footerY + (footerHeight - 9) / 2, 0xFFAAAAAA, false);
         
         guiGraphics.pose().popPose();
     }
