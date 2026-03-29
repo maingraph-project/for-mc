@@ -321,5 +321,11 @@ public class BlueprintNetworkHandler {
                     payload.blueprintName(), payload.nodeId(), payload.actionType(), payload.data());
             });
         }
+
+        public static void handleOpenUI(final OpenUIPayload payload, final NetworkManager.PacketContext context) {
+            context.queue(() -> {
+                ltd.opens.mg.mc.MaingraphforMCClient.handleBlueprintKey();
+            });
+        }
     }
 }

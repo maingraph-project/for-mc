@@ -16,6 +16,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
+import ltd.opens.mg.mc.network.MGMCNetwork;
+import ltd.opens.mg.mc.network.payloads.OpenUIPayload;
 
 import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
@@ -122,6 +124,15 @@ public class MaingraphforMC {
     public static void onRegisterCommands(com.mojang.brigadier.CommandDispatcher<CommandSourceStack> dispatcher, net.minecraft.commands.CommandBuildContext registry, net.minecraft.commands.Commands.CommandSelection selection) {
         dispatcher.register(Commands.literal("mgmc")
             .requires(MaingraphforMC::hasPermission)
+            .then(Commands.literal("openui")
+                .executes(context -> {
+                    if (context.getSource().getPlayer() != null) {
+                        ServerPlayer player = (ServerPlayer) context.getSource().getPlayer();
+                        MGMCNetwork.sendToPlayer(player, new OpenUIPayload());
+                    }
+                    return 1;
+                })
+            )
             .then(Commands.literal("workbench")
                 .executes(context -> {
                     if (context.getSource().getPlayer() != null) {

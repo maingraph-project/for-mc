@@ -57,7 +57,7 @@ public class MaingraphforMCClient {
         return EventResult.pass();
     }
 
-    private static void handleBlueprintKey() {
+    public static void handleBlueprintKey() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             mc.setScreen(new BlueprintSelectionScreen());
