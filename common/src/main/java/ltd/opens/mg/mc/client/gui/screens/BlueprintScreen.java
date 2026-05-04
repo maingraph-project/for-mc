@@ -14,7 +14,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.List;
 
 public class BlueprintScreen extends Screen {
     private final Screen parent;
@@ -224,6 +227,11 @@ public class BlueprintScreen extends Screen {
 
         guiGraphics.pose().popPose();
 
+        // --- Screen Space UI (Rendered on top of nodes/regions) ---
+        // Apply a base Z-offset for all UI elements to ensure they are above nodes and regions
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 100);
+
         // Selection Box (Screen Space)
         BlueprintRenderer.drawSelectionBox(guiGraphics, state);
         
@@ -231,12 +239,22 @@ public class BlueprintScreen extends Screen {
         BlueprintRenderer.drawMinimap(guiGraphics, state, this.width, this.height);
         
         // Quick Search
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 150);
         BlueprintRenderer.drawQuickSearch(guiGraphics, state, this.width, this.height, this.font);
+        guiGraphics.pose().popPose();
         
         // Marker Editing
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 150);
         BlueprintRenderer.drawMarkerEditing(guiGraphics, state, this.font);
+        guiGraphics.pose().popPose();
         
         // --- Modern Top Bar (Narrower) ---
+        // Use a higher Z-offset for the Top Bar to ensure it stays on top
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 100);
+        
         int barHeight = 26;
         guiGraphics.fill(0, 0, this.width, barHeight, 0xF0121212); 
         guiGraphics.fill(0, barHeight, this.width, barHeight + 1, 0xFF2D2D2D); 
@@ -269,6 +287,8 @@ public class BlueprintScreen extends Screen {
         if (!state.readOnly) {
             renderCustomButton(guiGraphics, mouseX, mouseY, rightX, 3, 50, 20, Component.translatable("gui.mgmc.blueprint_editor.save"), "save");
         }
+        
+        guiGraphics.pose().popPose(); // End of Top Bar Z-offset
 
         // --- Bottom UI ---
         // Stats (Bottom Left)
@@ -283,14 +303,23 @@ public class BlueprintScreen extends Screen {
         guiGraphics.drawString(font, titleText, this.width - titleW - 8, height - 15, 0xFFFFFFFF, false);
 
         if (state.showNodeMenu) {
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(0, 0, 250);
             state.menu.renderNodeMenu(guiGraphics, font, mouseX, mouseY, state.menuX, state.menuY, this.width, this.height);
+            guiGraphics.pose().popPose();
         }
         
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 250);
         state.contextMenu.render(guiGraphics, font, mouseX, mouseY, this.width, this.height);
+        guiGraphics.pose().popPose();
 
         // --- Notification Popup ---
         if (state.notificationMessage != null && state.notificationTimer > 0) {
-            // ... (existing notification code)
+            // Use a high Z-offset for notifications
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(0, 0, 300);
+            
             int msgW = font.width(state.notificationMessage);
             int popupW = msgW + 20;
             int popupH = 20;
@@ -315,10 +344,125 @@ public class BlueprintScreen extends Screen {
             // Draw close "X" indicator
             int closeColor = (alphaInt << 24) | 0x888888;
             guiGraphics.drawString(font, "×", popupX + popupW - 12, popupY + (popupH - 9) / 2, closeColor, false);
+            
+            guiGraphics.pose().popPose();
         }
 
         // --- Settings Menu ---
+        // Ensure settings panel is on the very top
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 400);
         BlueprintSettingsPanel.render(guiGraphics, this, state, font, mouseX, mouseY);
+        guiGraphics.pose().popPose();
+
+        // --- Node Tooltip (ALT + Hover) ---
+        if (hasAltDown()) {
+            for (GuiNode node : state.nodes) {
+                double worldMouseX = state.viewport.toWorldX(mouseX);
+                double worldMouseY = state.viewport.toWorldY(mouseY);
+                
+                if (worldMouseX >= node.x && worldMouseX <= node.x + node.width && 
+                    worldMouseY >= node.y && worldMouseY <= node.y + node.height) {
+                    
+                    renderNodeTooltip(guiGraphics, node, mouseX, mouseY);
+                    break;
+                }
+            }
+        }
+
+        guiGraphics.pose().popPose(); // End of UI Z-offset
+    }
+
+    private void renderNodeTooltip(GuiGraphics guiGraphics, GuiNode node, int mouseX, int mouseY) {
+        String descKey = node.definition.description();
+        boolean hasDesc = descKey != null && !descKey.isEmpty();
+
+        Component title = Component.translatable(node.title);
+        Component category = Component.translatable(node.definition.category());
+        Component ponder = Component.translatable("gui.mgmc.tooltip.ponder");
+        String modId = node.definition.registeredBy();
+        
+        int maxWidth = 220;
+        List<FormattedCharSequence> descLines = hasDesc ? font.split(Component.translatable(descKey), maxWidth - 20) : java.util.Collections.emptyList();
+        
+        // Calculate dimensions
+        int width = maxWidth;
+        int headerHeight = 28;
+        int footerHeight = 20;
+        int contentHeight = hasDesc ? (descLines.size() * 10) + 12 : 4;
+        int height = headerHeight + contentHeight + footerHeight;
+        
+        int tx = mouseX + 12;
+        int ty = mouseY + 12;
+        
+        // Keep inside screen
+        if (tx + width > this.width) tx = mouseX - width - 12;
+        if (ty + height > this.height) ty = mouseY - height - 12;
+        
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 600); // Higher than everything
+        
+        // --- 1. Background & Border (Modern Glass Style) ---
+        // Main shadow
+        guiGraphics.fill(tx + 2, ty + 2, tx + width + 2, ty + height + 2, 0x44000000);
+        // Main body (Dark semi-transparent)
+        guiGraphics.fill(tx, ty, tx + width, ty + height, 0xF5121212);
+        // Subtle gradient border
+        guiGraphics.renderOutline(tx, ty, width, height, 0x44FFFFFF);
+        
+        // --- 2. Header (Title & Category) ---
+        // Title accent bar
+        guiGraphics.fill(tx, ty, tx + 3, ty + headerHeight, node.color);
+        
+        // Title
+        guiGraphics.drawString(font, title, tx + 10, ty + 6, 0xFFFFFFFF, false);
+        
+        // Category & ModID (Secondary info)
+        String modName = modId;
+        if ("mgmc".equals(modId)) {
+            modName = "Maingraph for MC";
+        } else {
+            // Try to use Architectury to get the mod name
+            var mod = dev.architectury.platform.Platform.getOptionalMod(modId);
+            if (mod.isPresent()) {
+                modName = mod.get().getName();
+            } else if (modName.length() > 0) {
+                // Capitalize if it's just an ID
+                modName = modName.substring(0, 1).toUpperCase() + modName.substring(1);
+            }
+        }
+        
+        Component modInfo = Component.translatable("gui.mgmc.tooltip.mod", modName);
+        String subInfo = category.getString() + " · " + modInfo.getString();
+        guiGraphics.drawString(font, subInfo, tx + 10, ty + 16, 0xFF888888, false);
+        
+        // Separator (Only if has description)
+        if (hasDesc) {
+            guiGraphics.fill(tx + 8, ty + headerHeight - 2, tx + width - 8, ty + headerHeight - 1, 0x22FFFFFF);
+            
+            // --- 3. Content (Description) ---
+            for (int i = 0; i < descLines.size(); i++) {
+                guiGraphics.drawString(font, descLines.get(i), tx + 10, ty + headerHeight + 6 + i * 10, 0xFFBBBBBB, false);
+            }
+        }
+
+        // --- 4. Footer (Ponder Hint) ---
+        int footerY = ty + height - footerHeight;
+        // Subtle background for footer
+        guiGraphics.fill(tx + 1, footerY, tx + width - 1, ty + height - 1, 0x22FFFFFF);
+        
+        // W Icon Placeholder (A simple box)
+        int iconSize = 10;
+        int iconX = tx + 10;
+        int iconY = footerY + (footerHeight - iconSize) / 2;
+        guiGraphics.fill(iconX, iconY, iconX + iconSize, iconY + iconSize, 0xFF444444);
+        guiGraphics.renderOutline(iconX, iconY, iconSize, iconSize, 0xFF888888);
+        guiGraphics.drawString(font, "W", iconX + 2, iconY + 1, 0xFFFFFFFF, false);
+        
+        // Ponder text
+        guiGraphics.drawString(font, ponder, iconX + iconSize + 6, footerY + (footerHeight - 9) / 2, 0xFFAAAAAA, false);
+        
+        guiGraphics.pose().popPose();
     }
 
     @Override
@@ -336,23 +480,8 @@ public class BlueprintScreen extends Screen {
                 InputModalScreen.Mode.SELECTION,
                 (selected) -> {
                     if (selected.equals(Component.translatable("gui.mgmc.blueprint_editor.save_confirm.save").getString())) {
-                        // Check for unknown nodes
-                        boolean hasUnknown = false;
-                        for (GuiNode node : state.nodes) {
-                            if (node.definition.properties().containsKey("is_unknown")) {
-                                hasUnknown = true;
-                                break;
-                            }
-                        }
-                        
-                        if (hasUnknown) {
-                            state.showNotification(Component.translatable("gui.mgmc.blueprint_editor.save_error.unknown_nodes").getString());
-                            // Keep the screen open if they tried to save with unknown nodes
-                            return;
-                        }
-
-                        String json = BlueprintIO.serialize(state.nodes, state.connections, state.regions);
-                        NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
+                        saveBlueprint();
+                        if (state.isDirty) return; // Saving failed or cancelled
                     }
                     state.isDirty = false;
                     Minecraft.getInstance().setScreen(new BlueprintSelectionScreen());
@@ -438,6 +567,7 @@ public class BlueprintScreen extends Screen {
             } else {
                 NetworkService.getInstance().saveBlueprint(blueprintName, json, state.version);
             }
+            state.isDirty = false;
         }
     }
 

@@ -29,6 +29,7 @@ public class MGMCNetwork {
         NetworkManager.registerReceiver(NetworkManager.s2c(), ResponseExportPayload.TYPE, ResponseExportPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleResponseExport);
         NetworkManager.registerReceiver(NetworkManager.s2c(), RuntimeErrorReportPayload.TYPE, RuntimeErrorReportPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleRuntimeError);
         NetworkManager.registerReceiver(NetworkManager.s2c(), ExecuteClientActionPayload.TYPE, ExecuteClientActionPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleExecuteClientAction);
+        NetworkManager.registerReceiver(NetworkManager.s2c(), OpenUIPayload.TYPE, OpenUIPayload.STREAM_CODEC, BlueprintNetworkHandler.Client::handleOpenUI);
     }
 
     public static void sendToPlayer(ServerPlayer player, net.minecraft.network.protocol.common.custom.CustomPacketPayload payload) {

@@ -69,6 +69,16 @@ public class NodeHelper {
     }
 
     /**
+     * 设置节点描述的 i18n key
+     * @param descriptionKey 描述的 i18n key
+     * @return NodeHelper 实例
+     */
+    public NodeHelper description(String descriptionKey) {
+        builder.description(descriptionKey);
+        return this;
+    }
+
+    /**
      * 设置节点颜色
      */
     public NodeHelper color(int color) {
