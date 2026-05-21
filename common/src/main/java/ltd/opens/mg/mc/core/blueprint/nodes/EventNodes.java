@@ -38,6 +38,24 @@ public class EventNodes {
                 default -> null;
             });
 
+        NodeHelper.setup("on_blueprint_called", "node.mgmc.on_blueprint_called.name")
+            .category("node_category.mgmc.events.world")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/world/on_blueprint_called")
+            .execOut()
+            .output(NodePorts.LIST, "node.mgmc.port.args_list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
+            .output(NodePorts.PARAMETERS, "node.mgmc.on_mgrun.port.parameters", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
+            .output(NodePorts.TRIGGER_ENTITY, "node.mgmc.port.trigger_entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .output(NodePorts.TRIGGER_NAME, "node.mgmc.port.trigger_name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .registerValue((node, portId, ctx) -> switch (portId) {
+                case NodePorts.LIST, NodePorts.PARAMETERS -> ctx.args != null ? Arrays.asList(ctx.args) : Collections.emptyList();
+                case NodePorts.TRIGGER_ENTITY -> ctx.triggerEntity;
+                case NodePorts.TRIGGER_NAME -> ctx.triggerName != null ? ctx.triggerName : "";
+                case NodePorts.XYZ -> ctx.triggerXYZ;
+                default -> null;
+            });
+
         // --- 玩家事件 ---
         NodeHelper.setup("on_break_block", "node.mgmc.on_break_block.name")
             .category("node_category.mgmc.events.player")
