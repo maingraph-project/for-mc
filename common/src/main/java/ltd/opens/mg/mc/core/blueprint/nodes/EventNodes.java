@@ -1,10 +1,13 @@
 package ltd.opens.mg.mc.core.blueprint.nodes;
 
+import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeHelper;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.events.MGMCEventType;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.routing.BlueprintRouter;
 import net.minecraft.world.entity.player.Player;
 import ltd.opens.mg.mc.core.blueprint.data.XYZ;
@@ -339,6 +342,34 @@ public class EventNodes {
                 case NodePorts.XYZ -> ctx.triggerXYZ;
                 case NodePorts.ENTITY -> ctx.triggerEntity;
                 default -> null;
+            });
+
+        // --- 蓝图事件 ---
+        NodeHelper.setup("on_blueprint_called", "node.mgmc.on_blueprint_called.name")
+            .category("node_category.mgmc.events.blueprint")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/blueprint/on_blueprint_called")
+            .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.LIST, "node.mgmc.port.args_list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
+            .register(new NodeHelper.NodeHandlerAdapter() {
+                @Override
+                public void execute(JsonObject node, NodeContext ctx) {
+                    NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+                }
+
+                @Override
+                public Object getValue(JsonObject node, String portId, NodeContext ctx) {
+                    if (NodePorts.LIST.equals(portId)) {
+                        List<Object> list = new ArrayList<>();
+                        if (ctx.args != null) {
+                            for (String arg : ctx.args) {
+                                list.add(arg);
+                            }
+                        }
+                        return list;
+                    }
+                    return null;
+                }
             });
     }
 }
