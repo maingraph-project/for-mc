@@ -266,6 +266,29 @@ public class EventNodes {
                 default -> null;
             });
 
+        NodeHelper.setup("on_item_pickup", "node.mgmc.on_item_pickup.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_item_pickup")
+            .execOut()
+            .output(NodePorts.ITEM_ID, "node.mgmc.port.item_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .registerEvent(MGMCEventType.ITEM_PICKUP, (e, b) -> {
+                if (e.getPlayer() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer());
+                }
+                if (e.getItemId() != null) {
+                    b.triggerItemId(e.getItemId());
+                }
+            }, e -> e.getItemId() != null ? e.getItemId() : "",
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.ITEM_ID -> ctx.triggerItemId;
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                default -> null;
+            });
+
         NodeHelper.setup("on_player_hurt", "node.mgmc.on_player_hurt.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)

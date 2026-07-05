@@ -18,6 +18,7 @@ public class MGMCEventContext {
     @Nullable private final BlockPos pos;
     @Nullable private final net.minecraft.world.level.block.state.BlockState blockState;
     @Nullable private final ItemStack item;
+    @Nullable private final String itemId; // For item pickup events
     @Nullable private final DamageSource damageSource;
     private final float amount;
     @Nullable private final XYZ xyz;
@@ -29,7 +30,7 @@ public class MGMCEventContext {
 
     public MGMCEventContext(Level level, @Nullable Entity entity, @Nullable Player player, @Nullable Entity targetEntity,
                             @Nullable BlockPos pos, @Nullable net.minecraft.world.level.block.state.BlockState blockState,
-                            @Nullable ItemStack item, @Nullable DamageSource damageSource, float amount,
+                            @Nullable ItemStack item, @Nullable String itemId, @Nullable DamageSource damageSource, float amount,
                             @Nullable XYZ xyz, float speed,
                             @Nullable String eventName, @Nullable Object[] args) {
         this.level = level;
@@ -39,6 +40,7 @@ public class MGMCEventContext {
         this.pos = pos;
         this.blockState = blockState;
         this.item = item;
+        this.itemId = itemId;
         this.damageSource = damageSource;
         this.amount = amount;
         this.xyz = xyz;
@@ -54,6 +56,7 @@ public class MGMCEventContext {
     @Nullable public BlockPos getPos() { return pos; }
     @Nullable public net.minecraft.world.level.block.state.BlockState getBlockState() { return blockState; }
     @Nullable public ItemStack getItem() { return item; }
+    @Nullable public String getItemId() { return itemId; }
     @Nullable public DamageSource getDamageSource() { return damageSource; }
     public float getAmount() { return amount; }
     @Nullable public XYZ getXyz() { return xyz; }
@@ -73,6 +76,7 @@ public class MGMCEventContext {
         private BlockPos pos;
         private net.minecraft.world.level.block.state.BlockState blockState;
         private ItemStack item;
+        private String itemId;
         private DamageSource damageSource;
         private float amount;
         private XYZ xyz;
@@ -90,6 +94,7 @@ public class MGMCEventContext {
         public Builder pos(BlockPos pos) { this.pos = pos; return this; }
         public Builder blockState(net.minecraft.world.level.block.state.BlockState blockState) { this.blockState = blockState; return this; }
         public Builder item(ItemStack item) { this.item = item; return this; }
+        public Builder itemId(String itemId) { this.itemId = itemId; return this; }
         public Builder damageSource(DamageSource damageSource) { this.damageSource = damageSource; return this; }
         public Builder amount(float amount) { this.amount = amount; return this; }
         public Builder xyz(XYZ xyz) { this.xyz = xyz; return this; }
@@ -98,7 +103,7 @@ public class MGMCEventContext {
         public Builder args(Object[] args) { this.args = args; return this; }
 
         public MGMCEventContext build() {
-            return new MGMCEventContext(level, entity, player, targetEntity, pos, blockState, item, damageSource, amount, xyz, speed, eventName, args);
+            return new MGMCEventContext(level, entity, player, targetEntity, pos, blockState, item, itemId, damageSource, amount, xyz, speed, eventName, args);
         }
     }
 }
