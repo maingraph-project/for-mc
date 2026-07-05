@@ -72,7 +72,15 @@ public class CommonEvents {
                 .entity(player)
                 .build());
         });
-        
+
+        PlayerEvent.PLAYER_QUIT.register(player -> {
+            if (player.level().isClientSide()) return;
+            EventDispatcher.dispatch(MGMCEventType.PLAYER_LEAVE, MGMCEventContext.builder(player.level())
+                .player(player)
+                .entity(player)
+                .build());
+        });
+
         EntityEvent.ADD.register((entity, level) -> {
             if (level.isClientSide()) return EventResult.pass();
             EventDispatcher.dispatch(MGMCEventType.ENTITY_SPAWN, MGMCEventContext.builder(level)

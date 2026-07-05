@@ -194,6 +194,26 @@ public class EventNodes {
                 default -> null;
             });
 
+        NodeHelper.setup("on_player_leave", "node.mgmc.on_player_leave.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_player_leave")
+            .execOut()
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .registerEvent(MGMCEventType.PLAYER_LEAVE, (e, b) -> {
+                if (e.getPlayer() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer());
+                }
+            }, e -> BlueprintRouter.PLAYERS_ID,
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                case NodePorts.NAME -> ctx.triggerName;
+                default -> null;
+            });
+
         NodeHelper.setup("on_player_hurt", "node.mgmc.on_player_hurt.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
