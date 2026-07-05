@@ -41,17 +41,6 @@ public class EventNodes {
                 default -> null;
             });
 
-        NodeHelper.setup("on_blueprint_called", "node.mgmc.on_blueprint_called.name")
-            .category("node_category.mgmc.events.world")
-            .color(NodeThemes.COLOR_NODE_EVENT)
-            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/blueprint/on_blueprint_called")
-            .execOut()
-            .output(NodePorts.LIST, "node.mgmc.port.args_list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
-            .registerValue((node, portId, ctx) -> switch (portId) {
-                case NodePorts.LIST -> ctx.args != null ? Arrays.asList(ctx.args) : Collections.emptyList();
-                default -> null;
-            });
-
         // --- 玩家事件 ---
         NodeHelper.setup("on_break_block", "node.mgmc.on_break_block.name")
             .category("node_category.mgmc.events.player")
