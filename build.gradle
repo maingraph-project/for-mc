@@ -36,10 +36,14 @@ allprojects {
     group = rootProject.mod_group_id
 
     repositories {
-        mavenCentral()
-        maven { url "https://maven.architectury.dev/" }
-        maven { url "https://maven.minecraftforge.net/" }
+        // NeoForge仓库必须放在最前面，避免从Maven Central下载NeoForge依赖导致403错误
         maven { url "https://maven.neoforged.net/releases/" }
+        maven { url "https://maven.minecraftforge.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://maven.fabricmc.net/" }
+        // Sonatype Central (官方Maven Central仓库)
+        maven { url "https://central.sonatype.com/repository/maven-public/" }
+        mavenCentral()
     }
 
     tasks.withType(JavaCompile) {

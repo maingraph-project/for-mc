@@ -126,6 +126,34 @@ public class EventNodes {
                 default -> null;
             });
 
+        NodeHelper.setup("on_left_click_block", "node.mgmc.on_left_click_block.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_left_click_block")
+            .execOut()
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .output(NodePorts.BLOCK_ID, "node.mgmc.port.block_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .registerEvent(MGMCEventType.BLOCK_LEFT_CLICK, (e, b) -> {
+                if (e.getPlayer() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer());
+                }
+                if (e.getPos() != null) {
+                    b.triggerX(e.getPos().getX()).triggerY(e.getPos().getY()).triggerZ(e.getPos().getZ());
+                }
+                if (e.getBlockState() != null) {
+                    b.triggerBlockId(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(e.getBlockState().getBlock()).toString());
+                }
+            }, e -> e.getBlockState() != null ? net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(e.getBlockState().getBlock()).toString() : "",
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.XYZ -> ctx.triggerXYZ;
+                case NodePorts.BLOCK_ID -> ctx.triggerBlockId;
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                default -> null;
+            });
+
         NodeHelper.setup("on_player_join", "node.mgmc.on_player_join.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
