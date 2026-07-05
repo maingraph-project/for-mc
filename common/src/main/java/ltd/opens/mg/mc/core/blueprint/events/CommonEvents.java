@@ -6,12 +6,22 @@ import dev.architectury.event.events.common.BlockEvent;
 import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.event.events.common.InteractionEvent;
 import dev.architectury.event.events.common.PlayerEvent;
+import dev.architectury.event.events.common.TickEvent;
 import ltd.opens.mg.mc.core.blueprint.EventDispatcher;
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity.RemovalReason;
+import net.minecraft.core.registries.BuiltInRegistries;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CommonEvents {
+    // 位置追踪系统
+    private static final Map<UUID, XYZ> lastPlayerPositions = new ConcurrentHashMap<>();
+
     public static void init() {
         BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
             if (level.isClientSide()) return EventResult.pass();
@@ -75,10 +85,45 @@ public class CommonEvents {
 
         PlayerEvent.PLAYER_QUIT.register(player -> {
             if (player.level().isClientSide()) return;
+            // 清理位置追踪缓存
+            lastPlayerPositions.remove(player.getUUID());
             EventDispatcher.dispatch(MGMCEventType.PLAYER_LEAVE, MGMCEventContext.builder(player.level())
                 .player(player)
                 .entity(player)
                 .build());
+        });
+
+        // 服务器tick事件 - 检测玩家移动
+        TickEvent.SERVER_POST.register(server -> {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (player.level().isClientSide()) continue;
+
+                UUID playerId = player.getUUID();
+                XYZ currentPos = new XYZ(player.getX(), player.getY(), player.getZ());
+                XYZ oldPos = lastPlayerPositions.get(playerId);
+
+                if (oldPos != null) {
+                    double dx = currentPos.x() - oldPos.x();
+                    double dy = currentPos.y() - oldPos.y();
+                    double dz = currentPos.z() - oldPos.z();
+                    double distanceSq = dx * dx + dy * dy + dz * dz;
+
+                    // 如果移动距离大于阈值，触发PLAYER_MOVE事件
+                    if (distanceSq > 1E-6) {
+                        float speed = (float) Math.sqrt(distanceSq);
+                        EventDispatcher.dispatch(MGMCEventType.PLAYER_MOVE, MGMCEventContext.builder(player.level())
+                            .player(player)
+                            .entity(player)
+                            .pos(player.blockPosition())
+                            .xyz(currentPos)
+                            .speed(speed)
+                            .build());
+                    }
+                }
+
+                // 更新位置缓存
+                lastPlayerPositions.put(playerId, currentPos);
+            }
         });
 
         EntityEvent.ADD.register((entity, level) -> {

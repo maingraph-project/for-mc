@@ -214,6 +214,30 @@ public class EventNodes {
                 default -> null;
             });
 
+        NodeHelper.setup("on_player_move", "node.mgmc.on_player_move.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_player_move")
+            .execOut()
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .output(NodePorts.SPEED, "node.mgmc.port.speed", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .registerEvent(MGMCEventType.PLAYER_MOVE, (e, b) -> {
+                if (e.getPlayer() != null && e.getXyz() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer())
+                     .triggerX(e.getXyz().x()).triggerY(e.getXyz().y()).triggerZ(e.getXyz().z())
+                     .triggerSpeed(e.getSpeed());
+                }
+            }, e -> BlueprintRouter.PLAYERS_ID,
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.XYZ -> ctx.triggerXYZ;
+                case NodePorts.SPEED -> ctx.triggerSpeed;
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                default -> null;
+            });
+
         NodeHelper.setup("on_player_hurt", "node.mgmc.on_player_hurt.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
