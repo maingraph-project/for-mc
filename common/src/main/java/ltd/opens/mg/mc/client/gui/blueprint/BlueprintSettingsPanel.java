@@ -21,6 +21,12 @@ public class BlueprintSettingsPanel {
             .type(SettingType.BOOLEAN)
             .defaultValue(true)
             .register();
+
+        SettingsHelper.setup("save_button_highlight", "gui.mgmc.settings.save_button_highlight")
+            .description("gui.mgmc.settings.save_button_highlight.desc")
+            .type(SettingType.BOOLEAN)
+            .defaultValue(true)
+            .register();
     }
     
     public static void render(GuiGraphics guiGraphics, BlueprintScreen screen, BlueprintState state, Font font, int mouseX, int mouseY) {

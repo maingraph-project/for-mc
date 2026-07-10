@@ -4,6 +4,7 @@ import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.gui.blueprint.*;
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintSettingsPanel;
+import ltd.opens.mg.mc.client.gui.blueprint.settings.SettingsRegistry;
 
 import ltd.opens.mg.mc.client.gui.blueprint.handler.*;
 import ltd.opens.mg.mc.client.gui.blueprint.io.*;
@@ -499,7 +500,7 @@ public class BlueprintScreen extends Screen {
         int textColor = hovered ? 0xFFFFFFFF : 0xFFBBBBBB;
 
         // Save button highlight logic
-        if ("save".equals(buttonId) && state.isDirty) {
+        if ("save".equals(buttonId) && state.isDirty && SettingsRegistry.getBoolean("save_button_highlight")) {
             float pulse = (float)(Math.sin(System.currentTimeMillis() / 200.0) + 1.0) * 0.5f; // 0.0 to 1.0
             int alpha = 100 + (int)(pulse * 100); // 100 to 200
             

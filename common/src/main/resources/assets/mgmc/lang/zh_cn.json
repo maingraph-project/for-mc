@@ -2,6 +2,8 @@
   "gui.mgmc.settings.title": "编辑器设置",
   "gui.mgmc.settings.snap_guides": "智能吸附辅助线",
   "gui.mgmc.settings.snap_guides.desc": "当你拖拽单个节点时，如果其边缘或中心与其他节点对齐，会自动吸附并在视图中显示红色的虚线辅助线。",
+  "gui.mgmc.settings.save_button_highlight": "未保存时保存按钮高亮",
+  "gui.mgmc.settings.save_button_highlight.desc": "当蓝图有未保存的改动时，顶栏的保存按钮会以绿色脉冲高亮提示；关闭后保存按钮保持普通样式。",
   "key.mgmc.open_blueprint": "打开蓝图编辑器",
   "key.categories.mgmc.main": "Maingraph for MC",
   "gui.mgmc.blueprint_selection.title": "选择蓝图",
