@@ -286,6 +286,7 @@
   "node.mgmc.get_entity_info.port.permission_level": "Permission Level",
   "node.mgmc.get_entity_look_direction.name": "Get Entity Look Direction",
   "node.mgmc.raycast.name": "Raycast",
+  "node.mgmc.raycast.desc": "Casts an invisible ray (straight line) from a start point in a given direction, detecting the first block or entity it hits. You can set the max distance and whether to stop at blocks or entities, and it outputs the hit type (MISS / BLOCK / ENTITY), the hit position, the hit entity, the hit block position, and a list of points along the ray.",
   "node.mgmc.port.direction": "Direction",
   "node.mgmc.port.max_distance": "Max Distance",
   "node.mgmc.port.stop_on_block": "Stop on Block",

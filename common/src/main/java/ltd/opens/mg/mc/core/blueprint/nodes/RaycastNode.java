@@ -29,6 +29,7 @@ public class RaycastNode {
         NodeHelper.setup("raycast", "node.mgmc.raycast.name")
             .category("node_category.mgmc.variable.world")
             .color(NodeThemes.COLOR_NODE_VARIABLE)
+            .description("node.mgmc.raycast.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/world/raycast")
             .input(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
             .input(NodePorts.DIRECTION, "node.mgmc.port.direction", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)

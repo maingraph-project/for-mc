@@ -311,6 +311,7 @@
   "node.mgmc.get_entity_info.port.permission_level": "权限等级",
   "node.mgmc.get_entity_look_direction.name": "获取实体朝向",
   "node.mgmc.raycast.name": "射线检测",
+  "node.mgmc.raycast.desc": "从起点沿某个方向射出一条看不见的射线（直线），检测最先碰到的方块或生物。可设置最大距离、是否在方块或生物处停下，并输出命中类型（MISS 未命中 / BLOCK 方块 / ENTITY 生物）、命中点坐标、命中实体、命中方块坐标，以及沿途经过的点位列表。",
   "node.mgmc.port.direction": "方向",
   "node.mgmc.port.max_distance": "最大距离",
   "node.mgmc.port.stop_on_block": "方块阻挡",
