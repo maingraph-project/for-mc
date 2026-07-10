@@ -258,7 +258,9 @@
   "node.mgmc.logic_xor.name": "逻辑异或 (XOR)",
   "node.mgmc.logic_xor.desc": "逻辑异或（互斥）：A 和 B 中恰好一个成立时为真，两个相同时为假。",
   "node.mgmc.client_show_toast.name": "显示客户端 Toast 提示",
+  "node.mgmc.client_show_toast.desc": "在客户端屏幕上显示一个 Toast 提示（含标题与内容）。",
   "node.mgmc.client_open_url.name": "打开网页",
+  "node.mgmc.client_open_url.desc": "在客户端默认浏览器中打开一个网页链接。",
   "node.mgmc.port.url": "URL",
 
   "node.mgmc.port.exec_in": "输入",

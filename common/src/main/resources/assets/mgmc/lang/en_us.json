@@ -251,7 +251,9 @@
   "node.mgmc.logic_xor.name": "Logic XOR",
   "node.mgmc.logic_xor.desc": "Logic XOR (exclusive): true when exactly one of A and B is true, false when both match.",
   "node.mgmc.client_show_toast.name": "Show Client Toast",
+  "node.mgmc.client_show_toast.desc": "Shows a toast notification (title and message) on the client screen.",
   "node.mgmc.client_open_url.name": "Open Web Page",
+  "node.mgmc.client_open_url.desc": "Opens a web URL in the client's default browser.",
   "node.mgmc.port.url": "URL",
 
   "node.mgmc.port.exec_in": "In",
