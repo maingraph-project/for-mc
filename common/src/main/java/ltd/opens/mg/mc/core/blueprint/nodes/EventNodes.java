@@ -1,10 +1,13 @@
 package ltd.opens.mg.mc.core.blueprint.nodes;
 
+import com.google.gson.JsonObject;
 import ltd.opens.mg.mc.core.blueprint.NodeDefinition;
 import ltd.opens.mg.mc.core.blueprint.NodeHelper;
 import ltd.opens.mg.mc.core.blueprint.NodePorts;
 import ltd.opens.mg.mc.core.blueprint.NodeThemes;
 import ltd.opens.mg.mc.core.blueprint.events.MGMCEventType;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeContext;
+import ltd.opens.mg.mc.core.blueprint.engine.NodeLogicRegistry;
 import ltd.opens.mg.mc.core.blueprint.routing.BlueprintRouter;
 import net.minecraft.world.entity.player.Player;
 import ltd.opens.mg.mc.core.blueprint.data.XYZ;
@@ -22,6 +25,7 @@ public class EventNodes {
         NodeHelper.setup("on_mgrun", "node.mgmc.on_mgrun.name")
             .category("node_category.mgmc.events.world")
             .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_mgrun.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/world/on_mgrun")
             .execOut()
             .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
@@ -38,21 +42,11 @@ public class EventNodes {
                 default -> null;
             });
 
-        NodeHelper.setup("on_blueprint_called", "node.mgmc.on_blueprint_called.name")
-            .category("node_category.mgmc.events.world")
-            .color(NodeThemes.COLOR_NODE_EVENT)
-            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/blueprint/on_blueprint_called")
-            .execOut()
-            .output(NodePorts.LIST, "node.mgmc.port.args_list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
-            .registerValue((node, portId, ctx) -> switch (portId) {
-                case NodePorts.LIST -> ctx.args != null ? Arrays.asList(ctx.args) : Collections.emptyList();
-                default -> null;
-            });
-
         // --- 玩家事件 ---
         NodeHelper.setup("on_break_block", "node.mgmc.on_break_block.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_break_block.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_break_block")
             .execOut()
             .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -81,6 +75,7 @@ public class EventNodes {
         NodeHelper.setup("on_place_block", "node.mgmc.on_place_block.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_place_block.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_place_block")
             .execOut()
             .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -134,9 +129,39 @@ public class EventNodes {
                 default -> null;
             });
 
+        NodeHelper.setup("on_left_click_block", "node.mgmc.on_left_click_block.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_left_click_block.desc")
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_left_click_block")
+            .execOut()
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .output(NodePorts.BLOCK_ID, "node.mgmc.port.block_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .registerEvent(MGMCEventType.BLOCK_LEFT_CLICK, (e, b) -> {
+                if (e.getPlayer() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer());
+                }
+                if (e.getPos() != null) {
+                    b.triggerX(e.getPos().getX()).triggerY(e.getPos().getY()).triggerZ(e.getPos().getZ());
+                }
+                if (e.getBlockState() != null) {
+                    b.triggerBlockId(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(e.getBlockState().getBlock()).toString());
+                }
+            }, e -> e.getBlockState() != null ? net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(e.getBlockState().getBlock()).toString() : "",
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.XYZ -> ctx.triggerXYZ;
+                case NodePorts.BLOCK_ID -> ctx.triggerBlockId;
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                default -> null;
+            });
+
         NodeHelper.setup("on_player_join", "node.mgmc.on_player_join.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_player_join.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_player_join")
             .execOut()
             .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
@@ -202,9 +227,79 @@ public class EventNodes {
                 default -> null;
             });
 
+        NodeHelper.setup("on_player_leave", "node.mgmc.on_player_leave.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_player_leave")
+            .execOut()
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .registerEvent(MGMCEventType.PLAYER_LEAVE, (e, b) -> {
+                if (e.getPlayer() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer());
+                }
+            }, e -> BlueprintRouter.PLAYERS_ID,
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                case NodePorts.NAME -> ctx.triggerName;
+                default -> null;
+            });
+
+        NodeHelper.setup("on_player_move", "node.mgmc.on_player_move.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_player_move.desc")
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_player_move")
+            .execOut()
+            .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
+            .output(NodePorts.SPEED, "node.mgmc.port.speed", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .registerEvent(MGMCEventType.PLAYER_MOVE, (e, b) -> {
+                if (e.getPlayer() != null && e.getXyz() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer())
+                     .triggerX(e.getXyz().x()).triggerY(e.getXyz().y()).triggerZ(e.getXyz().z())
+                     .triggerSpeed(e.getSpeed());
+                }
+            }, e -> BlueprintRouter.PLAYERS_ID,
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.XYZ -> ctx.triggerXYZ;
+                case NodePorts.SPEED -> ctx.triggerSpeed;
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                default -> null;
+            });
+
+        NodeHelper.setup("on_item_pickup", "node.mgmc.on_item_pickup.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_item_pickup.desc")
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_item_pickup")
+            .execOut()
+            .output(NodePorts.ITEM_ID, "node.mgmc.port.item_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .registerEvent(MGMCEventType.ITEM_PICKUP, (e, b) -> {
+                if (e.getPlayer() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer());
+                }
+                if (e.getItemId() != null) {
+                    b.triggerItemId(e.getItemId());
+                }
+            }, e -> e.getItemId() != null ? e.getItemId() : "",
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.ITEM_ID -> ctx.triggerItemId;
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                default -> null;
+            });
+
         NodeHelper.setup("on_player_hurt", "node.mgmc.on_player_hurt.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_player_hurt.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_player_hurt")
             .execOut()
             .output(NodePorts.DAMAGE_AMOUNT, "node.mgmc.port.damage_amount", NodeDefinition.PortType.FLOAT, NodeThemes.COLOR_PORT_FLOAT)
@@ -232,6 +327,7 @@ public class EventNodes {
         NodeHelper.setup("on_use_item", "node.mgmc.on_use_item.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_use_item.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_use_item")
             .execOut()
             .output(NodePorts.ITEM_ID, "node.mgmc.port.item_id", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
@@ -255,6 +351,7 @@ public class EventNodes {
         NodeHelper.setup("on_player_attack", "node.mgmc.on_player_attack.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_player_attack.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_player_attack")
             .execOut()
             .output(NodePorts.VICTIM_ENTITY, "node.mgmc.port.victim_entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
@@ -334,6 +431,7 @@ public class EventNodes {
         NodeHelper.setup("on_entity_spawn", "node.mgmc.on_entity_spawn.name")
             .category("node_category.mgmc.events.entity")
             .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_entity_spawn.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/entity/on_entity_spawn")
             .execOut()
             .output(NodePorts.XYZ, "node.mgmc.port.xyz", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -350,6 +448,35 @@ public class EventNodes {
                 case NodePorts.XYZ -> ctx.triggerXYZ;
                 case NodePorts.ENTITY -> ctx.triggerEntity;
                 default -> null;
+            });
+
+        // --- 蓝图事件 ---
+        NodeHelper.setup("on_blueprint_called", "node.mgmc.on_blueprint_called.name")
+            .category("node_category.mgmc.events.blueprint")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_blueprint_called.desc")
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/blueprint/on_blueprint_called")
+            .output(NodePorts.EXEC, "node.mgmc.port.exec_out", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
+            .output(NodePorts.LIST, "node.mgmc.port.args_list", NodeDefinition.PortType.LIST, NodeThemes.COLOR_PORT_LIST)
+            .register(new NodeHelper.NodeHandlerAdapter() {
+                @Override
+                public void execute(JsonObject node, NodeContext ctx) {
+                    NodeLogicRegistry.triggerExec(node, NodePorts.EXEC, ctx);
+                }
+
+                @Override
+                public Object getValue(JsonObject node, String portId, NodeContext ctx) {
+                    if (NodePorts.LIST.equals(portId)) {
+                        List<Object> list = new ArrayList<>();
+                        if (ctx.args != null) {
+                            for (String arg : ctx.args) {
+                                list.add(arg);
+                            }
+                        }
+                        return list;
+                    }
+                    return null;
+                }
             });
     }
 }

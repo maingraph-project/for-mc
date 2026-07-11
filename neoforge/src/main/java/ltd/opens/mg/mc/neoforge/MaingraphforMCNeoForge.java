@@ -7,5 +7,6 @@ import net.neoforged.fml.common.Mod;
 public class MaingraphforMCNeoForge {
     public MaingraphforMCNeoForge() {
         MaingraphforMC.init();
+        NeoForgeEvents.init(); // 初始化NeoForge平台特定事件
     }
 }

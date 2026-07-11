@@ -360,7 +360,7 @@ public class BlueprintNodeHandler {
             state.snapGuides.clear();
             
             if (SettingsRegistry.getBoolean("snap_guides") && state.selectedNodes.size() <= 1) {
-                float snapThreshold = 10.0f / state.viewport.zoom; 
+                float snapThreshold = SettingsRegistry.getFloat("snap_threshold") / state.viewport.zoom;
                 if (snapThreshold > 20) snapThreshold = 20;
                 
                 float snappedX = targetX;

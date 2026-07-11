@@ -4,6 +4,7 @@ import ltd.opens.mg.mc.MaingraphforMC;
 import ltd.opens.mg.mc.client.network.NetworkService;
 import ltd.opens.mg.mc.client.gui.blueprint.*;
 import ltd.opens.mg.mc.client.gui.blueprint.BlueprintSettingsPanel;
+import ltd.opens.mg.mc.client.gui.blueprint.settings.SettingsRegistry;
 
 import ltd.opens.mg.mc.client.gui.blueprint.handler.*;
 import ltd.opens.mg.mc.client.gui.blueprint.io.*;
@@ -499,7 +500,7 @@ public class BlueprintScreen extends Screen {
         int textColor = hovered ? 0xFFFFFFFF : 0xFFBBBBBB;
 
         // Save button highlight logic
-        if ("save".equals(buttonId) && state.isDirty) {
+        if ("save".equals(buttonId) && state.isDirty && SettingsRegistry.getBoolean("save_button_highlight")) {
             float pulse = (float)(Math.sin(System.currentTimeMillis() / 200.0) + 1.0) * 0.5f; // 0.0 to 1.0
             int alpha = 100 + (int)(pulse * 100); // 100 to 200
             
@@ -573,6 +574,9 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (BlueprintSettingsPanel.mouseReleased(this, state, mouseX, mouseY, button)) {
+            return true;
+        }
         state.buttonLongPressTarget = null;
         state.isMouseDown = false;
         int modifiers = (hasControlDown() ? 2 : 0) | (hasShiftDown() ? 1 : 0) | (hasAltDown() ? 4 : 0);
@@ -700,6 +704,9 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (BlueprintSettingsPanel.mouseDragged(this, state, mouseX, mouseY, button)) {
+            return true;
+        }
         int modifiers = (hasControlDown() ? 2 : 0) | (hasShiftDown() ? 1 : 0) | (hasAltDown() ? 4 : 0);
         MouseButtonEvent event = new MouseButtonEvent(mouseX, mouseY, new ButtonInfo(button, 2, modifiers));
         return eventHandler.mouseDragged(event, dragX, dragY) || super.mouseDragged(mouseX, mouseY, button, dragX, dragY);

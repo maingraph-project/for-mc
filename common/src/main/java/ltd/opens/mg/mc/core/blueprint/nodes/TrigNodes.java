@@ -10,6 +10,7 @@ public class TrigNodes {
         NodeHelper.setup("sin", "node.mgmc.sin.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.sin.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/sin")
             .registerUnaryMathOp(Math::sin);
 
@@ -17,6 +18,7 @@ public class TrigNodes {
         NodeHelper.setup("cos", "node.mgmc.cos.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.cos.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/cos")
             .registerUnaryMathOp(Math::cos);
 
@@ -24,6 +26,7 @@ public class TrigNodes {
         NodeHelper.setup("tan", "node.mgmc.tan.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.tan.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/tan")
             .registerUnaryMathOp(Math::tan);
 
@@ -31,6 +34,7 @@ public class TrigNodes {
         NodeHelper.setup("asin", "node.mgmc.asin.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.asin.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/asin")
             .registerUnaryMathOp(Math::asin);
 
@@ -38,6 +42,7 @@ public class TrigNodes {
         NodeHelper.setup("acos", "node.mgmc.acos.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.acos.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/acos")
             .registerUnaryMathOp(Math::acos);
 
@@ -45,6 +50,7 @@ public class TrigNodes {
         NodeHelper.setup("atan", "node.mgmc.atan.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.atan.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/atan")
             .registerUnaryMathOp(Math::atan);
 
@@ -52,6 +58,7 @@ public class TrigNodes {
         NodeHelper.setup("atan2", "node.mgmc.atan2.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.atan2.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/atan2")
             .registerMathOp(Math::atan2);
 
@@ -59,6 +66,7 @@ public class TrigNodes {
         NodeHelper.setup("to_radians", "node.mgmc.to_radians.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.to_radians.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/to_radians")
             .registerUnaryMathOp(Math::toRadians);
 
@@ -66,6 +74,7 @@ public class TrigNodes {
         NodeHelper.setup("to_degrees", "node.mgmc.to_degrees.name")
             .category("node_category.mgmc.logic.trig")
             .color(NodeThemes.COLOR_NODE_MATH)
+            .description("node.mgmc.to_degrees.desc")
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/trig/to_degrees")
             .registerUnaryMathOp(Math::toDegrees);
     }

@@ -28,6 +28,11 @@ public class SettingsHelper {
         return this;
     }
 
+    public SettingsHelper range(float min, float max) {
+        builder.range(min, max);
+        return this;
+    }
+
     public SettingsHelper onChange(Consumer<Object> onChange) {
         builder.onChange(onChange);
         return this;
