@@ -12,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 通用事件分发器
@@ -20,28 +19,53 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EventDispatcher {
 
-    private static final Map<MGMCEventType, List<NodeDefinition>> EVENT_NODES = new ConcurrentHashMap<>();
+    /**
+     * 事件节点索引快照（不可变，重建时整体替换以保证并发读取安全）。
+     * 配合 {@code eventNodesVersion} 与 {@link NodeRegistry#getVersion()}，
+     * 可在节点注册表发生变动（例如附属 mod 在引擎初始化之后才注册事件节点）后自动重建，
+     * 不再依赖固定的初始化注册顺序。
+     */
+    private static volatile Map<MGMCEventType, List<NodeDefinition>> EVENT_NODES = new java.util.HashMap<>();
+    private static long eventNodesVersion = -1;
 
     /**
-     * 初始化分发器，从注册表中提取所有事件节点。
+     * 依据当前节点注册表重建事件索引。
+     * 注册表（含附属 mod 在初始化后注册的节点）发生变动后调用即可生效，
+     * 无需在引擎初始化阶段强制规定注册顺序。
      */
-    public static void init() {
-        EVENT_NODES.clear();
-
+    private static void rebuildIndex() {
+        Map<MGMCEventType, List<NodeDefinition>> index = new java.util.HashMap<>();
         for (NodeDefinition def : NodeRegistry.getAllDefinitions()) {
             Object meta = def.properties().get("event_metadata");
             if (meta instanceof EventMetadata metadata) {
-                EVENT_NODES.computeIfAbsent(metadata.eventType(), k -> new ArrayList<>()).add(def);
+                index.computeIfAbsent(metadata.eventType(), k -> new ArrayList<>()).add(def);
             }
         }
+        EVENT_NODES = index;
+        eventNodesVersion = NodeRegistry.getVersion();
+    }
+
+    /**
+     * 初始化事件分发器（构建初始索引）。运行时若节点注册表发生变动，
+     * {@link #dispatch} 会自动重建索引，因此本方法无需关心注册时机。
+     */
+    public static void init() {
+        rebuildIndex();
         MaingraphforMC.LOGGER.info("EventDispatcher initialized with {} event types", EVENT_NODES.size());
     }
 
     public static void clear() {
-        // No cache to clear for now
+        EVENT_NODES = new java.util.HashMap<>();
+        eventNodesVersion = -1;
     }
 
     public static void dispatch(MGMCEventType type, MGMCEventContext context) {
+        // 若注册表自上次构建后发生过变动（例如附属 mod 较晚注册了事件节点），重建索引。
+        // 正常路径下仅做一次 long 比较，几乎零开销。
+        if (eventNodesVersion != NodeRegistry.getVersion()) {
+            rebuildIndex();
+        }
+
         List<NodeDefinition> defs = EVENT_NODES.get(type);
         if (defs == null || defs.isEmpty()) return;
 

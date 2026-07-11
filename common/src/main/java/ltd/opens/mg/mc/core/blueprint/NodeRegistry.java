@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NodeRegistry {
     private static final Map<String, NodeDefinition> REGISTRY = new ConcurrentHashMap<>();
     private static boolean frozen = false;
+    private static final java.util.concurrent.atomic.AtomicLong VERSION = new java.util.concurrent.atomic.AtomicLong();
 
     public static void freeze() {
         frozen = true;
@@ -15,6 +16,14 @@ public class NodeRegistry {
 
     public static boolean isFrozen() {
         return frozen;
+    }
+
+    /**
+     * 注册表版本号，每次成功注册新节点时自增。
+     * 供 EventDispatcher 在注册表发生变动（如附属 mod 晚注册事件节点）后感知并重建索引。
+     */
+    public static long getVersion() {
+        return VERSION.get();
     }
 
     public static void register(NodeDefinition definition) {
@@ -39,6 +48,7 @@ public class NodeRegistry {
             throw new IllegalStateException("Node ID Conflict: " + definition.id());
         }
         REGISTRY.put(definition.id(), definition);
+        VERSION.incrementAndGet();
     }
 
     public static NodeDefinition get(String id) {
