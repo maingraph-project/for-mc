@@ -4,6 +4,8 @@
   "gui.mgmc.settings.snap_guides.desc": "When dragging a single node, if its edge or center aligns with other nodes, it will automatically snap and show red dashed guides in the view.",
   "gui.mgmc.settings.save_button_highlight": "Highlight Save Button When Unsaved",
   "gui.mgmc.settings.save_button_highlight.desc": "When the blueprint has unsaved changes, the Save button in the top bar pulses green as a reminder. When disabled, the Save button keeps its normal style.",
+  "gui.mgmc.settings.snap_threshold": "Snap Threshold",
+  "gui.mgmc.settings.snap_threshold.desc": "While dragging a node, the maximum distance (in screen pixels) at which its edge or center aligns with another node and snaps automatically. A larger value makes snapping easier.",
   "key.mgmc.open_blueprint": "Open Blueprint Editor",
   "key.categories.mgmc.main": "Maingraph for MC",
   "gui.mgmc.blueprint_selection.title": "Select Blueprint",

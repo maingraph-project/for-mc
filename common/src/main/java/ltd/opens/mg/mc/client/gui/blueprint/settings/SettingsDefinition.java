@@ -9,14 +9,18 @@ public class SettingsDefinition {
     public final SettingType type;
     public final Object defaultValue;
     public final Consumer<Object> onChange;
+    public final float min;
+    public final float max;
 
-    public SettingsDefinition(String id, String labelKey, String descriptionKey, SettingType type, Object defaultValue, Consumer<Object> onChange) {
+    public SettingsDefinition(String id, String labelKey, String descriptionKey, SettingType type, Object defaultValue, Consumer<Object> onChange, float min, float max) {
         this.id = id;
         this.labelKey = labelKey;
         this.descriptionKey = descriptionKey;
         this.type = type;
         this.defaultValue = defaultValue;
         this.onChange = onChange;
+        this.min = min;
+        this.max = max;
     }
 
     public static class Builder {
@@ -26,6 +30,8 @@ public class SettingsDefinition {
         private SettingType type;
         private Object defaultValue;
         private Consumer<Object> onChange;
+        private float min = 0.0f;
+        private float max = 1.0f;
 
         public Builder(String id, String labelKey) {
             this.id = id;
@@ -52,8 +58,14 @@ public class SettingsDefinition {
             return this;
         }
 
+        public Builder range(float min, float max) {
+            this.min = min;
+            this.max = max;
+            return this;
+        }
+
         public SettingsDefinition build() {
-            return new SettingsDefinition(id, labelKey, descriptionKey, type, defaultValue, onChange);
+            return new SettingsDefinition(id, labelKey, descriptionKey, type, defaultValue, onChange, min, max);
         }
     }
 }

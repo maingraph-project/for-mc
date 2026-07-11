@@ -574,6 +574,9 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (BlueprintSettingsPanel.mouseReleased(this, state, mouseX, mouseY, button)) {
+            return true;
+        }
         state.buttonLongPressTarget = null;
         state.isMouseDown = false;
         int modifiers = (hasControlDown() ? 2 : 0) | (hasShiftDown() ? 1 : 0) | (hasAltDown() ? 4 : 0);
@@ -701,6 +704,9 @@ public class BlueprintScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (BlueprintSettingsPanel.mouseDragged(this, state, mouseX, mouseY, button)) {
+            return true;
+        }
         int modifiers = (hasControlDown() ? 2 : 0) | (hasShiftDown() ? 1 : 0) | (hasAltDown() ? 4 : 0);
         MouseButtonEvent event = new MouseButtonEvent(mouseX, mouseY, new ButtonInfo(button, 2, modifiers));
         return eventHandler.mouseDragged(event, dragX, dragY) || super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
