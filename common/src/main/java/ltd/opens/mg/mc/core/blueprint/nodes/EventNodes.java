@@ -247,6 +247,27 @@ public class EventNodes {
                 default -> null;
             });
 
+        NodeHelper.setup("on_player_tick", "node.mgmc.on_player_tick.name")
+            .category("node_category.mgmc.events.player")
+            .color(NodeThemes.COLOR_NODE_EVENT)
+            .description("node.mgmc.on_player_tick.desc")
+            .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/events/player/on_player_tick")
+            .execOut()
+            .output(NodePorts.ENTITY, "node.mgmc.port.entity", NodeDefinition.PortType.ENTITY, NodeThemes.COLOR_PORT_ENTITY)
+            .output(NodePorts.NAME, "node.mgmc.port.name", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
+            .registerEvent(MGMCEventType.PLAYER_TICK, (e, b) -> {
+                if (e.getPlayer() != null) {
+                    b.triggerUuid(e.getPlayer().getUUID().toString())
+                     .triggerName(e.getPlayer().getName().getString())
+                     .triggerEntity(e.getPlayer());
+                }
+            }, e -> BlueprintRouter.PLAYERS_ID,
+            (node, portId, ctx) -> switch (portId) {
+                case NodePorts.ENTITY -> ctx.triggerEntity;
+                case NodePorts.NAME -> ctx.triggerName;
+                default -> null;
+            });
+
         NodeHelper.setup("on_player_move", "node.mgmc.on_player_move.name")
             .category("node_category.mgmc.events.player")
             .color(NodeThemes.COLOR_NODE_EVENT)

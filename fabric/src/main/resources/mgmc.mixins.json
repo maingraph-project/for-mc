@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "ltd.opens.mg.mc.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ItemEntityPickupMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -19,6 +19,9 @@
       "ltd.opens.mg.mc.fabric.MaingraphforMCFabric"
     ]
   },
+  "mixins": [
+    "mgmc.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.15.11",
     "fabric": "*",

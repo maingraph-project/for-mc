@@ -126,6 +126,15 @@ public class CommonEvents {
             }
         });
 
+        // 玩家tick事件 - 每游戏刻为在线玩家触发（高频事件）
+        TickEvent.PLAYER_POST.register(player -> {
+            if (player.level().isClientSide()) return;
+            EventDispatcher.dispatch(MGMCEventType.PLAYER_TICK, MGMCEventContext.builder(player.level())
+                .player(player)
+                .entity(player)
+                .build());
+        });
+
         EntityEvent.ADD.register((entity, level) -> {
             if (level.isClientSide()) return EventResult.pass();
             EventDispatcher.dispatch(MGMCEventType.ENTITY_SPAWN, MGMCEventContext.builder(level)
