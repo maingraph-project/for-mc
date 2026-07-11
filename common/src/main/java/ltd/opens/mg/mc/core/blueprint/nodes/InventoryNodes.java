@@ -10,6 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
@@ -18,6 +19,10 @@ import net.minecraft.world.item.Items;
 import ltd.opens.mg.mc.MaingraphforMC;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 
 public class InventoryNodes {
 
@@ -49,7 +54,28 @@ public class InventoryNodes {
                             if (nbtStr != null && !nbtStr.isEmpty() && !nbtStr.equals("{}")) {
                                 try {
                                     CompoundTag tag = TagParser.parseTag(nbtStr);
-                                    stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+
+                                    // 兼容旧版格式：Enchantments 列表 -> 1.21 的 enchantments 数据组件，
+                                    // 否则附魔不会生效（原逻辑只把 NBT 塞进 custom_data，游戏不会据此附魔）。
+                                    if (tag.contains("Enchantments", Tag.TAG_LIST)) {
+                                        ListTag enchList = tag.getList("Enchantments", Tag.TAG_COMPOUND);
+                                        RegistryAccess reg = player.getServer().registryAccess();
+                                        for (int i = 0; i < enchList.size(); i++) {
+                                            CompoundTag e = enchList.getCompound(i);
+                                            if (e.contains("id", Tag.TAG_STRING) && e.contains("lvl", Tag.TAG_INT)) {
+                                                ResourceLocation id = ResourceLocation.parse(e.getString("id"));
+                                                reg.lookupOrThrow(Registries.ENCHANTMENT)
+                                                    .get(ResourceKey.create(Registries.ENCHANTMENT, id))
+                                                    .ifPresent(h -> stack.enchant(h, e.getInt("lvl")));
+                                            }
+                                        }
+                                        tag.remove("Enchantments");
+                                    }
+
+                                    // 其余 NBT 原样存入 custom_data（保持旧行为，作为自定义数据持久化）
+                                    if (!tag.isEmpty()) {
+                                        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+                                    }
                                 } catch (Exception e) {
                                     MaingraphforMC.LOGGER.error("Error parsing NBT in give_item node: " + node.get("id"), e);
                                 }
