@@ -10,7 +10,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BlueprintSettingsPanel {
     
@@ -21,8 +23,25 @@ public class BlueprintSettingsPanel {
             .type(SettingType.BOOLEAN)
             .defaultValue(true)
             .register();
+
+        SettingsHelper.setup("save_button_highlight", "gui.mgmc.settings.save_button_highlight")
+            .description("gui.mgmc.settings.save_button_highlight.desc")
+            .type(SettingType.BOOLEAN)
+            .defaultValue(true)
+            .register();
+
+        SettingsHelper.setup("snap_threshold", "gui.mgmc.settings.snap_threshold")
+            .description("gui.mgmc.settings.snap_threshold.desc")
+            .type(SettingType.FLOAT)
+            .defaultValue(10.0f)
+            .range(1.0f, 50.0f)
+            .register();
     }
-    
+
+    // Slider geometry cache: id -> {x, y, w, h} (screen coords, updated each render frame)
+    private static final Map<String, int[]> sliderRects = new HashMap<>();
+    private static String draggingSettingId = null;
+
     public static void render(GuiGraphics guiGraphics, BlueprintScreen screen, BlueprintState state, Font font, int mouseX, int mouseY) {
         // Animation
         float target = state.showSettings ? 1.0f : 0.0f;
@@ -61,7 +80,8 @@ public class BlueprintSettingsPanel {
 
             int currentY = (int)(menuY + 35 - state.settingsScrollY);
             Collection<SettingsDefinition> settings = SettingsRegistry.getDefinitions();
-            
+            sliderRects.clear();
+
             for (SettingsDefinition def : settings) {
                 if (def.type == SettingType.BOOLEAN) {
                     // Title
@@ -97,6 +117,43 @@ public class BlueprintSettingsPanel {
                     } else {
                         currentY += 20;
                     }
+                } else if (def.type == SettingType.FLOAT) {
+                    float value = SettingsRegistry.getFloat(def.id);
+                    float min = def.min;
+                    float max = def.max;
+                    float t = (max > min) ? (value - min) / (max - min) : 0.0f;
+                    t = Math.max(0.0f, Math.min(1.0f, t));
+
+                    // Title
+                    String title = Component.translatable(def.labelKey).getString();
+                    guiGraphics.drawString(font, title, menuX + 10, currentY, 0xFFEEEEEE, false);
+
+                    // Slider track
+                    int sliderX = menuX + 10;
+                    int sliderY = currentY + 15;
+                    int sliderW = menuW - 20;
+                    int sliderH = 6;
+                    guiGraphics.fill(sliderX, sliderY, sliderX + sliderW, sliderY + sliderH, 0xFF555555);
+                    int knobX = sliderX + (int)(sliderW * t) - 3;
+                    guiGraphics.fill(knobX, sliderY - 2, knobX + 6, sliderY + sliderH + 2, 0xFF44AAFF);
+                    sliderRects.put(def.id, new int[]{sliderX, sliderY, sliderW, sliderH});
+
+                    // Value text
+                    String valStr = String.format("%.1f", value);
+                    int valW = font.width(valStr);
+                    guiGraphics.drawString(font, valStr, menuX + menuW - 10 - valW, currentY, 0xFFAAAAAA, false);
+
+                    // Description
+                    int lineY = sliderY + sliderH + 4;
+                    if (def.descriptionKey != null) {
+                        Component desc = Component.translatable(def.descriptionKey);
+                        List<FormattedCharSequence> lines = font.split(desc, menuW - 20);
+                        for (FormattedCharSequence line : lines) {
+                            guiGraphics.drawString(font, line, menuX + 10, lineY, 0xFFAAAAAA, false);
+                            lineY += 10;
+                        }
+                    }
+                    currentY = lineY + 10; // Spacing after item
                 }
                 // Handle other types...
             }
@@ -161,6 +218,24 @@ public class BlueprintSettingsPanel {
                         }
                     }
                     currentY += itemHeight;
+                } else if (def.type == SettingType.FLOAT) {
+                    int sliderY = currentY + 15;
+                    int lineY = sliderY + 6 + 4;
+                    if (def.descriptionKey != null) {
+                        Component desc = Component.translatable(def.descriptionKey);
+                        List<FormattedCharSequence> lines = Minecraft.getInstance().font.split(desc, menuW - 20);
+                        lineY += lines.size() * 10;
+                    }
+                    currentY = lineY + 10;
+
+                    // Check slider drag start
+                    int[] rect = sliderRects.get(def.id);
+                    if (state.showSettings && rect != null
+                            && isHovering((int)mouseX, (int)mouseY, rect[0] - 4, rect[1] - 4, rect[2] + 8, rect[3] + 8)) {
+                        applyFloat(def, rect, (int)mouseX);
+                        draggingSettingId = def.id;
+                        return true;
+                    }
                 }
             }
             
@@ -195,6 +270,44 @@ public class BlueprintSettingsPanel {
         return false;
     }
     
+    public static boolean mouseDragged(BlueprintScreen screen, BlueprintState state, double mouseX, double mouseY, int button) {
+        if (draggingSettingId != null) {
+            int[] rect = sliderRects.get(draggingSettingId);
+            SettingsDefinition def = findDef(draggingSettingId);
+            if (rect != null && def != null) {
+                applyFloat(def, rect, (int) mouseX);
+                return true;
+            }
+            draggingSettingId = null;
+        }
+        return false;
+    }
+
+    public static boolean mouseReleased(BlueprintScreen screen, BlueprintState state, double mouseX, double mouseY, int button) {
+        if (draggingSettingId != null) {
+            draggingSettingId = null;
+            return true;
+        }
+        return false;
+    }
+
+    private static void applyFloat(SettingsDefinition def, int[] rect, int mouseX) {
+        float t = (mouseX - rect[0]) / (float) rect[2];
+        t = Math.max(0.0f, Math.min(1.0f, t));
+        float value = def.min + t * (def.max - def.min);
+        value = Math.round(value * 10.0f) / 10.0f; // snap to 1 decimal place
+        SettingsRegistry.set(def.id, value);
+    }
+
+    private static SettingsDefinition findDef(String id) {
+        for (SettingsDefinition def : SettingsRegistry.getDefinitions()) {
+            if (def.id.equals(id)) {
+                return def;
+            }
+        }
+        return null;
+    }
+
     private static boolean isHovering(int mouseX, int mouseY, int x, int y, int w, int h) {
         return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
     }

@@ -16,6 +16,7 @@ public class VectorNodes {
         // 1. vector_add
         NodeHelper.setup("vector_add", "node.mgmc.vector_add.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_add.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_add")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -33,6 +34,7 @@ public class VectorNodes {
         // 2. vector_sub
         NodeHelper.setup("vector_sub", "node.mgmc.vector_sub.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_sub.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_sub")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -50,6 +52,7 @@ public class VectorNodes {
         // 3. vector_mul
         NodeHelper.setup("vector_mul", "node.mgmc.vector_mul.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_mul.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_mul")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -67,6 +70,7 @@ public class VectorNodes {
         // 4. vector_div
         NodeHelper.setup("vector_div", "node.mgmc.vector_div.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_div.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_div")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -84,6 +88,7 @@ public class VectorNodes {
         // 5. vector_normalize
         NodeHelper.setup("vector_normalize", "node.mgmc.vector_normalize.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_normalize.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_normalize")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -100,6 +105,7 @@ public class VectorNodes {
         // 6. vector_length
         NodeHelper.setup("vector_length", "node.mgmc.vector_length.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_length.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_length")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -115,6 +121,7 @@ public class VectorNodes {
         // 7. vector_dot
         NodeHelper.setup("vector_dot", "node.mgmc.vector_dot.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_dot.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_dot")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -132,6 +139,7 @@ public class VectorNodes {
         // 8. vector_cross
         NodeHelper.setup("vector_cross", "node.mgmc.vector_cross.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_cross.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_cross")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)
@@ -153,6 +161,7 @@ public class VectorNodes {
         // 9. vector_distance
         NodeHelper.setup("vector_distance", "node.mgmc.vector_distance.name")
             .category("node_category.mgmc.logic.vector")
+            .description("node.mgmc.vector_distance.desc")
             .color(NodeThemes.COLOR_NODE_MATH)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/logic/vector/vector_distance")
             .input(NodePorts.A, "node.mgmc.port.a", NodeDefinition.PortType.XYZ, NodeThemes.COLOR_PORT_XYZ)

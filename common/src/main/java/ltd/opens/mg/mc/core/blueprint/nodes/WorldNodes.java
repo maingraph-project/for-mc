@@ -21,6 +21,7 @@ public class WorldNodes {
         // 1. play_sound
         NodeHelper.setup("play_sound", "node.mgmc.play_sound.name")
             .category("node_category.mgmc.action.world")
+            .description("node.mgmc.play_sound.desc")
             .color(NodeThemes.COLOR_NODE_ACTION)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/action/world/play_sound")
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
@@ -48,6 +49,7 @@ public class WorldNodes {
         // 2. get_time
         NodeHelper.setup("get_time", "node.mgmc.get_time.name")
             .category("node_category.mgmc.variable.world")
+            .description("node.mgmc.get_time.desc")
             .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/world/get_time")
             .output(NodePorts.TIME, "node.mgmc.port.time", NodeDefinition.PortType.INT, NodeThemes.COLOR_PORT_INT)
@@ -61,6 +63,7 @@ public class WorldNodes {
         // 3. set_time
         NodeHelper.setup("set_time", "node.mgmc.set_time.name")
             .category("node_category.mgmc.action.world")
+            .description("node.mgmc.set_time.desc")
             .color(NodeThemes.COLOR_NODE_ACTION)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/action/world/set_time")
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)
@@ -77,6 +80,7 @@ public class WorldNodes {
         // 4. get_weather
         NodeHelper.setup("get_weather", "node.mgmc.get_weather.name")
             .category("node_category.mgmc.variable.world")
+            .description("node.mgmc.get_weather.desc")
             .color(NodeThemes.COLOR_NODE_VARIABLE)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/variable/world/get_weather")
             .output(NodePorts.WEATHER, "node.mgmc.port.weather", NodeDefinition.PortType.STRING, NodeThemes.COLOR_PORT_STRING)
@@ -91,6 +95,7 @@ public class WorldNodes {
         // 5. set_weather
         NodeHelper.setup("set_weather", "node.mgmc.set_weather.name")
             .category("node_category.mgmc.action.world")
+            .description("node.mgmc.set_weather.desc")
             .color(NodeThemes.COLOR_NODE_ACTION)
             .property("web_url", "http://zhcn-docs.mc.maingraph.nb6.ltd/nodes/action/world/set_weather")
             .input(NodePorts.EXEC, "node.mgmc.port.exec_in", NodeDefinition.PortType.EXEC, NodeThemes.COLOR_PORT_EXEC)

@@ -6,6 +6,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.damagesource.DamageSource;
+import ltd.opens.mg.mc.core.blueprint.data.XYZ;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -17,16 +18,20 @@ public class MGMCEventContext {
     @Nullable private final BlockPos pos;
     @Nullable private final net.minecraft.world.level.block.state.BlockState blockState;
     @Nullable private final ItemStack item;
+    @Nullable private final String itemId; // For item pickup events
     @Nullable private final DamageSource damageSource;
     private final float amount;
-    
+    @Nullable private final XYZ xyz;
+    private final float speed;
+
     // For MGRUN
     @Nullable private final String eventName;
     @Nullable private final Object[] args;
-    
+
     public MGMCEventContext(Level level, @Nullable Entity entity, @Nullable Player player, @Nullable Entity targetEntity,
                             @Nullable BlockPos pos, @Nullable net.minecraft.world.level.block.state.BlockState blockState,
-                            @Nullable ItemStack item, @Nullable DamageSource damageSource, float amount,
+                            @Nullable ItemStack item, @Nullable String itemId, @Nullable DamageSource damageSource, float amount,
+                            @Nullable XYZ xyz, float speed,
                             @Nullable String eventName, @Nullable Object[] args) {
         this.level = level;
         this.entity = entity;
@@ -35,12 +40,15 @@ public class MGMCEventContext {
         this.pos = pos;
         this.blockState = blockState;
         this.item = item;
+        this.itemId = itemId;
         this.damageSource = damageSource;
         this.amount = amount;
+        this.xyz = xyz;
+        this.speed = speed;
         this.eventName = eventName;
         this.args = args;
     }
-    
+
     public Level getLevel() { return level; }
     @Nullable public Entity getEntity() { return entity; }
     @Nullable public Player getPlayer() { return player; }
@@ -48,8 +56,11 @@ public class MGMCEventContext {
     @Nullable public BlockPos getPos() { return pos; }
     @Nullable public net.minecraft.world.level.block.state.BlockState getBlockState() { return blockState; }
     @Nullable public ItemStack getItem() { return item; }
+    @Nullable public String getItemId() { return itemId; }
     @Nullable public DamageSource getDamageSource() { return damageSource; }
     public float getAmount() { return amount; }
+    @Nullable public XYZ getXyz() { return xyz; }
+    public float getSpeed() { return speed; }
     @Nullable public String getEventName() { return eventName; }
     @Nullable public Object[] getArgs() { return args; }
 
@@ -65,8 +76,11 @@ public class MGMCEventContext {
         private BlockPos pos;
         private net.minecraft.world.level.block.state.BlockState blockState;
         private ItemStack item;
+        private String itemId;
         private DamageSource damageSource;
         private float amount;
+        private XYZ xyz;
+        private float speed;
         private String eventName;
         private Object[] args;
 
@@ -80,13 +94,16 @@ public class MGMCEventContext {
         public Builder pos(BlockPos pos) { this.pos = pos; return this; }
         public Builder blockState(net.minecraft.world.level.block.state.BlockState blockState) { this.blockState = blockState; return this; }
         public Builder item(ItemStack item) { this.item = item; return this; }
+        public Builder itemId(String itemId) { this.itemId = itemId; return this; }
         public Builder damageSource(DamageSource damageSource) { this.damageSource = damageSource; return this; }
         public Builder amount(float amount) { this.amount = amount; return this; }
+        public Builder xyz(XYZ xyz) { this.xyz = xyz; return this; }
+        public Builder speed(float speed) { this.speed = speed; return this; }
         public Builder eventName(String eventName) { this.eventName = eventName; return this; }
         public Builder args(Object[] args) { this.args = args; return this; }
 
         public MGMCEventContext build() {
-            return new MGMCEventContext(level, entity, player, targetEntity, pos, blockState, item, damageSource, amount, eventName, args);
+            return new MGMCEventContext(level, entity, player, targetEntity, pos, blockState, item, itemId, damageSource, amount, xyz, speed, eventName, args);
         }
     }
 }
